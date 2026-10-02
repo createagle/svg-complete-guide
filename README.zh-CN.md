@@ -16,7 +16,7 @@ chapters/
   01-intro/
     README.md                  # 本章示例说明
     01-png-vs-svg.html         # 一个示例一个独立页面
-    exercises/                 # 练习参考答案
+    exercises/                 # 练习的初始代码（NN-start）与成品代码（NN-final）
   02-syntax/
   ...
   49-project/                  # 综合项目可以是独立 Vite 工程

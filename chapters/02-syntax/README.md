@@ -6,4 +6,4 @@
 | --- | --- | --- |
 | 2-1 Presentation attributes vs CSS | [01-cascade.html](https://createagle.github.io/svg-complete-guide/chapters/02-syntax/01-cascade.html) | Toggle the presentation attribute, a stylesheet rule, an inline style and an `!important` rule one by one to see which one wins |
 
-Exercise answers: [exercises/](exercises/README.md).
+Exercise starter and finished code: [exercises/](exercises/README.md).

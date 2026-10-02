@@ -16,7 +16,7 @@ chapters/
   01-intro/
     README.md                  # Chapter demo list
     01-png-vs-svg.html         # One demo per standalone page
-    exercises/                 # Exercise answers
+    exercises/                 # Exercise starter (NN-start) and finished (NN-final) code
   02-syntax/
   ...
   49-project/                  # The capstone may be a standalone Vite project

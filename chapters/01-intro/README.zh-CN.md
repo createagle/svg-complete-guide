@@ -9,4 +9,4 @@
 
 素材：`icon.svg` 是源图标，`icon-32.png` 由它按 32×32 渲染导出。
 
-练习参考答案见 [exercises/](exercises/README.zh-CN.md)。
+练习的初始代码和成品代码见 [exercises/](exercises/README.zh-CN.md)。

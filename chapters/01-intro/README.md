@@ -9,4 +9,4 @@
 
 Assets: `icon.svg` is the source icon; `icon-32.png` is rendered from it at 32×32.
 
-Exercise answers: [exercises/](exercises/README.md).
+Exercise starter and finished code: [exercises/](exercises/README.md).

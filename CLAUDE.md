@@ -18,7 +18,11 @@
 
 ## 示例约定
 
-- 目录：`chapters/<NN-slug>/<NN-name>.html`，每章一个 `README.md`，练习答案放 `exercises/`。
+- 目录：`chapters/<NN-slug>/<NN-name>.html`，每章一个 `README.md`（及 `README.zh-CN.md`）。
+- 练习：`exercises/` 只放代码——初始代码 `NN-start.*`（有才放）和成品代码 `NN-final.*`（有才放），
+  其 README 只列文件对照表。题目与参考答案写在文档里：每道题一个三级标题，给出题目和初始代码链接，
+  参考答案用可折叠的 widget（`<details>` + `<summary>参考答案</summary>`，默认收起，不加 text id）嵌入，
+  答案里附成品代码链接。
 - **示例页只放演示本身**：不写标题、说明文字、面包屑、源码面板。讲解全部写在 Claude Docs 文档里。
   页面要能直接作为 iframe 内嵌。
 - **GitHub Pages 上的页面文案一律用英文**（`<title>`、控件标签、图注、`alt`、`aria-label`）。

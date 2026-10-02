@@ -6,4 +6,4 @@
 | --- | --- | --- |
 | 2-1 表现属性 vs CSS 优先级 | [01-cascade.html](https://createagle.github.io/svg-complete-guide/chapters/02-syntax/01-cascade.html) | 逐层打开表现属性、样式表、内联 style、!important，看哪一层生效 |
 
-练习参考答案见 [exercises/](exercises/README.zh-CN.md)。
+练习的初始代码和成品代码见 [exercises/](exercises/README.zh-CN.md)。

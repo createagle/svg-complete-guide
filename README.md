@@ -19,7 +19,9 @@ chapters/
   02-syntax/
   ...
   49-project/                  # 综合项目可以是独立 Vite 工程
-.github/workflows/pages.yml    # push 到 main 即自动部署
+.github/workflows/
+  pages.yml                    # push 到 main 即自动部署
+  sync-main.yml                # claude/** 分支自动快进到 main 并部署
 ```
 
 - 示例链接：`https://createagle.github.io/svg-complete-guide/chapters/<章目录>/<示例>.html`
@@ -34,8 +36,10 @@ chapters/
 
 ## 部署
 
-推送到 `main` 后由 `.github/workflows/pages.yml` 自动部署。首次使用需在仓库
-**Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+- `.github/workflows/sync-main.yml`：推送到 `claude/**` 分支后，自动快进合并到 `main` 并触发部署。
+- `.github/workflows/pages.yml`：推送到 `main`（或被上面的 workflow 触发）时部署到 GitHub Pages。
+
+首次使用需在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
 
 本地预览（`demo.js` 读取原始源码需要 HTTP 环境，双击打开时会退回浏览器序列化的代码）：
 

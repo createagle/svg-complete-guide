@@ -9,7 +9,7 @@
   正文   400 字/分钟（汉字按字计，英文单词和数字按 1 个字计）
   代码   10 行/分钟（代码块里的非空行）
   表格   3 行/分钟（不含表头和分隔行）
-  图     每张 0.5 分钟（导出里的 embedded content 占位）
+  图     每张 0.5 分钟（导出里的 embedded content 占位；「练习」节里的嵌入是折叠的参考答案，不计）
   演示   每个 1 分钟（「在线演示」链接）
 每节向上取整、至少 1 分钟；全章 = 各节之和（章标题前的导语并入第一节）。
 """
@@ -59,7 +59,8 @@ def sections(md):
             continue
         table_line = 0
         if 'embedded content' in line:
-            current['figures'] += 1
+            if '练习' not in current['title']:
+                current['figures'] += 1
             continue
         current['demos'] += line.count('[在线演示](')
         current['prose'] += prose_units(line)

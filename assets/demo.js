@@ -5,7 +5,7 @@
   let sources = [];
   try {
     const html = await (await fetch(location.href)).text();
-    sources = [...html.matchAll(/<div class="stage">\n([\s\S]*?)\n\s*<\/div>\s*<\/section>/g)].map((m) => m[1]);
+    sources = [...html.matchAll(/<div class="stage"[^>]*>\n([\s\S]*?)\n\s*<\/div>\s*<\/section>/g)].map((m) => m[1]);
   } catch (e) { /* 忽略，使用 innerHTML */ }
 
   stages.forEach((stage, i) => {

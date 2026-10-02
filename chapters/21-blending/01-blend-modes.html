@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>21-1 Blend Modes and Isolation</title>
+  <style>
+    .frame { position: relative; line-height: 0; border-radius: 12px; overflow: hidden; max-width: 100%; }
+    .frame svg { display: block; max-width: 100%; height: auto; }
+    #dots circle { mix-blend-mode: var(--mode, normal); }
+    #dots.isolated { isolation: isolate; }
+    #title { position: absolute; left: 0; right: 0; top: 18px; margin: 0; line-height: 1; text-align: center; font: 900 44px system-ui, sans-serif; color: #fff; }
+    #title.blend { mix-blend-mode: difference; }
+    select, input { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">mix-blend-mode <select id="mode"><option>normal</option><option selected>multiply</option><option>screen</option><option>overlay</option><option>darken</option><option>lighten</option><option>color-dodge</option><option>color-burn</option><option>hard-light</option><option>soft-light</option><option>difference</option><option>exclusion</option><option>hue</option><option>saturation</option><option>color</option><option>luminosity</option></select></label>
+    <label class="control"><input id="iso" type="checkbox"> isolation: isolate on the group</label>
+    <label class="control"><input id="html" type="checkbox" checked> HTML heading with difference</label>
+  </div>
+  <div class="stage">
+    <div class="frame">
+      <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Three overlapping circles over a photo">
+        <image href="photo.jpg" width="480" height="320"/>
+        <g id="dots">
+          <circle cx="200" cy="130" r="80" fill="#06b6d4"/>
+          <circle cx="280" cy="130" r="80" fill="#ec4899"/>
+          <circle cx="240" cy="200" r="80" fill="#facc15"/>
+        </g>
+      </svg>
+      <h2 id="title">SVG + HTML</h2>
+    </div>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      $('dots').style.setProperty('--mode', $('mode').value);
+      $('dots').classList.toggle('isolated', $('iso').checked);
+      $('title').classList.toggle('blend', $('html').checked);
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

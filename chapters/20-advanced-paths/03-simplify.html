@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>20-3 Simplifying a Freehand Path</title>
+  <style>
+    #pad { touch-action: none; cursor: crosshair; }
+    .pad { fill: none; stroke: var(--border); }
+    #rawLine { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+    #out { fill: none; stroke: #2563eb; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    #kept circle { fill: #f97316; }
+    .stats { margin: 0; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+    button { font: inherit; font-size: 14px; padding: 4px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); cursor: pointer; }
+    input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">tolerance <input id="tol" type="range" min="0" max="12" step="0.5" value="3"><output for="tol"></output></label>
+    <label class="control"><input id="smooth" type="checkbox" checked> smooth</label>
+    <label class="control"><input id="raw" type="checkbox" checked> show raw points</label>
+    <button id="clear" type="button">Clear</button>
+  </div>
+  <div class="stage">
+    <svg id="pad" width="560" height="300" viewBox="0 0 560 300" role="img" aria-label="Drawing pad: draw with the pointer">
+      <rect class="pad" x=".5" y=".5" width="559" height="299" rx="12"/>
+      <polyline id="rawLine"/>
+      <path id="out"/>
+      <g id="kept"></g>
+    </svg>
+  </div>
+  <p id="stats" class="stats"></p>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const NS = 'http://www.w3.org/2000/svg';
+    const r = (n) => +n.toFixed(1);
+    let raw = [];
+    // Ramer–Douglas–Peucker: keep a point only if it is farther than tol from the chord between the kept neighbours
+    function simplify(pts, tol) {
+      if (pts.length < 3) return pts.slice();
+      const [ax, ay] = pts[0], [bx, by] = pts[pts.length - 1];
+      const len = Math.hypot(bx - ax, by - ay) || 1;
+      let max = 0, idx = 0;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const dist = Math.abs((by - ay) * pts[i][0] - (bx - ax) * pts[i][1] + bx * ay - by * ax) / len;
+        if (dist > max) { max = dist; idx = i; }
+      }
+      if (max <= tol) return [pts[0], pts[pts.length - 1]];
+      return simplify(pts.slice(0, idx + 1), tol).slice(0, -1).concat(simplify(pts.slice(idx), tol));
+    }
+    // Open Catmull-Rom spline through the kept points
+    function smoothD(p) {
+      let d = `M${r(p[0][0])} ${r(p[0][1])}`;
+      for (let i = 0; i < p.length - 1; i++) {
+        const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
+        d += ` C${r(p1[0] + (p2[0] - p0[0]) / 6)} ${r(p1[1] + (p2[1] - p0[1]) / 6)} ${r(p2[0] - (p3[0] - p1[0]) / 6)} ${r(p2[1] - (p3[1] - p1[1]) / 6)} ${r(p2[0])} ${r(p2[1])}`;
+      }
+      return d;
+    }
+    function render() {
+      const tol = +$('tol').value;
+      $('rawLine').setAttribute('points', raw.map((p) => p.join(',')).join(' '));
+      $('rawLine').style.display = $('raw').checked ? '' : 'none';
+      if (raw.length < 2) { $('out').removeAttribute('d'); $('kept').replaceChildren(); $('stats').textContent = 'Draw on the pad.'; return; }
+      const kept = simplify(raw, tol);
+      const d = $('smooth').checked ? smoothD(kept) : 'M' + kept.map(([x, y]) => `${r(x)} ${r(y)}`).join(' L');
+      $('out').setAttribute('d', d);
+      $('kept').replaceChildren(...kept.map(([x, y]) => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 3); return c; }));
+      const line = (p) => 'M' + p.map(([x, y]) => `${r(x)} ${r(y)}`).join(' L');
+      $('stats').textContent = `${raw.length} raw points → ${kept.length} kept · d: ${line(raw).length} → ${line(kept).length} characters as lines, ${smoothD(kept).length} smoothed`;
+      document.querySelector('output').value = tol;
+    }
+    const toLocal = (e) => { const p = new DOMPoint(e.clientX, e.clientY).matrixTransform($('pad').getScreenCTM().inverse()); return [p.x, p.y]; };
+    $('pad').addEventListener('pointerdown', (e) => {
+      $('pad').setPointerCapture(e.pointerId);
+      raw = [toLocal(e)];
+      const move = (ev) => { raw.push(toLocal(ev)); render(); };
+      $('pad').addEventListener('pointermove', move);
+      $('pad').addEventListener('pointerup', () => $('pad').removeEventListener('pointermove', move), { once: true });
+    });
+    $('clear').addEventListener('click', () => { raw = []; render(); });
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', render));
+    // Start with a wobbly hand-drawn-looking spiral so there is something to simplify
+    for (let i = 0; i <= 220; i++) {
+      const t = i / 220 * Math.PI * 3.2, rad = 20 + t * 22;
+      raw.push([280 + Math.cos(t) * rad + Math.sin(i * 1.7) * 2.2, 150 + Math.sin(t) * rad * 0.55 + Math.cos(i * 2.3) * 2.2]);
+    }
+    render();
+  </script>
+</body>
+</html>

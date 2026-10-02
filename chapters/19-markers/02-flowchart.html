@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>19-2 Flowchart Connectors with Markers</title>
+  <style>
+    #chart { touch-action: none; }
+    .edge { fill: none; stroke: var(--muted); stroke-width: 2; marker-end: url(#head); }
+    .edge.back { stroke: #f97316; stroke-dasharray: 6 4; }
+    .edge-label { fill: #f97316; font: 12px system-ui, sans-serif; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+    .node rect { fill: var(--bg); stroke: #2563eb; stroke-width: 2; }
+    .node text { fill: var(--fg); font: 600 14px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .node { cursor: grab; }
+    select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 0L10 5L0 10z" fill="context-stroke"/>
+      </marker>
+    </defs>
+  </svg>
+  <div class="controls">
+    <label class="control">connector
+      <select id="style"><option>curved</option><option>straight</option><option>orthogonal</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <svg id="chart" width="560" height="320" viewBox="0 0 560 320" role="img" aria-label="A four-step flowchart; drag the boxes">
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const NS = 'http://www.w3.org/2000/svg';
+    const W = 120, H = 48;
+    const nodes = { idea: { x: 100, y: 70, label: 'Idea' }, draft: { x: 280, y: 70, label: 'Draft' },
+                    review: { x: 280, y: 230, label: 'Review' }, publish: { x: 460, y: 230, label: 'Publish' } };
+    const edges = [['idea', 'draft'], ['draft', 'review'], ['review', 'publish'], ['review', 'draft', 'changes']];
+    // Where the line from a box's center toward point p leaves the box
+    function border(n, p) {
+      const dx = p.x - n.x, dy = p.y - n.y;
+      const t = Math.min((W / 2) / Math.abs(dx || 1e-9), (H / 2) / Math.abs(dy || 1e-9));
+      return { x: n.x + dx * t, y: n.y + dy * t };
+    }
+    function pathFor(a, b, style) {
+      if (style === 'straight') {
+        const s = border(a, b), e = border(b, a);
+        return { d: `M${s.x} ${s.y}L${e.x} ${e.y}`, mid: { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 } };
+      }
+      if (style === 'orthogonal') {
+        if (Math.abs(b.x - a.x) >= Math.abs(b.y - a.y)) {
+          const sx = a.x + Math.sign(b.x - a.x) * W / 2, ex = b.x - Math.sign(b.x - a.x) * W / 2, mx = (sx + ex) / 2;
+          return { d: `M${sx} ${a.y}H${mx}V${b.y}H${ex}`, mid: { x: mx, y: (a.y + b.y) / 2 } };
+        }
+        const sy = a.y + Math.sign(b.y - a.y) * H / 2, ey = b.y - Math.sign(b.y - a.y) * H / 2, my = (sy + ey) / 2;
+        return { d: `M${a.x} ${sy}V${my}H${b.x}V${ey}`, mid: { x: (a.x + b.x) / 2, y: my } };
+      }
+      // Curved: a quadratic Bézier whose control point sits to the side of the straight line
+      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+      const c = { x: (a.x + b.x) / 2 - (dy / len) * len * 0.2, y: (a.y + b.y) / 2 + (dx / len) * len * 0.2 };
+      const s = border(a, c), e = border(b, c);
+      return { d: `M${s.x} ${s.y}Q${c.x} ${c.y} ${e.x} ${e.y}`, mid: { x: (s.x + 2 * c.x + e.x) / 4, y: (s.y + 2 * c.y + e.y) / 4 } };
+    }
+    function draw() {
+      const style = $('style').value;
+      $('edges').replaceChildren();
+      for (const [from, to, label] of edges) {
+        const { d, mid } = pathFor(nodes[from], nodes[to], style);
+        const p = document.createElementNS(NS, 'path');
+        p.setAttribute('class', 'edge' + (label ? ' back' : ''));
+        p.setAttribute('d', d);
+        $('edges').append(p);
+        if (label) {
+          const t = document.createElementNS(NS, 'text');
+          t.setAttribute('class', 'edge-label');
+          t.setAttribute('x', mid.x);
+          t.setAttribute('y', mid.y - 6);
+          t.textContent = label;
+          $('edges').append(t);
+        }
+      }
+      for (const id in nodes) {
+        const g = $('n-' + id);
+        g.setAttribute('transform', `translate(${nodes[id].x} ${nodes[id].y})`);
+      }
+    }
+    for (const id in nodes) {
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'node');
+      g.id = 'n-' + id;
+      g.innerHTML = `<rect x="${-W / 2}" y="${-H / 2}" width="${W}" height="${H}" rx="10"/><text>${nodes[id].label}</text>`;
+      $('nodes').append(g);
+      // Drag in SVG coordinates (chapter 16)
+      g.addEventListener('pointerdown', (e) => {
+        g.setPointerCapture(e.pointerId);
+        const toLocal = (ev) => new DOMPoint(ev.clientX, ev.clientY).matrixTransform($('chart').getScreenCTM().inverse());
+        const p0 = toLocal(e), n = nodes[id], dx = n.x - p0.x, dy = n.y - p0.y;
+        const move = (ev) => {
+          const p = toLocal(ev);
+          n.x = Math.max(W / 2, Math.min(560 - W / 2, p.x + dx));
+          n.y = Math.max(H / 2, Math.min(320 - H / 2, p.y + dy));
+          draw();
+        };
+        g.addEventListener('pointermove', move);
+        g.addEventListener('pointerup', () => g.removeEventListener('pointermove', move), { once: true });
+      });
+    }
+    $('style').addEventListener('input', draw);
+    draw();
+  </script>
+</body>
+</html>

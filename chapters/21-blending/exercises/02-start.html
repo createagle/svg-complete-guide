@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 21-2 · Starter</title>
+  <style>
+    .badge circle { mix-blend-mode: multiply; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="A two-circle badge whose colors mix with the striped card behind it">
+    <defs>
+      <pattern id="stripes" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="16" height="16" fill="#e0f2fe"/><rect width="8" height="16" fill="#0ea5e9"/>
+      </pattern>
+    </defs>
+    <rect width="320" height="200" rx="16" fill="url(#stripes)"/>
+    <g class="badge">
+      <circle cx="140" cy="100" r="56" fill="#fde047"/>
+      <circle cx="180" cy="100" r="56" fill="#fb923c"/>
+    </g>
+  </svg>
+  </div>
+</body>
+</html>

@@ -17,6 +17,8 @@
 }
 
 * { box-sizing: border-box; }
+/* Keep the hidden attribute working on elements that set their own display (e.g. .control) */
+[hidden] { display: none !important; }
 body {
   margin: 0;
   background: var(--bg);

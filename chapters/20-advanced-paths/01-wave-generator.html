@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>20-1 Wave Generator</title>
+  <style>
+    .sky { fill: #e0f2fe; }
+    @media (prefers-color-scheme: dark) { .sky { fill: #0c4a6e; } }
+    .code { position: relative; width: min(560px, 100%); }
+    .code pre { margin: 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 8.5em; overflow-y: auto; }
+    .code button { position: absolute; top: 8px; right: 8px; font: inherit; font-size: 12px; padding: 2px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--fg); cursor: pointer; }
+    select, input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">amplitude <input id="amp" type="range" min="0" max="50" step="2" value="20"><output for="amp"></output></label>
+    <label class="control">wavelength <input id="len" type="range" min="60" max="400" step="20" value="200"><output for="len"></output></label>
+    <label class="control">phase <input id="phase" type="range" min="0" max="360" step="15" value="0"><output for="phase"></output></label>
+    <label class="control">layers <input id="layers" type="range" min="1" max="3" step="1" value="3"><output for="layers"></output></label>
+    <label class="control">output
+      <select id="format"><option value="d">SVG path d</option><option value="shape">CSS shape()</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <svg width="560" height="200" viewBox="0 0 560 200" role="img" aria-label="Layered waves">
+      <rect width="560" height="200" rx="12" class="sky"/>
+      <g id="waves"></g>
+    </svg>
+  </div>
+  <div class="code">
+    <pre id="code"></pre>
+    <button id="copy" type="button">Copy</button>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const NS = 'http://www.w3.org/2000/svg';
+    const W = 560, H = 200;
+    const r = (n) => +n.toFixed(1);
+    // One wave as a list of commands: a Q for the first half-wave, then T (smooth quadratic) for each following half
+    function wave(y0, A, L, phase) {
+      const x0 = -L - (phase / 360) * L;
+      const cmds = [['M', x0, y0], ['Q', x0 + L / 4, y0 - 2 * A, x0 + L / 2, y0]];
+      for (let x = x0 + L / 2; x < W; x += L / 2) cmds.push(['T', x + L / 2, y0]);
+      return cmds;
+    }
+    const toD = (cmds) => cmds.map(([c, ...n]) => c + n.map(r).join(' ')).join(' ') + ` V${H} H${r(cmds[0][1])} Z`;
+    // The same commands as CSS shape(), with x and y as percentages so the shape scales with its box
+    function toShape(cmds) {
+      const px = (x) => r((x / W) * 100) + '%', py = (y) => r((y / H) * 100) + '%';
+      const parts = cmds.map(([c, ...n]) => c === 'M' ? `from ${px(n[0])} ${py(n[1])}`
+        : c === 'Q' ? `curve to ${px(n[2])} ${py(n[3])} with ${px(n[0])} ${py(n[1])}`
+        : `smooth to ${px(n[0])} ${py(n[1])}`);
+      return `clip-path: shape(${parts.join(', ')}, vline to 100%, hline to ${px(cmds[0][1])}, close);`;
+    }
+    function update() {
+      const A = +$('amp').value, L = +$('len').value, phase = +$('phase').value, n = +$('layers').value;
+      $('waves').replaceChildren();
+      let first;
+      for (let i = 0; i < n; i++) {
+        // Back layers sit higher, are shifted in phase and are lighter
+        const cmds = wave(130 - i * 30, A * (1 - i * 0.2), L * (1 + i * 0.25), phase + i * 90);
+        const p = document.createElementNS(NS, 'path');
+        p.setAttribute('d', toD(cmds));
+        p.setAttribute('fill', ['#1d4ed8', '#3b82f6', '#93c5fd'][i]);
+        $('waves').prepend(p);
+        if (i === 0) first = cmds;
+      }
+      $('code').textContent = $('format').value === 'd' ? `d="${toD(first)}"` : toShape(first);
+      document.querySelectorAll('output').forEach((o) => { const id = o.getAttribute('for'); o.value = $(id).value + (id === 'phase' ? '°' : ''); });
+    }
+    $('copy').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText($('code').textContent); $('copy').textContent = 'Copied'; }
+      catch { $('copy').textContent = 'Select & copy'; }
+      setTimeout(() => { $('copy').textContent = 'Copy'; }, 1200);
+    });
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

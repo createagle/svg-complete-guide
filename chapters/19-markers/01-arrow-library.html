@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>19-1 A Reusable Library of Arrows and Markers</title>
+  <style>
+    select, input { accent-color: var(--accent); }
+    output { min-width: 2ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0L10 5L0 10z" fill="context-stroke"/>
+      </marker>
+      <marker id="open" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M1.5 1L8.5 5L1.5 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+      <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4">
+        <circle cx="5" cy="5" r="4" fill="context-stroke"/>
+      </marker>
+      <marker id="ring" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
+        <circle cx="5" cy="5" r="3.5" fill="var(--bg)" stroke="context-stroke" stroke-width="2"/>
+      </marker>
+      <marker id="diamond" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M5 0.5L9.5 5L5 9.5L0.5 5z" fill="context-stroke"/>
+      </marker>
+      <marker id="bar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+        <path d="M5 0V10" stroke="context-stroke" stroke-width="2"/>
+      </marker>
+    </defs>
+  </svg>
+  <div class="controls">
+    <label class="control">marker-start <select id="start"><option>none</option><option>arrow</option><option>open</option><option selected>dot</option><option>ring</option><option>diamond</option><option>bar</option></select></label>
+    <label class="control">marker-mid <select id="mid"><option selected>none</option><option>dot</option><option>ring</option><option>diamond</option></select></label>
+    <label class="control">marker-end <select id="end"><option>none</option><option selected>arrow</option><option>open</option><option>dot</option><option>ring</option><option>diamond</option><option>bar</option></select></label>
+    <label class="control">stroke-width <input id="sw" type="range" min="1" max="8" step="1" value="2"><output for="sw"></output></label>
+    <label class="control">markerUnits <select id="units"><option selected>strokeWidth</option><option>userSpaceOnUse</option></select></label>
+    <label class="control">stroke <input id="color" type="color" value="#2563eb"></label>
+  </div>
+  <div class="stage">
+    <svg width="560" height="300" viewBox="0 0 560 300" role="img" aria-label="Three connectors sharing the same markers">
+      <g id="links" fill="none" stroke-linejoin="round">
+        <line x1="40" y1="50" x2="520" y2="50"/>
+        <polyline points="40,130 200,130 200,190 360,190 360,130 520,130"/>
+        <path d="M40 270 C200 180 360 340 520 250"/>
+      </g>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    // Marker sizes in "stroke widths"; with userSpaceOnUse they are fixed at the size of a 3-unit stroke
+    const base = { arrow: 6, open: 6, dot: 4, ring: 5, diamond: 6, bar: 5 };
+    function update() {
+      const g = $('links').style;
+      for (const k of ['start', 'mid', 'end']) {
+        const v = $(k).value;
+        g.setProperty('marker-' + k, v === 'none' ? 'none' : `url(#${v})`);
+      }
+      g.stroke = $('color').value;
+      g.strokeWidth = $('sw').value;
+      const user = $('units').value === 'userSpaceOnUse';
+      for (const id in base) {
+        const m = $(id), s = base[id] * (user ? 3 : 1);
+        m.setAttribute('markerUnits', $('units').value);
+        m.setAttribute('markerWidth', s);
+        m.setAttribute('markerHeight', s);
+      }
+      document.querySelector('output').value = $('sw').value;
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# 第 19 章 · 练习代码
+
+[English](README.md) | **简体中文**
+
+每道练习的初始版本和成品版本，都部署在 GitHub Pages 上，可以直接在线预览。题目和参考答案在教程文档里；没有代码的练习只在文档里作答。
+
+| 练习 | 初始效果 | 成品效果 |
+| --- | --- | --- |
+| 1 · 给线段加箭头 | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/19-markers/exercises/01-start.html) · [01-start.html](01-start.html) | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/19-markers/exercises/01-final.html) · [01-final.html](01-final.html) |
+| 2 · 给每个数据点加标记 | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/19-markers/exercises/02-start.html) · [02-start.html](02-start.html) | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/19-markers/exercises/02-final.html) · [02-final.html](02-final.html) |
+| 3 · 修正双向箭头 | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/19-markers/exercises/03-start.html) · [03-start.html](03-start.html) | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/19-markers/exercises/03-final.html) · [03-final.html](03-final.html) |

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>21-2 One-Click Product Recolor</title>
+  <style>
+    .product { position: relative; isolation: isolate; width: 300px; height: 300px; --tint: #2563eb; }
+    .product svg { position: absolute; inset: 0; }
+    .tint { mix-blend-mode: var(--mode, multiply); }
+    .swatches { display: flex; gap: 6px; }
+    .swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--bg); outline: 1px solid var(--border); cursor: pointer; padding: 0; }
+    .swatch[aria-pressed="true"] { outline: 2px solid var(--fg); }
+    select, input { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <div class="swatches"><button class="swatch" type="button" data-color="#ef4444" style="background:#ef4444" aria-label="Color #ef4444"></button><button class="swatch" type="button" data-color="#f59e0b" style="background:#f59e0b" aria-label="Color #f59e0b"></button><button class="swatch" type="button" data-color="#22c55e" style="background:#22c55e" aria-label="Color #22c55e"></button><button class="swatch" type="button" data-color="#06b6d4" style="background:#06b6d4" aria-label="Color #06b6d4"></button><button class="swatch" type="button" data-color="#2563eb" style="background:#2563eb" aria-label="Color #2563eb"></button><button class="swatch" type="button" data-color="#a855f7" style="background:#a855f7" aria-label="Color #a855f7"></button><button class="swatch" type="button" data-color="#111827" style="background:#111827" aria-label="Color #111827"></button></div>
+    <label class="control">custom <input id="pick" type="color" value="#2563eb"></label>
+    <label class="control">mix-blend-mode
+      <select id="mode"><option>multiply</option><option>color</option><option>hue</option><option>overlay</option><option>normal</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <div class="product">
+      <!-- Layer 1: a gray product with all the shading -->
+      <svg class="base" width="300" height="300" viewBox="0 0 300 300" role="img" aria-label="T-shirt">
+        <defs>
+          <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#000" stop-opacity=".18"/>
+            <stop offset=".35" stop-color="#fff" stop-opacity=".35"/>
+            <stop offset=".7" stop-color="#000" stop-opacity="0"/>
+            <stop offset="1" stop-color="#000" stop-opacity=".22"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="150" cy="276" rx="92" ry="8" fill="#000" opacity=".12"/>
+        <path d="M100 40 L58 58 L20 108 L56 134 L76 114 L76 266 L224 266 L224 114 L244 134 L280 108 L242 58 L200 40 C190 62 172 72 150 72 C128 72 110 62 100 40 Z" fill="#e7e5e4"/>
+        <path d="M100 40 L58 58 L20 108 L56 134 L76 114 L76 266 L224 266 L224 114 L244 134 L280 108 L242 58 L200 40 C190 62 172 72 150 72 C128 72 110 62 100 40 Z" fill="url(#sheen)"/>
+        <path d="M76 150 C96 170 104 200 98 240 M224 160 C204 190 200 220 210 262 M120 120 C140 150 160 150 182 122" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="6" stroke-linecap="round"/>
+        <path d="M100 40 C110 62 128 72 150 72 C172 72 190 62 200 40" fill="none" stroke="#a8a29e" stroke-width="5"/>
+        <path d="M76 114 L76 128 M224 114 L224 128" stroke="#a8a29e" stroke-width="2"/>
+      </svg>
+      <!-- Layer 2: the same silhouette in the new color, blended onto layer 1 -->
+      <svg id="tint" class="tint" width="300" height="300" viewBox="0 0 300 300" aria-hidden="true">
+        <path d="M100 40 L58 58 L20 108 L56 134 L76 114 L76 266 L224 266 L224 114 L244 134 L280 108 L242 58 L200 40 C190 62 172 72 150 72 C128 72 110 62 100 40 Z" fill="var(--tint)"/>
+      </svg>
+    </div>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const product = document.querySelector('.product');
+    function setColor(c) {
+      product.style.setProperty('--tint', c);
+      $('pick').value = c;
+      document.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', b.dataset.color === c));
+    }
+    document.querySelectorAll('.swatch').forEach((b) => b.addEventListener('click', () => setColor(b.dataset.color)));
+    $('pick').addEventListener('input', () => setColor($('pick').value));
+    $('mode').addEventListener('input', () => $('tint').style.setProperty('--mode', $('mode').value));
+    setColor('#2563eb');
+  </script>
+</body>
+</html>

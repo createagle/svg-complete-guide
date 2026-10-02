@@ -2,10 +2,10 @@
 
 [English](README.md) | **简体中文**
 
-第 1 章练习的初始代码和成品代码。题目和参考答案在教程文档里。
+每道练习的初始版本和成品版本，都部署在 GitHub Pages 上，可以直接在线预览。题目和参考答案在教程文档里；没有代码的练习只在文档里作答。
 
-| 练习 | 初始代码 | 成品代码 |
+| 练习 | 初始效果 | 成品效果 |
 | --- | --- | --- |
-| 1 · 把对勾改成叉号 | [01-start.svg](01-start.svg) | [01-final.svg](01-final.svg) |
-| 2 · 把圆形底改成圆角正方形 | [02-start.svg](02-start.svg) | [02-final.svg](02-final.svg) |
-| 3 · 给真实页面的图片选格式 | —（无代码） | —（答案在文档里） |
+| 1 · 把对勾改成叉号 | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/01-intro/exercises/01-start.html) · [01-start.html](01-start.html) | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/01-intro/exercises/01-final.html) · [01-final.html](01-final.html) |
+| 2 · 把圆形底改成圆角正方形 | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/01-intro/exercises/02-start.html) · [02-start.html](02-start.html) | [在线预览](https://createagle.github.io/svg-complete-guide/chapters/01-intro/exercises/02-final.html) · [02-final.html](02-final.html) |
+| 3 · 给真实页面的图片选格式 | — | — |

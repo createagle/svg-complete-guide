@@ -19,10 +19,13 @@
 ## 示例约定
 
 - 目录：`chapters/<NN-slug>/<NN-name>.html`，每章一个 `README.md`（及 `README.zh-CN.md`）。
-- 练习：`exercises/` 只放代码——初始代码 `NN-start.*`（有才放）和成品代码 `NN-final.*`（有才放），
-  其 README 只列文件对照表。题目与参考答案写在文档里：每道题一个三级标题，给出题目和初始代码链接，
-  参考答案用可折叠的 widget（`<details>` + `<summary>参考答案</summary>`，默认收起，不加 text id）嵌入，
-  答案里附成品代码链接。
+- 练习：`exercises/` 放每道题的初始版本 `NN-start.*` 和成品版本 `NN-final.*`（没有代码的题不放）。
+  **两个版本都必须能在 GitHub Pages 上直接预览**：优先做成 HTML 页面（`body.demo` + 公共样式，英文文案），
+  只有题目本身就是独立 SVG 文件时才用 `.svg`（确保在浏览器里打开能看清）。README 用表格列出每题的
+  在线预览链接和源码文件。题目与参考答案写在文档里：每道题一个三级标题，题目下写
+  `初始效果：[在线预览](Pages 地址) · [查看源码](GitHub 地址)`；参考答案用可折叠 widget
+  （`<details>` + `<summary>参考答案</summary>`，默认收起，不加 text id），末尾写
+  `最终效果：在线预览 · 查看源码` 两个链接。
 - **示例页只放演示本身**：不写标题、说明文字、面包屑、源码面板。讲解全部写在 Claude Docs 文档里。
   页面要能直接作为 iframe 内嵌。
 - **GitHub Pages 上的页面文案一律用英文**（`<title>`、控件标签、图注、`alt`、`aria-label`）。

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>15-2 CSS Rotation: transform-box and transform-origin</title>
+  <style>
+    #scene { overflow: visible; }
+    .frame { fill: none; stroke: var(--border); }
+    .ghosts > * { fill: none; stroke: var(--muted); stroke-dasharray: 4 3; }
+    .spin > * { fill: #2563eb; fill-opacity: .8; transform: rotate(var(--angle, 0deg)); transform-box: var(--box); transform-origin: var(--origin); }
+    #origins circle { fill: #f97316; stroke: var(--bg); stroke-width: 2; }
+    select, input { accent-color: var(--accent); }
+    output { min-width: 4ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">transform-box
+      <select id="box"><option>view-box</option><option>fill-box</option></select>
+    </label>
+    <label class="control">transform-origin
+      <select id="origin"><option value="0 0">0 0</option><option>center</option><option>left top</option><option>right bottom</option><option value="50px 50px">50px 50px</option></select>
+    </label>
+    <label class="control">rotate <input id="angle" type="range" min="0" max="180" step="5" value="30"><output for="angle"></output></label>
+  </div>
+  <div class="stage">
+    <svg id="scene" width="400" height="280" viewBox="0 0 400 280" role="img" aria-label="Three shapes rotated with CSS">
+      <rect class="frame" x=".5" y=".5" width="399" height="279"/>
+      <g class="ghosts">
+        <rect x="40" y="60" width="100" height="60" rx="6"/>
+        <circle cx="250" cy="90" r="40"/>
+        <path d="M300 190 L360 250 H240 Z"/>
+      </g>
+      <g class="spin">
+        <rect x="40" y="60" width="100" height="60" rx="6"/>
+        <circle cx="250" cy="90" r="40"/>
+        <path d="M300 190 L360 250 H240 Z"/>
+      </g>
+      <g id="origins"></g>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const NS = 'http://www.w3.org/2000/svg';
+    // Turn a transform-origin keyword pair into fractions of the reference box (or absolute px)
+    const pos = { '0 0': [0, 0], center: [.5, .5], 'left top': [0, 0], 'right bottom': [1, 1] };
+    function update() {
+      const box = $('box').value, origin = $('origin').value, a = $('angle').value;
+      const s = $('scene').style;
+      s.setProperty('--angle', a + 'deg');
+      s.setProperty('--box', box);
+      s.setProperty('--origin', origin);
+      // Mark the pivot of each shape with an orange dot
+      $('origins').replaceChildren();
+      document.querySelectorAll('.ghosts > *').forEach((shape) => {
+        const ref = box === 'fill-box' ? shape.getBBox() : { x: 0, y: 0, width: 400, height: 280 };
+        const [x, y] = origin === '50px 50px' ? [ref.x + 50, ref.y + 50] : [ref.x + pos[origin][0] * ref.width, ref.y + pos[origin][1] * ref.height];
+        const dot = document.createElementNS(NS, 'circle');
+        dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 5);
+        $('origins').append(dot);
+      });
+      document.querySelector('output').value = a + '°';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

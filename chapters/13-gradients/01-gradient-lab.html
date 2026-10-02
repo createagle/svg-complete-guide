@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>13-1 Gradient Lab: Units, Spread and Transform</title>
+  <style>
+    #guide circle.end { fill: var(--fg); stroke: none; }
+    select, input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">type
+      <select id="type"><option>linear</option><option>radial</option></select>
+    </label>
+    <label class="control">gradientUnits
+      <select id="units"><option>objectBoundingBox</option><option>userSpaceOnUse</option></select>
+    </label>
+    <label class="control">spreadMethod
+      <select id="spread"><option>pad</option><option>reflect</option><option>repeat</option></select>
+    </label>
+    <label class="control">length <input id="len" type="range" min="20" max="100" step="5" value="100"><output for="len"></output></label>
+    <label class="control" id="angleCtl">rotate <input id="angle" type="range" min="0" max="180" step="5" value="0"><output for="angle"></output></label>
+  </div>
+  <div class="stage">
+    <svg id="lab" width="560" height="280" viewBox="0 0 560 280" role="img" aria-label="Four shapes painted with the same gradient">
+      <defs>
+        <linearGradient id="g-linear">
+          <stop offset="0" stop-color="#2563eb"/>
+          <stop offset=".5" stop-color="#a855f7"/>
+          <stop offset="1" stop-color="#f97316"/>
+        </linearGradient>
+        <radialGradient id="g-radial">
+          <stop offset="0" stop-color="#2563eb"/>
+          <stop offset=".5" stop-color="#a855f7"/>
+          <stop offset="1" stop-color="#f97316"/>
+        </radialGradient>
+      </defs>
+      <g id="shapes">
+        <rect x="20" y="30" width="300" height="220" rx="12"/>
+        <rect x="350" y="30" width="90" height="90" rx="12"/>
+        <circle cx="495" cy="75" r="45"/>
+        <rect x="350" y="150" width="190" height="100" rx="12"/>
+      </g>
+      <g id="guide" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="5 4"></g>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const NS = 'http://www.w3.org/2000/svg';
+    const W = 560, H = 280;
+    function set(el, attrs) { for (const k in attrs) el.setAttribute(k, attrs[k]); }
+    function update() {
+      const type = $('type').value, units = $('units').value, k = $('len').value / 100, a = +$('angle').value;
+      const user = units === 'userSpaceOnUse';
+      const g = $('g-' + type);
+      set(g, { gradientUnits: units, spreadMethod: $('spread').value });
+      const guide = $('guide');
+      guide.replaceChildren();
+      if (type === 'linear') {
+        // The gradient vector starts at the left edge and runs `length` of the way across
+        if (user) {
+          set(g, { x1: 0, y1: H / 2, x2: W * k, y2: H / 2, gradientTransform: `rotate(${a} ${W / 2} ${H / 2})` });
+          const line = document.createElementNS(NS, 'line');
+          set(line, { x1: 0, y1: H / 2, x2: W * k, y2: H / 2, transform: `rotate(${a} ${W / 2} ${H / 2})` });
+          guide.append(line);
+        } else {
+          set(g, { x1: 0, y1: .5, x2: k, y2: .5, gradientTransform: `rotate(${a} .5 .5)` });
+        }
+      } else {
+        if (user) {
+          set(g, { cx: W / 2, cy: H / 2, r: (W / 2) * k, fx: W / 2, fy: H / 2 });
+          const c = document.createElementNS(NS, 'circle');
+          set(c, { cx: W / 2, cy: H / 2, r: (W / 2) * k });
+          guide.append(c);
+        } else {
+          set(g, { cx: .5, cy: .5, r: .5 * k, fx: .5, fy: .5 });
+        }
+      }
+      document.querySelectorAll('#shapes > *').forEach((s) => s.setAttribute('fill', `url(#g-${type})`));
+      $('angleCtl').hidden = type !== 'linear';
+      document.querySelectorAll('output').forEach((o) => { o.value = $(o.htmlFor).value + ($(o.htmlFor).id === 'angle' ? '°' : '%'); });
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

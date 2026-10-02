@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 15-2 · Finished</title>
+  <style>
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { transform-box: fill-box; transform-origin: center; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="120" height="120" viewBox="0 0 100 100" role="img" aria-label="Loading">
+    <circle cx="50" cy="50" r="40" fill="none" stroke="#e7e5e4" stroke-width="10"/>
+    <circle class="spin" cx="50" cy="50" r="40" fill="none" stroke="#2563eb" stroke-width="10"
+            stroke-linecap="round" stroke-dasharray="63 189"/>
+  </svg>
+  </div>
+</body>
+</html>

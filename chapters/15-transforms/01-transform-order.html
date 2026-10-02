@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>15-1 Transform Order: translate then rotate vs rotate then translate</title>
+  <style>
+    .axes path { fill: none; stroke: var(--border); stroke-width: 1; }
+    .axes .axis { stroke: var(--muted); }
+    .axes text { fill: var(--muted); font: 12px system-ui, sans-serif; }
+    .ghost { fill: none; stroke: var(--muted); stroke-dasharray: 4 3; }
+    .moved { fill: #2563eb; fill-opacity: .85; }
+    .local path { fill: none; stroke: #f97316; stroke-width: 2; }
+    .local circle { fill: #f97316; }
+    .step { opacity: .45; }
+
+    figcaption code { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; color: var(--fg); }
+    figcaption .matrix { color: var(--muted); font-size: 12px; }
+    input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker>
+      <g id="axes" class="axes">
+        <path d="M-40 0H240M0 -40V240" />
+        <path d="M0 0H220" class="axis" marker-end="url(#tip)"/>
+        <path d="M0 0V220" class="axis" marker-end="url(#tip)"/>
+        <text x="226" y="-6">x</text><text x="8" y="232">y</text>
+      </g>
+      <g id="local-axes" class="local">
+        <path d="M0 0H70" marker-end="url(#tip)"/>
+        <path d="M0 0V70" marker-end="url(#tip)"/>
+        <circle r="4"/>
+      </g>
+      <path id="arrow" d="M0 -14 H44 V-24 L70 0 L44 24 V14 H0 Z"/>
+    </defs>
+  </svg>
+  <div class="controls">
+    <label class="control">translate x <input id="tx" type="range" min="0" max="160" step="10" value="120"><output for="tx"></output></label>
+    <label class="control">rotate <input id="angle" type="range" min="0" max="90" step="5" value="45"><output for="angle"></output></label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg width="280" height="280" viewBox="-40 -40 280 280" role="img" aria-label="Translate first, then rotate">
+        <use href="#axes"/>
+        <use href="#arrow" class="ghost"/>
+        <use href="#local-axes" id="a-step" class="step"/>
+        <g id="a">
+          <use href="#arrow" class="moved"/>
+          <use href="#local-axes"/>
+        </g>
+      </svg>
+      <figcaption><code id="a-code"></code></figcaption>
+      <figcaption><code id="a-matrix" class="matrix"></code></figcaption>
+    </figure>
+    <figure>
+      <svg width="280" height="280" viewBox="-40 -40 280 280" role="img" aria-label="Rotate first, then translate">
+        <use href="#axes"/>
+        <use href="#arrow" class="ghost"/>
+        <use href="#local-axes" id="b-step" class="step"/>
+        <g id="b">
+          <use href="#arrow" class="moved"/>
+          <use href="#local-axes"/>
+        </g>
+      </svg>
+      <figcaption><code id="b-code"></code></figcaption>
+      <figcaption><code id="b-matrix" class="matrix"></code></figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const f = (n) => +n.toFixed(2);
+    function update() {
+      const tx = $('tx').value, a = $('angle').value;
+      const forms = { a: `translate(${tx} 0) rotate(${a})`, b: `rotate(${a}) translate(${tx} 0)` };
+      // The faded axes show the coordinate system after the first function only
+      const steps = { a: `translate(${tx} 0)`, b: `rotate(${a})` };
+      for (const id in forms) {
+        $(id + '-step').setAttribute('transform', steps[id]);
+        $(id).setAttribute('transform', forms[id]);
+        $(id + '-code').textContent = `transform="${forms[id]}"`;
+        const m = $(id).transform.baseVal.consolidate().matrix;
+        $(id + '-matrix').textContent = `matrix(${[m.a, m.b, m.c, m.d, m.e, m.f].map(f).join(' ')})`;
+      }
+      $('tx').nextElementSibling.value = tx;
+      $('angle').nextElementSibling.value = a + '°';
+    }
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

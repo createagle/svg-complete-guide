@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>8-1 Text on a Path</title>
+  <style>
+    .stage svg { width: 520px; }
+    .guide { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .label { font: 600 22px system-ui, sans-serif; fill: var(--fg); }
+    .start { fill: var(--accent); }
+    select, input { accent-color: var(--accent); }
+    output { min-width: 4ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">startOffset <input id="off" type="range" min="0" max="100" value="50"><output for="off"></output></label>
+    <label class="control">text-anchor
+      <select id="anchor"><option>start</option><option selected>middle</option><option>end</option></select>
+    </label>
+    <label class="control">Curve <input id="bend" type="range" min="-120" max="120" value="-90"><output for="bend"></output></label>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 400 220" role="img" aria-label="Text that follows a curved line">
+      <path id="track" class="guide"/>
+      <circle class="start" id="dot" r="5"/>
+      <text class="label">
+        <textPath id="tp" href="#track">Text follows the path</textPath>
+      </text>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      document.querySelectorAll('output').forEach((o) => { o.value = $(o.htmlFor).value; });
+      const bend = +$('bend').value;
+      $('track').setAttribute('d', `M30 140 Q200 ${140 + bend * 2} 370 140`);
+      $('tp').setAttribute('startOffset', $('off').value + '%');
+      $('tp').setAttribute('text-anchor', $('anchor').value);
+      // Mark the startOffset point on the path
+      const track = $('track');
+      const p = track.getPointAtLength(track.getTotalLength() * $('off').value / 100);
+      $('dot').setAttribute('cx', p.x);
+      $('dot').setAttribute('cy', p.y);
+      $('off').nextElementSibling.value = $('off').value + '%';
+    }
+    document.querySelectorAll('input, select').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

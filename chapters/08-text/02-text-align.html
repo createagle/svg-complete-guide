@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>8-2 text-anchor and dominant-baseline</title>
+  <style>
+    .stage svg { width: 480px; border: 1px solid var(--border); border-radius: 8px; }
+    .cross { stroke: var(--accent); stroke-width: 1; }
+    .sample { font: 44px system-ui, sans-serif; fill: var(--fg); }
+    .box { fill: var(--accent); fill-opacity: .12; }
+    figcaption code { font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--fg); }
+    select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">text-anchor
+      <select id="anchor"><option>start</option><option>middle</option><option>end</option></select>
+    </label>
+    <label class="control">dominant-baseline
+      <select id="base">
+        <option>auto</option><option>middle</option><option>central</option>
+        <option>hanging</option>
+      </select>
+    </label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg viewBox="0 0 400 200" role="img" aria-label="Sample text placed at a fixed point">
+        <rect class="box" id="box"/>
+        <line class="cross" x1="0" y1="100" x2="400" y2="100"/>
+        <line class="cross" x1="200" y1="0" x2="200" y2="200"/>
+        <text class="sample" id="t" x="200" y="100">Hxg 字</text>
+      </svg>
+      <figcaption><code id="code"></code></figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      const t = $('t');
+      t.setAttribute('text-anchor', $('anchor').value);
+      t.setAttribute('dominant-baseline', $('base').value);
+      const b = t.getBBox();
+      Object.entries({ x: b.x, y: b.y, width: b.width, height: b.height }).forEach(([k, v]) => $('box').setAttribute(k, v));
+      $('code').textContent = `<text x="200" y="100" text-anchor="${$('anchor').value}" dominant-baseline="${$('base').value}">`;
+    }
+    document.querySelectorAll('select').forEach((el) => el.addEventListener('input', update));
+    document.fonts.ready.then(update);
+    update();
+  </script>
+</body>
+</html>

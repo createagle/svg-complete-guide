@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>7-2 fill-rule: nonzero vs evenodd</title>
+  <style>
+    .stage svg { width: 150px; }
+    .stage path { fill: #2563eb; stroke: var(--fg); stroke-width: 1.5; }
+    select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">fill-rule
+      <select id="rule"><option>nonzero</option><option>evenodd</option></select>
+    </label>
+  </div>
+  <div class="stage" id="stage">
+    <figure>
+      <svg viewBox="-5 -5 110 110" role="img" aria-label="A five-pointed star drawn as one self-crossing outline">
+        <path d="M50 5 L79 90 L5 35 H95 L21 90 Z"/>
+      </svg>
+      <figcaption>One self-crossing outline</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="-5 -5 110 110" role="img" aria-label="Two circles drawn in the same direction">
+        <path d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 50 10 Z
+                 M50 30 A20 20 0 1 1 50 70 A20 20 0 1 1 50 30 Z"/>
+      </svg>
+      <figcaption>Two circles, same direction</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="-5 -5 110 110" role="img" aria-label="Two squares drawn in opposite directions">
+        <path d="M10 10 H90 V90 H10 Z
+                 M30 30 V70 H70 V30 Z"/>
+      </svg>
+      <figcaption>Two squares, opposite directions</figcaption>
+    </figure>
+  </div>
+  <script>
+    const rule = document.getElementById('rule');
+    rule.addEventListener('input', () => {
+      document.querySelectorAll('#stage path').forEach((p) => p.setAttribute('fill-rule', rule.value));
+    });
+  </script>
+</body>
+</html>

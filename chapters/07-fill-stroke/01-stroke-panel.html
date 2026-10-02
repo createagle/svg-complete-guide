@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>7-1 Stroke Properties Panel</title>
+  <style>
+    .stage svg { width: 520px; border: 1px solid var(--border); border-radius: 8px; }
+    .shape { stroke: #2563eb; stroke-opacity: .85; }
+    #line { fill: none; }
+    #ring { fill: #fbbf24; }
+    .skeleton { fill: none; stroke: var(--fg); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; pointer-events: none; }
+    select, input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">stroke-width <input id="w" type="range" min="1" max="40" value="16"><output for="w"></output></label>
+    <label class="control">stroke-linecap
+      <select id="cap"><option>butt</option><option>round</option><option>square</option></select>
+    </label>
+    <label class="control">stroke-linejoin
+      <select id="join"><option>miter</option><option>round</option><option>bevel</option></select>
+    </label>
+    <label class="control">stroke-miterlimit <input id="ml" type="range" min="1" max="10" step=".5" value="4"><output for="ml"></output></label>
+  </div>
+  <div class="controls">
+    <label class="control">stroke-dasharray
+      <select id="dash">
+        <option value="none">none</option>
+        <option>20 10</option>
+        <option>0 24</option>
+        <option>30 10 5 10</option>
+      </select>
+    </label>
+    <label class="control">stroke-dashoffset <input id="off" type="range" min="0" max="60" value="0"><output for="off"></output></label>
+    <label class="control">paint-order
+      <select id="po"><option>normal</option><option>stroke</option></select>
+    </label>
+  </div>
+  <div class="controls">
+    <label class="control">scale <input id="s" type="range" min=".5" max="1.5" step=".05" value="1"><output for="s"></output></label>
+    <label class="control"><input id="nss" type="checkbox"> vector-effect: non-scaling-stroke</label>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 360 220" role="img" aria-label="An open zigzag and a filled circle sharing the same stroke settings">
+      <g id="g">
+        <path class="shape" id="line" d="M30 170 L110 50 L150 170 L190 120 L240 120"/>
+        <circle class="shape" id="ring" cx="295" cy="110" r="38"/>
+        <path class="skeleton" d="M30 170 L110 50 L150 170 L190 120 L240 120"/>
+        <circle class="skeleton" cx="295" cy="110" r="38"/>
+      </g>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const shapes = document.querySelectorAll('.shape');
+    function update() {
+      document.querySelectorAll('output').forEach((o) => { o.value = $(o.htmlFor).value; });
+      const s = +$('s').value;
+      $('g').setAttribute('transform', `translate(180 110) scale(${s}) translate(-180 -110)`);
+      for (const el of shapes) {
+        Object.entries({
+          'stroke-width': $('w').value,
+          'stroke-linecap': $('cap').value,
+          'stroke-linejoin': $('join').value,
+          'stroke-miterlimit': $('ml').value,
+          'stroke-dasharray': $('dash').value,
+          'stroke-dashoffset': $('off').value,
+          'paint-order': $('po').value,
+          'vector-effect': $('nss').checked ? 'non-scaling-stroke' : 'none',
+        }).forEach(([k, v]) => el.setAttribute(k, v));
+      }
+    }
+    document.querySelectorAll('input, select').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

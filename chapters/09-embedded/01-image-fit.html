@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>9-1 Fitting and Clipping an Image</title>
+  <style>
+    #frame { display: block; margin: 0 auto; max-width: none; background: repeating-conic-gradient(var(--border) 0 25%, transparent 0 50%) 0 0 / 16px 16px; outline: 2px solid var(--fg); }
+    figcaption code { font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--fg); }
+    select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Frame
+      <select id="size"><option value="240x240">240 × 240</option><option value="320x160">320 × 160</option><option value="160x240">160 × 240</option></select>
+    </label>
+    <label class="control">Align
+      <select id="align"><option>xMinYMin</option><option selected>xMidYMid</option><option>xMaxYMax</option><option>none</option></select>
+    </label>
+    <label class="control">Fit
+      <select id="fit"><option>meet</option><option selected>slice</option></select>
+    </label>
+    <label class="control">Clip
+      <select id="clip"><option value="">none</option><option value="url(#oval)">ellipse</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg id="frame" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="A landscape photo placed in a frame">
+        <defs>
+          <clipPath id="oval" clipPathUnits="objectBoundingBox">
+            <ellipse cx=".5" cy=".5" rx=".5" ry=".5"/>
+          </clipPath>
+        </defs>
+        <image id="img" href="photo.jpg" width="240" height="240"/>
+      </svg>
+      <figcaption><code id="code"></code></figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      const [w, h] = $('size').value.split('x');
+      const align = $('align').value;
+      $('fit').disabled = align === 'none';
+      const par = align === 'none' ? 'none' : `${align} ${$('fit').value}`;
+      Object.assign($('frame').style, { width: w + 'px', height: h + 'px' });
+      $('frame').setAttribute('viewBox', `0 0 ${w} ${h}`);
+      const img = $('img');
+      img.setAttribute('width', w);
+      img.setAttribute('height', h);
+      img.setAttribute('preserveAspectRatio', par);
+      if ($('clip').value) img.setAttribute('clip-path', $('clip').value); else img.removeAttribute('clip-path');
+      $('code').textContent = `<image href="photo.jpg" width="${w}" height="${h}" preserveAspectRatio="${par}"${$('clip').value ? ` clip-path="${$('clip').value}"` : ''}/>`;
+    }
+    document.querySelectorAll('select').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

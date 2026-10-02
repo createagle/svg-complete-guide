@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>9-2 An HTML Card inside SVG</title>
+  <style>
+    .stage svg { width: 440px; }
+    .blob { fill: var(--accent); fill-opacity: .15; }
+    .card { box-sizing: border-box; height: 100%; padding: 14px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border);
+            color: var(--fg); font: 14px/1.5 system-ui, sans-serif; box-shadow: 0 4px 16px rgb(0 0 0 / .12); overflow: hidden; }
+    .card h3 { margin: 0 0 6px; font-size: 16px; }
+    .card p { margin: 0 0 10px; color: var(--muted); }
+    .card button { font: inherit; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--accent); background: none; color: var(--accent); cursor: pointer; }
+    input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">foreignObject width <input id="w" type="range" min="160" max="320" value="260"><output for="w"></output></label>
+    <label class="control"><input id="tilt" type="checkbox"> rotate(-6)</label>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 400 260" role="img" aria-label="An HTML card placed inside an SVG drawing">
+      <circle class="blob" cx="70" cy="60" r="60"/>
+      <circle class="blob" cx="336" cy="200" r="56"/>
+      <g id="group">
+        <foreignObject id="fo" x="40" y="40" width="260" height="180">
+          <div class="card">
+            <h3>Plain HTML in SVG</h3>
+            <p>This paragraph wraps by itself, because it is laid out by the HTML engine inside a foreignObject.</p>
+            <button id="like" type="button">♥ <span id="n">0</span></button>
+          </div>
+        </foreignObject>
+      </g>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      $('w').nextElementSibling.value = $('w').value;
+      $('fo').setAttribute('width', $('w').value);
+      $('group').setAttribute('transform', $('tilt').checked ? 'rotate(-6 200 130)' : '');
+    }
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    $('like').addEventListener('click', () => { $('n').textContent = +$('n').textContent + 1; });
+    update();
+  </script>
+</body>
+</html>

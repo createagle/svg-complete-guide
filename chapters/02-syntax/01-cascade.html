@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Presentation attributes vs CSS</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+    .ring { fill: none; stroke: var(--border); stroke-width: 2; stroke-dasharray: 4 4; }
+  </style>
+  <style id="sheet">.dot { fill: #16a34a; }</style>
+  <style id="important">.dot { fill: #9333ea !important; }</style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control"><input type="checkbox" id="use-attr" checked> <span class="swatch" style="background:#2563eb"></span> fill attribute</label>
+    <label class="control"><input type="checkbox" id="use-sheet" checked> <span class="swatch" style="background:#16a34a"></span> stylesheet rule</label>
+    <label class="control"><input type="checkbox" id="use-inline"> <span class="swatch" style="background:#ea580c"></span> inline style</label>
+    <label class="control"><input type="checkbox" id="use-important"> <span class="swatch" style="background:#9333ea"></span> !important rule</label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg width="160" height="160" viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="ring" cx="60" cy="60" r="52"/>
+        <circle id="dot" class="dot" cx="60" cy="60" r="44" fill="#2563eb"/>
+      </svg>
+      <figcaption id="winner"></figcaption>
+    </figure>
+  </div>
+  <script>
+    const dot = document.getElementById('dot');
+    const $ = (id) => document.getElementById(id);
+    const update = () => {
+      if ($('use-attr').checked) dot.setAttribute('fill', '#2563eb');
+      else dot.removeAttribute('fill');
+      $('sheet').sheet.disabled = !$('use-sheet').checked;
+      $('important').sheet.disabled = !$('use-important').checked;
+      dot.style.fill = $('use-inline').checked ? '#ea580c' : '';
+
+      const winner =
+        $('use-important').checked ? '!important rule' :
+        $('use-inline').checked ? 'inline style' :
+        $('use-sheet').checked ? 'stylesheet rule' :
+        $('use-attr').checked ? 'fill attribute' : 'initial value (black)';
+      $('winner').textContent = 'Winner: ' + winner;
+    };
+    document.querySelectorAll('input').forEach((input) => input.addEventListener('change', update));
+    update();
+  </script>
+</body>
+</html>

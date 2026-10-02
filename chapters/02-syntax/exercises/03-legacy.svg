@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="96" height="32" viewBox="0 0 96 32">
+  <defs>
+    <circle id="dot" cx="16" cy="16" r="12"/>
+  </defs>
+  <use xlink:href="#dot" fill="#2563eb"/>
+  <use xlink:href="#dot" x="32" fill="#16a34a"/>
+  <use xlink:href="#dot" x="64" fill="#ea580c"/>
+</svg>

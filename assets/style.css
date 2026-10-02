@@ -39,6 +39,7 @@ body.demo {
 .stage svg { max-width: 100%; height: auto; }
 .stage figure { margin: 0; text-align: center; }
 .stage figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; max-width: 560px; }
 .control { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
 
 /* Index page */

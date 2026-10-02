@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>16-1 Pointer Position in Every Coordinate System</title>
+  <style>
+    #root { touch-action: none; cursor: crosshair; }
+    .grid { fill: none; stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+    .frame { fill: none; stroke: var(--muted); }
+    .inner-bg { fill: #2563eb; fill-opacity: .08; }
+    .inner-grid { stroke: #93c5fd; }
+    .turned-bg { fill: #f97316; fill-opacity: .08; }
+    .turned-grid { stroke: #fdba74; }
+    .axis { fill: none; stroke: #f97316; stroke-width: 2; vector-effect: non-scaling-stroke; }
+    .tag { fill: var(--muted); font: 11px ui-monospace, Menlo, Consolas, monospace; }
+    .tag.small { font-size: 3px; }
+    #turned .tag.small { font-size: 6px; }
+    .marker { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; visibility: hidden; }
+    .marker.root { stroke: var(--fg); }
+    .marker.inner { stroke: #2563eb; }
+    .marker.turned { stroke: #f97316; }
+    .readout { border-collapse: collapse; font: 13px/1.6 ui-monospace, Menlo, Consolas, monospace; }
+    .readout th { text-align: left; font-weight: 400; color: var(--muted); padding-right: 16px; }
+    .readout td { min-width: 15ch; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+    <svg id="root" width="560" height="420" viewBox="0 0 400 300" role="img" aria-label="Three nested coordinate systems with a pointer marker in each">
+      <path class="grid" d="M0 0V300 M50 0V300 M100 0V300 M150 0V300 M200 0V300 M250 0V300 M300 0V300 M350 0V300 M400 0V300 M0 0H400 M0 50H400 M0 100H400 M0 150H400 M0 200H400 M0 250H400 M0 300H400"/>
+      <rect class="frame" x=".5" y=".5" width="399" height="299"/>
+      <text class="tag" x="8" y="292">root svg · viewBox 0 0 400 300</text>
+
+      <svg id="inner" x="230" y="20" width="160" height="120" viewBox="0 0 40 30">
+        <rect class="inner-bg" width="40" height="30"/>
+        <path class="grid inner-grid" d="M0 0V30 M5 0V30 M10 0V30 M15 0V30 M20 0V30 M25 0V30 M30 0V30 M35 0V30 M40 0V30 M0 0H40 M0 5H40 M0 10H40 M0 15H40 M0 20H40 M0 25H40 M0 30H40"/>
+        <text class="tag small" x="1" y="24.5">nested svg</text>
+        <text class="tag small" x="1" y="28.5">viewBox 0 0 40 30</text>
+        <circle id="m-inner" class="marker inner" r="1.6"/>
+      </svg>
+
+      <g id="turned" transform="translate(110 190) rotate(-25) scale(1.4)">
+        <rect class="turned-bg" x="-60" y="-50" width="120" height="100"/>
+        <path class="grid turned-grid" d="M-60 -50V50 M-50 -50V50 M-40 -50V50 M-30 -50V50 M-20 -50V50 M-10 -50V50 M0 -50V50 M10 -50V50 M20 -50V50 M30 -50V50 M40 -50V50 M50 -50V50 M60 -50V50 M-60 -50H60 M-60 -40H60 M-60 -30H60 M-60 -20H60 M-60 -10H60 M-60 0H60 M-60 10H60 M-60 20H60 M-60 30H60 M-60 40H60 M-60 50H60"/>
+        <path class="axis" d="M0 0H55M0 0V45"/>
+        <text class="tag small" x="-58" y="-40">g · translate rotate scale</text>
+        <circle id="m-turned" class="marker turned" r="3"/>
+      </g>
+
+      <circle id="m-root" class="marker root" r="6"/>
+    </svg>
+  </div>
+  <table class="readout">
+    <tr><th>clientX, clientY</th><td id="o-client">–</td></tr>
+    <tr><th>root svg</th><td id="o-root">–</td></tr>
+    <tr><th>nested svg</th><td id="o-inner">–</td></tr>
+    <tr><th>rotated g</th><td id="o-turned">–</td></tr>
+  </table>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const f = (n) => n.toFixed(1);
+    // Convert a pointer position into the user coordinates of any element
+    function toLocal(el, e) {
+      return new DOMPoint(e.clientX, e.clientY).matrixTransform(el.getScreenCTM().inverse());
+    }
+    $('root').addEventListener('pointermove', (e) => {
+      $('o-client').textContent = `${e.clientX}, ${e.clientY}`;
+      for (const id of ['root', 'inner', 'turned']) {
+        const p = toLocal($(id), e);
+        $('o-' + id).textContent = `${f(p.x)}, ${f(p.y)}`;
+        // Each marker is drawn in its own layer's coordinates, so it lands under the pointer only if the conversion is right
+        const m = $('m-' + id);
+        m.setAttribute('cx', p.x);
+        m.setAttribute('cy', p.y);
+        m.style.visibility = 'visible';
+      }
+    });
+  </script>
+</body>
+</html>

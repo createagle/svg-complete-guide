@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 18-1 · Finished</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="360" height="240" viewBox="0 0 480 320" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river, fading out toward the bottom">
+    <defs>
+      <linearGradient id="fade-down" x1="0" y1="0" x2="0" y2="1">
+        <stop offset=".5" stop-color="#fff"/>
+        <stop offset="1" stop-color="#000"/>
+      </linearGradient>
+      <mask id="fade-out">
+        <rect width="480" height="320" fill="url(#fade-down)"/>
+      </mask>
+    </defs>
+    <image href="../photo.jpg" width="480" height="320" mask="url(#fade-out)"/>
+  </svg>
+  </div>
+</body>
+</html>

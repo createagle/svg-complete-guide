@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>18-1 Luminance and Alpha Masks</title>
+  <style>
+    figure svg { border-radius: 8px; }
+    select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">mask content
+      <select id="content"><option value="gradient">white → black gradient</option><option value="colors">colored circles on black</option></select>
+    </label>
+    <label class="control">mask-type
+      <select id="type"><option>luminance</option><option>alpha</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg width="320" height="173" viewBox="0 0 480 260" role="img" aria-label="The mask content on a checkerboard">
+        <defs>
+          <pattern id="checker" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect width="20" height="20" fill="#d6d3d1"/><path d="M0 0H10V10H0ZM10 10H20V20H10Z" fill="#a8a29e"/>
+          </pattern>
+          <linearGradient id="fade">
+            <stop offset="0" stop-color="#fff"/>
+            <stop offset="1" stop-color="#000"/>
+          </linearGradient>
+        </defs>
+        <rect width="480" height="260" fill="url(#checker)"/>
+        <g id="preview"></g>
+      </svg>
+      <figcaption>mask content</figcaption>
+    </figure>
+    <figure>
+      <svg width="320" height="173" viewBox="0 0 480 260" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river, masked">
+        <mask id="m" x="0" y="0" width="480" height="260" maskUnits="userSpaceOnUse"></mask>
+        <image href="photo.jpg" width="480" height="260" preserveAspectRatio="xMidYMid slice" mask="url(#m)"/>
+      </svg>
+      <figcaption>photo with mask="url(#m)"</figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const contents = {
+      gradient: `<rect width="480" height="260" fill="url(#fade)"/>`,
+      colors: `<rect width="480" height="260" fill="#000"/>
+          <circle cx="80" cy="130" r="60" fill="#fff"/>
+          <circle cx="200" cy="130" r="60" fill="#f00"/>
+          <circle cx="320" cy="130" r="60" fill="#0f0"/>
+          <circle cx="430" cy="130" r="45" fill="#00f"/>`,
+    };
+    function update() {
+      const html = contents[$('content').value];
+      $('preview').innerHTML = html;
+      $('m').innerHTML = html;
+      $('m').style.maskType = $('type').value;
+    }
+    document.querySelectorAll('select').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

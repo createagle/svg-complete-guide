@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>16-2 Dragging Inside a Rotated, Scaled Layer</title>
+  <style>
+    #scene { touch-action: none; }
+    .grid { fill: none; stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+    .handle { fill: #2563eb; fill-opacity: .85; stroke: var(--bg); stroke-width: 2; vector-effect: non-scaling-stroke; cursor: grab; }
+    #naive { fill: #f97316; }
+    .handle:active { cursor: grabbing; }
+    .tag { fill: var(--muted); font: 11px ui-monospace, Menlo, Consolas, monospace; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+    <svg id="scene" width="560" height="392" viewBox="0 0 400 280" role="img" aria-label="Two draggable handles inside rotated layers">
+      <g transform="translate(105 130) rotate(30) scale(1.2)">
+        <path class="grid" d="M-50 -50V50 M-40 -50V50 M-30 -50V50 M-20 -50V50 M-10 -50V50 M0 -50V50 M10 -50V50 M20 -50V50 M30 -50V50 M40 -50V50 M50 -50V50 M-50 -50H50 M-50 -40H50 M-50 -30H50 M-50 -20H50 M-50 -10H50 M-50 0H50 M-50 10H50 M-50 20H50 M-50 30H50 M-50 40H50 M-50 50H50"/>
+        <circle id="naive" class="handle" r="12"/>
+      </g>
+      <text class="tag" x="105" y="268" text-anchor="middle">naive: movementX/Y</text>
+      <g transform="translate(295 130) rotate(30) scale(1.2)">
+        <path class="grid" d="M-50 -50V50 M-40 -50V50 M-30 -50V50 M-20 -50V50 M-10 -50V50 M0 -50V50 M10 -50V50 M20 -50V50 M30 -50V50 M40 -50V50 M50 -50V50 M-50 -50H50 M-50 -40H50 M-50 -30H50 M-50 -20H50 M-50 -10H50 M-50 0H50 M-50 10H50 M-50 20H50 M-50 30H50 M-50 40H50 M-50 50H50"/>
+        <circle id="converted" class="handle" r="12"/>
+      </g>
+      <text class="tag" x="295" y="268" text-anchor="middle">converted: getScreenCTM()</text>
+    </svg>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function toLocal(el, e) {
+      return new DOMPoint(e.clientX, e.clientY).matrixTransform(el.getScreenCTM().inverse());
+    }
+    // Naive: treat screen pixels as if they were the layer's user units
+    $('naive').addEventListener('pointerdown', (e) => {
+      const el = e.currentTarget;
+      el.setPointerCapture(e.pointerId);
+      const move = (ev) => {
+        el.setAttribute('cx', +el.getAttribute('cx') + ev.movementX);
+        el.setAttribute('cy', +el.getAttribute('cy') + ev.movementY);
+      };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', () => el.removeEventListener('pointermove', move), { once: true });
+    });
+    // Converted: map the pointer into the layer, keep the grab offset
+    $('converted').addEventListener('pointerdown', (e) => {
+      const el = e.currentTarget;
+      el.setPointerCapture(e.pointerId);
+      const start = toLocal(el, e);
+      const dx = +el.getAttribute('cx') - start.x, dy = +el.getAttribute('cy') - start.y;
+      const move = (ev) => {
+        const p = toLocal(el, ev);
+        el.setAttribute('cx', p.x + dx);
+        el.setAttribute('cy', p.y + dy);
+      };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', () => el.removeEventListener('pointermove', move), { once: true });
+    });
+    document.querySelectorAll('.handle').forEach((h) => { h.setAttribute('cx', 0); h.setAttribute('cy', 0); });
+  </script>
+</body>
+</html>

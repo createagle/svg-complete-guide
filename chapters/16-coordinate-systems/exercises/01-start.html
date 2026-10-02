@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 16-1 · Starter</title>
+  <style>
+    #board { cursor: crosshair; }
+    .board { fill: none; stroke: var(--border); }
+    #board text { fill: var(--muted); font: 10px system-ui, sans-serif; pointer-events: none; }
+    #board circle { fill: #2563eb; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg id="board" width="400" height="300" viewBox="0 0 200 150" role="img" aria-label="Click to place dots">
+    <rect class="board" x=".5" y=".5" width="199" height="149" rx="6"/>
+    <text x="100" y="78" text-anchor="middle">Click anywhere</text>
+  </svg>
+  </div>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const board = document.getElementById('board');
+    board.addEventListener('click', (e) => {
+      const dot = document.createElementNS(NS, 'circle');
+      dot.setAttribute('cx', e.offsetX);
+      dot.setAttribute('cy', e.offsetY);
+      dot.setAttribute('r', 4);
+      board.append(dot);
+    });
+  </script>
+</body>
+</html>

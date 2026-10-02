@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>18-2 Irregular Edges and Fades with CSS Masks</title>
+  <style>
+    .hero {
+      width: 320px; height: 200px; padding: 28px 24px; color: #fff;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      /* Layer 1: the repeating SVG edge along the bottom. Layer 2: a solid block for everything above it */
+      mask: url(edge-wave.svg) bottom left / var(--tile, 80px) 20px repeat-x,
+            linear-gradient(#000 0 0) top / 100% calc(100% - 19px) no-repeat;
+    }
+    .hero h2 { margin: 0 0 4px; font-size: 24px; }
+    .hero p { margin: 0; opacity: .85; }
+    .list {
+      width: 260px; height: 200px; margin: 0; padding: 8px 16px; overflow-y: auto; list-style: none;
+      border: 1px solid var(--border); border-radius: 12px; font-size: 14px;
+    }
+    .list li { padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .list.faded { mask-image: linear-gradient(to bottom, transparent, #000 32px, #000 calc(100% - 32px), transparent); }
+    select, input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">edge
+      <select id="edge"><option value="wave">edge-wave.svg</option><option value="zigzag">edge-zigzag.svg</option><option value="scallop">edge-scallop.svg</option><option value="none">none</option></select>
+    </label>
+    <label class="control">tile width <input id="tile" type="range" min="40" max="160" step="10" value="80"><output for="tile"></output></label>
+    <label class="control"><input id="fade" type="checkbox" checked> fade list edges</label>
+  </div>
+  <div class="stage">
+    <section id="hero" class="hero">
+      <h2>Drawing &amp; Styling</h2>
+      <p>Chapters 13–21</p>
+    </section>
+    <ul id="list" class="list">
+        <li>Release note 1: gradients follow CSS variables</li>
+        <li>Release note 2: patterns tile from the origin</li>
+        <li>Release note 3: transform-box is fill-box</li>
+        <li>Release note 4: pointer math uses getScreenCTM</li>
+        <li>Release note 5: clip-path accepts shape()</li>
+        <li>Release note 6: masks read luminance</li>
+        <li>Release note 7: markers orient along the path</li>
+        <li>Release note 8: mix-blend-mode needs isolation</li>
+        <li>Release note 9: icons inherit currentColor</li>
+        <li>Release note 10: sprites use view fragments</li>
+    </ul>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      const hero = $('hero').style, edge = $('edge').value;
+      hero.setProperty('--tile', $('tile').value + 'px');
+      hero.mask = edge === 'none' ? 'none'
+        : `url(edge-${edge}.svg) bottom left / var(--tile) 20px repeat-x, linear-gradient(#000 0 0) top / 100% calc(100% - 19px) no-repeat`;
+      $('list').classList.toggle('faded', $('fade').checked);
+      document.querySelector('output').value = $('tile').value;
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

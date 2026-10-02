@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>17-2 Reveal Animations with clip-path</title>
+  <style>
+    .frame { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; line-height: 0; max-width: 100%; }
+    .frame img, .frame svg { display: block; max-width: 100%; height: auto; }
+    .reveal { transition: clip-path .9s cubic-bezier(.2, .7, .2, 1); }
+    .iris { clip-path: circle(0% at 50% 50%); }
+    .iris.shown { clip-path: circle(75% at 50% 50%); }
+    .wipe { clip-path: inset(0 100% 0 0); }
+    .wipe.shown { clip-path: inset(0 0 0 0); }
+    .diagonal { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+    .diagonal.shown { clip-path: polygon(0 0, 150% 0, 100% 100%, 0 100%); }
+    .iris-circle { r: 0px; transition: r .9s cubic-bezier(.2, .7, .2, 1); }
+    .shown .iris-circle { r: 290px; }
+    button { font: inherit; font-size: 14px; padding: 4px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); cursor: pointer; }
+    select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">effect
+      <select id="mode"><option value="iris">circle()</option><option value="wipe">inset()</option><option value="diagonal">polygon()</option><option value="svg">SVG clipPath + CSS r</option></select>
+    </label>
+    <button id="toggle" type="button">Reveal</button>
+  </div>
+  <div class="stage">
+    <div class="frame">
+      <img id="photo" class="reveal iris" src="photo.jpg" width="480" height="320" alt="Flat illustration of mountains, a sun, a tree and a river">
+      <svg id="svgReveal" width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river">
+        <clipPath id="iris"><circle class="iris-circle" cx="240" cy="160"/></clipPath>
+        <image href="photo.jpg" width="480" height="320" clip-path="url(#iris)"/>
+      </svg>
+    </div>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let shown = false;
+    function render() {
+      const mode = $('mode').value, svg = mode === 'svg';
+      // The hidden attribute does not apply to <svg>, so toggle display instead
+      $('photo').style.display = svg ? 'none' : '';
+      $('svgReveal').style.display = svg ? '' : 'none';
+      $('photo').className = `reveal ${svg ? 'iris' : mode}` + (shown ? ' shown' : '');
+      $('svgReveal').classList.toggle('shown', shown);
+      $('toggle').textContent = shown ? 'Hide' : 'Reveal';
+    }
+    $('toggle').addEventListener('click', () => { shown = !shown; render(); });
+    // Switching effects starts from the hidden state so the next click animates
+    $('mode').addEventListener('input', () => { shown = false; render(); });
+    render();
+    // Play the reveal once after the first frame has painted the hidden state
+    requestAnimationFrame(() => requestAnimationFrame(() => { shown = true; render(); }));
+  </script>
+</body>
+</html>

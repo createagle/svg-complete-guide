@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>17-1 Clipping an Image to Shapes</title>
+  <style>
+    #photo { height: auto; padding: 16px; border: 10px dashed #f97316; background: #dbeafe; }
+    #clip-text text { font: 900 150px/1 system-ui, sans-serif; }
+    #rule { font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); max-width: 560px; text-align: center; overflow-wrap: anywhere; }
+    select, input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">clip-path
+      <select id="shape">
+        <option value="none">none</option>
+        <option value="circle(40% at 50% 50%)">circle()</option>
+        <option value="ellipse(45% 35% at 50% 50%)">ellipse()</option>
+        <option value="inset(10% round 24px)">inset() round</option>
+        <option value="polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)">polygon() star</option>
+        <option value="path(&quot;M0 120 C120 40 240 200 360 120 S480 80 480 80 V320 H0 Z&quot;)">path() wave</option>
+        <option value="shape(from 0% 40%, curve to 75% 40% with 25% 15% / 50% 65%, smooth to 100% 25%, vline to 100%, hline to 0%, close)">shape() wave</option>
+        <option value="url(#clip-text)">url(#clip-text)</option>
+      </select>
+    </label>
+    <label class="control">reference box
+      <select id="box"><option>border-box</option><option>padding-box</option><option>content-box</option></select>
+    </label>
+    <label class="control">width <input id="width" type="range" min="240" max="480" step="20" value="400"><output for="width"></output></label>
+  </div>
+  <div class="stage">
+    <img id="photo" src="photo.jpg" width="480" height="320" alt="Flat illustration of mountains, a sun, a tree and a river">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <clipPath id="clip-text">
+        <!-- On an HTML element, user space starts at the reference box's top-left corner -->
+        <text x="226" y="200" text-anchor="middle">SVG</text>
+      </clipPath>
+    </svg>
+  </div>
+  <code id="rule"></code>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      const shape = $('shape').value;
+      // url() and none take no reference box; basic shapes, path() and shape() do
+      const value = shape === 'none' || shape.startsWith('url(') ? shape : `${shape} ${$('box').value}`;
+      $('photo').style.clipPath = value;
+      $('photo').style.width = $('width').value + 'px';
+      $('rule').textContent = `clip-path: ${value};`;
+      document.querySelector('output').value = $('width').value;
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    $('shape').value = 'circle(40% at 50% 50%)';
+    update();
+  </script>
+</body>
+</html>

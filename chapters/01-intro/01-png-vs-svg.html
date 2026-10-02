@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PNG 与 SVG 放大对比 · 第 1 章 · SVG 完全指南</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body>
+<main>
+  <div class="breadcrumb">
+    <a href="../../">SVG 完全指南</a> / 第 1 章 认识 SVG ·
+    <a href="https://github.com/createagle/svg-complete-guide/blob/main/chapters/01-intro/01-png-vs-svg.html">查看源码</a>
+  </div>
+  <h1>PNG 与 SVG 放大对比</h1>
+  <p>同一个图标，左边是 32×32 的 PNG，右边是 SVG。拖动滑块放大，看哪一边先糊。</p>
+
+  <section class="demo">
+    <h2>示例 1-1 · 同一图标的两种格式</h2>
+    <label class="controls">放大倍数 <input id="zoom" type="range" min="1" max="12" value="4"> <output id="zoom-out">4×</output></label>
+    <div class="stage">
+      <figure>
+        <img class="zoomable" src="icon-32.png" alt="PNG 版图标" width="32" height="32">
+        <figcaption>icon-32.png（光栅图）</figcaption>
+      </figure>
+      <figure>
+        <img class="zoomable" src="icon.svg" alt="SVG 版图标" width="32" height="32">
+        <figcaption>icon.svg（矢量图）</figcaption>
+      </figure>
+    </div>
+  </section>
+</main>
+<script src="../../assets/demo.js"></script>
+<script>
+  const zoom = document.getElementById('zoom');
+  const out = document.getElementById('zoom-out');
+  const apply = () => {
+    const size = 32 * zoom.value;
+    document.querySelectorAll('.zoomable').forEach((img) => {
+      img.style.width = img.style.height = size + 'px';
+    });
+    out.textContent = zoom.value + '×';
+  };
+  zoom.addEventListener('input', apply);
+  apply();
+</script>
+</body>
+</html>

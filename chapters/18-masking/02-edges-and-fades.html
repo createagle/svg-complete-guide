@@ -10,9 +10,13 @@
       width: 320px; height: 200px; padding: 28px 24px; color: #fff;
       background: linear-gradient(135deg, #2563eb, #7c3aed);
       /* Layer 1: the repeating SVG edge along the bottom. Layer 2: a solid block for everything above it */
-      mask: url(edge-wave.svg) bottom left / var(--tile, 80px) 20px repeat-x,
+      mask: var(--edge) bottom left / var(--tile, 80px) 20px repeat-x,
             linear-gradient(#000 0 0) top / 100% calc(100% - 19px) no-repeat;
     }
+    .edge-wave    { --edge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 20' preserveAspectRatio='none'%3E%3Cpath d='M0 0H80V10Q60 20 40 10T0 10Z'/%3E%3C/svg%3E"); }
+    .edge-zigzag  { --edge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 20' preserveAspectRatio='none'%3E%3Cpath d='M0 0H80V20L60 6L40 20L20 6L0 20Z'/%3E%3C/svg%3E"); }
+    .edge-scallop { --edge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 20' preserveAspectRatio='none'%3E%3Cpath d='M0 0H80V10A10 10 0 0 1 60 10A10 10 0 0 1 40 10A10 10 0 0 1 20 10A10 10 0 0 1 0 10Z'/%3E%3C/svg%3E"); }
+    .edge-none    { mask: none; }
     .hero h2 { margin: 0 0 4px; font-size: 24px; }
     .hero p { margin: 0; opacity: .85; }
     .list {
@@ -28,13 +32,13 @@
 <body class="demo">
   <div class="controls">
     <label class="control">edge
-      <select id="edge"><option value="wave">edge-wave.svg</option><option value="zigzag">edge-zigzag.svg</option><option value="scallop">edge-scallop.svg</option><option value="none">none</option></select>
+      <select id="edge"><option>wave</option><option>zigzag</option><option>scallop</option><option>none</option></select>
     </label>
     <label class="control">tile width <input id="tile" type="range" min="40" max="160" step="10" value="80"><output for="tile"></output></label>
     <label class="control"><input id="fade" type="checkbox" checked> fade list edges</label>
   </div>
   <div class="stage">
-    <section id="hero" class="hero">
+    <section id="hero" class="hero edge-wave">
       <h2>Drawing &amp; Styling</h2>
       <p>Chapters 13–21</p>
     </section>
@@ -54,10 +58,8 @@
   <script>
     const $ = (id) => document.getElementById(id);
     function update() {
-      const hero = $('hero').style, edge = $('edge').value;
-      hero.setProperty('--tile', $('tile').value + 'px');
-      hero.mask = edge === 'none' ? 'none'
-        : `url(edge-${edge}.svg) bottom left / var(--tile) 20px repeat-x, linear-gradient(#000 0 0) top / 100% calc(100% - 19px) no-repeat`;
+      $('hero').className = 'hero edge-' + $('edge').value;
+      $('hero').style.setProperty('--tile', $('tile').value + 'px');
       $('list').classList.toggle('faded', $('fade').checked);
       document.querySelector('output').value = $('tile').value;
     }

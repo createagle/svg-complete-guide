@@ -1,49 +1,54 @@
-# SVG 完全指南 · 示例代码
+# SVG Complete Guide · Demos
 
-《SVG 完全指南》（5 篇 50 章）的配套示例，部署在 GitHub Pages：
+**English** | [简体中文](README.zh-CN.md)
+
+Companion demos for *SVG Complete Guide* (5 parts, 50 chapters), deployed on GitHub Pages:
 
 **https://createagle.github.io/svg-complete-guide/**
 
-## 目录约定
+## Layout
 
 ```text
-index.html                     # 示例总目录（按篇、章导航）
+index.html                     # Demo index (by part and chapter)
 assets/
-  style.css                    # 公共样式：亮/暗色主题、居中演示布局、prefers-reduced-motion
+  style.css                    # Shared styles: light/dark theme, centered demo layout, prefers-reduced-motion
 chapters/
   01-intro/
-    README.md                  # 本章示例说明
-    01-png-vs-svg.html         # 一个示例一个独立页面
-    exercises/                 # 练习参考答案
+    README.md                  # Chapter demo list
+    01-png-vs-svg.html         # One demo per standalone page
+    exercises/                 # Exercise answers
   02-syntax/
   ...
-  49-project/                  # 综合项目可以是独立 Vite 工程
+  49-project/                  # The capstone may be a standalone Vite project
+tools/
+  reading_time.py              # Estimates a chapter's reading time from its Markdown export
 .github/workflows/
-  pages.yml                    # push 到 main 即自动部署
-  sync-main.yml                # claude/** 分支自动快进到 main 并部署
+  pages.yml                    # Deploys on every push to main
+  sync-main.yml                # Fast-forwards claude/** branches to main and deploys
 ```
 
-- 示例链接：`https://createagle.github.io/svg-complete-guide/chapters/<章目录>/<示例>.html`
-- 查看源码：`https://github.com/createagle/svg-complete-guide/blob/main/chapters/<章目录>/<示例>.html`
-- 示例页只放演示本身（英文文案，无说明），可直接 iframe 内嵌；讲解在教程文档里。
-- 除第 41 章和框架章节外，示例都是零依赖的 HTML 页面，双击即可打开；统一支持暗色模式和 `prefers-reduced-motion`。
+- Live demo: `https://createagle.github.io/svg-complete-guide/chapters/<chapter>/<demo>.html`
+- Source: `https://github.com/createagle/svg-complete-guide/blob/main/chapters/<chapter>/<demo>.html`
+- Demo pages contain only the demo itself (English copy, no explanations) so they can be embedded in an iframe; explanations live in the tutorial.
+- Except for chapter 41 and the framework chapters, every demo is a dependency-free HTML page you can open by double-clicking. All demos support dark mode and `prefers-reduced-motion`.
+- Every Markdown file comes in English (`README.md`) and Chinese (`README.zh-CN.md`), linked to each other at the top.
 
-### 新增示例
+### Adding a demo
 
-1. 复制一个现有示例页，修改英文 `<title>`、控件和 `.stage` 里的代码。
-2. 在本章 `README.md` 的表格里加一行。
-3. 在根目录 `index.html` 对应章节下加链接。
+1. Copy an existing demo page and change its English `<title>`, controls, and the code inside `.stage`.
+2. Add a row to the chapter's `README.md` and `README.zh-CN.md`.
+3. Link it under its chapter in the root `index.html`.
 
-## 部署
+## Deployment
 
-- `.github/workflows/sync-main.yml`：推送到 `claude/**` 分支后，自动快进合并到 `main` 并触发部署。
-- `.github/workflows/pages.yml`：推送到 `main`（或被上面的 workflow 触发）时部署到 GitHub Pages。
+- `.github/workflows/sync-main.yml`: after a push to a `claude/**` branch, fast-forwards `main` and triggers a deploy.
+- `.github/workflows/pages.yml`: deploys to GitHub Pages on a push to `main` (or when triggered by the workflow above).
 
-首次使用需在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+First-time setup: in the repository, go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
 
-本地预览：
+Local preview:
 
 ```sh
 python3 -m http.server 8000
-# 打开 http://localhost:8000/
+# open http://localhost:8000/
 ```

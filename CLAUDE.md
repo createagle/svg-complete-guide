@@ -22,12 +22,15 @@
 - **示例页只放演示本身**：不写标题、说明文字、面包屑、源码面板。讲解全部写在 Claude Docs 文档里。
   页面要能直接作为 iframe 内嵌。
 - **GitHub Pages 上的页面文案一律用英文**（`<title>`、控件标签、图注、`alt`、`aria-label`）。
-  文档和仓库里的 Markdown 说明仍用中文。
+- **仓库里的 Markdown 一律中英双语**：英文写在 `README.md`，中文写在同目录的 `README.zh-CN.md`，
+  两个文件 H1 下第一行放语言切换：英文版 `**English** | [简体中文](README.zh-CN.md)`，
+  中文版 `[English](README.md) | **简体中文**`。两版内容保持一致，改一版就同步改另一版；
+  中文版里指向其他 README 的链接指向 `README.zh-CN.md`。`CLAUDE.md` 是协作约定，不需要双语。
 - 页面结构：`<body class="demo">` 内放可选的 `<label class="control">` 控件和 `<div class="stage">` 演示区，
   引用 `../../assets/style.css`。演示需要的样式写在页面 `<head>` 的 `<style>` 里。
 - 零依赖、双击可打开；支持暗色模式和 `prefers-reduced-motion`。
 - 用现代写法：`href` 而非 `xlink:href`，`currentColor` / CSS 变量做主题。
-- 新增示例后同步更新本章 `README.md` 和根目录 `index.html`（英文）。
+- 新增示例后同步更新本章 `README.md`、`README.zh-CN.md` 和根目录 `index.html`（英文）。
 - 文档里引用的代码片段要与页面源码一致；改了页面就同步改文档。
 
 ## 文档约定（Claude Docs）

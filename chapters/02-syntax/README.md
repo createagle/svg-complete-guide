@@ -1,7 +1,9 @@
-# 第 2 章 文档结构与语法 · 示例
+# Chapter 2 · Document Structure & Syntax · Demos
 
-| 示例 | 在线演示 | 说明 |
+**English** | [简体中文](README.zh-CN.md)
+
+| Demo | Live | What it shows |
 | --- | --- | --- |
-| 2-1 表现属性 vs CSS 优先级 | [01-cascade.html](https://createagle.github.io/svg-complete-guide/chapters/02-syntax/01-cascade.html) | 逐层打开表现属性、样式表、内联 style、!important，看哪一层生效 |
+| 2-1 Presentation attributes vs CSS | [01-cascade.html](https://createagle.github.io/svg-complete-guide/chapters/02-syntax/01-cascade.html) | Toggle the presentation attribute, a stylesheet rule, an inline style and an `!important` rule one by one to see which one wins |
 
-练习参考答案见 [exercises/](exercises/README.md)。
+Exercise answers: [exercises/](exercises/README.md).

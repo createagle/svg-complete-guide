@@ -1,0 +1,58 @@
+/* SVG 完全指南 · 示例页公共样式 */
+:root {
+  --bg: #fafaf9;
+  --fg: #1c1917;
+  --muted: #78716c;
+  --card: #ffffff;
+  --border: #e7e5e4;
+  --accent: #2563eb;
+  --code-bg: #f5f5f4;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1917;
+    --fg: #f5f5f4;
+    --muted: #a8a29e;
+    --card: #292524;
+    --border: #44403c;
+    --accent: #60a5fa;
+    --code-bg: #0c0a09;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+main { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
+a { color: var(--accent); }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+.breadcrumb { font-size: .9rem; color: var(--muted); margin-bottom: 16px; }
+
+/* 一个示例 = 渲染结果 + 源码 */
+.demo {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 24px 0;
+  overflow: hidden;
+}
+.demo > h2 { font-size: 1.05rem; margin: 0; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.demo .stage { padding: 24px 16px; display: flex; justify-content: center; }
+.demo .stage svg { max-width: 100%; height: auto; }
+.demo pre {
+  margin: 0;
+  padding: 16px;
+  background: var(--code-bg);
+  border-top: 1px solid var(--border);
+  overflow-x: auto;
+  font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* 首页章节列表 */
+.chapters { list-style: none; padding: 0; }
+.chapters li { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.chapters .examples { font-size: .9rem; color: var(--muted); }

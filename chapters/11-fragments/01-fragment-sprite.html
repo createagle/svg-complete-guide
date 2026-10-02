@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>11-1 One File, Many Icons</title>
+  <style>
+    .stage img { display: block; margin: 0 auto; border: 1px dashed var(--border); }
+    .stage figcaption code { font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--fg); }
+    .row { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+    select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Icon
+      <select id="pick"><option>sun</option><option selected>moon</option><option>cloud</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <figure>
+      <img src="sprite.svg" width="192" height="64" alt="Sun, moon and cloud icons side by side">
+      <figcaption><code>sprite.svg</code></figcaption>
+    </figure>
+  </div>
+  <div class="stage row">
+    <figure>
+      <img id="view" width="64" height="64" alt="">
+      <figcaption><code id="c-view"></code></figcaption>
+    </figure>
+    <figure>
+      <img id="svgview" width="64" height="64" alt="">
+      <figcaption><code id="c-svgview"></code></figcaption>
+    </figure>
+    <figure>
+      <img id="target" width="64" height="64" alt="">
+      <figcaption><code id="c-target"></code></figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const x = { sun: 0, moon: 32, cloud: 64 };
+    function update() {
+      const name = $('pick').value;
+      const urls = {
+        view: `sprite.svg#${name}`,
+        svgview: `sprite.svg#svgView(viewBox(${x[name]},0,32,32))`,
+        target: `stack.svg#${name}`,
+      };
+      for (const [id, url] of Object.entries(urls)) {
+        $(id).src = url;
+        $(id).alt = name;
+        $('c-' + id).textContent = url;
+      }
+    }
+    $('pick').addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

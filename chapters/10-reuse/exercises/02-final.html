@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 10-2 · Finished</title>
+  <style>.unread { --dot-color: #f97316; }</style>
+</head>
+<body class="demo">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="bell" viewBox="0 0 24 24">
+        <path d="M6 16 V11 A6 6 0 0 1 18 11 V16 L20 18 H4 Z" fill="#94a3b8"/>
+        <circle cx="12" cy="20.5" r="2" fill="#94a3b8"/>
+        <circle cx="18" cy="6" r="4" style="fill: var(--dot-color, #94a3b8)"/>
+      </symbol>
+  </svg>
+  <div class="stage">
+    <svg class="bell" width="96" height="96" viewBox="0 0 24 24" role="img" aria-label="Notifications"><use href="#bell"/></svg>
+    <svg class="bell unread" width="96" height="96" viewBox="0 0 24 24" role="img" aria-label="Unread notifications"><use href="#bell"/></svg>
+  </div>
+</body>
+</html>

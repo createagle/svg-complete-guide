@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>12-2 Measuring and Hit-Testing a Path</title>
+  <style>
+    .stage svg { width: 440px; border: 1px solid var(--border); border-radius: 8px; touch-action: none; }
+    #blob { fill: var(--accent); fill-opacity: .2; stroke: var(--accent); stroke-width: 12; }
+    #dot { fill: var(--fg); }
+    #probe { fill: none; stroke-width: 2; }
+    #probe.fill { stroke: #16a34a; }
+    #probe.stroke { stroke: #ea580c; }
+    #probe.outside { stroke: var(--muted); }
+    #info { font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--fg); min-height: 3em; text-align: center; }
+    input { accent-color: var(--accent); }
+    output { min-width: 4ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Position along the path <input id="t" type="range" min="0" max="100" value="25"><output for="t"></output></label>
+  </div>
+  <div class="stage">
+    <svg id="pad" viewBox="0 0 400 260" role="img" aria-label="A blob shape; move the pointer over it">
+      <path id="blob" d="M80 130 C80 60 160 30 220 50 C300 76 340 100 330 160 C320 220 230 230 170 210 C110 190 80 180 80 130 Z"/>
+      <circle id="dot" r="7"/>
+      <circle id="probe" class="outside" r="10" cx="-20" cy="-20"/>
+    </svg>
+  </div>
+  <p id="info"></p>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const blob = $('blob');
+    const total = blob.getTotalLength();
+    let hit = 'Move the pointer over the shape';
+    function show() {
+      const pct = +$('t').value;
+      $('t').nextElementSibling.value = pct + '%';
+      const p = blob.getPointAtLength((total * pct) / 100);
+      $('dot').setAttribute('cx', p.x);
+      $('dot').setAttribute('cy', p.y);
+      $('info').textContent = `getTotalLength() = ${total.toFixed(1)} · point at ${pct}% = (${p.x.toFixed(1)}, ${p.y.toFixed(1)})\n${hit}`;
+    }
+    $('pad').addEventListener('pointermove', (e) => {
+      // Screen pixels → user units, then ask the path what is under that point
+      const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform($('pad').getScreenCTM().inverse());
+      const onStroke = blob.isPointInStroke(pt);
+      const inFill = blob.isPointInFill(pt);
+      $('probe').setAttribute('cx', pt.x);
+      $('probe').setAttribute('cy', pt.y);
+      $('probe').setAttribute('class', onStroke ? 'stroke' : inFill ? 'fill' : 'outside');
+      hit = `(${pt.x.toFixed(0)}, ${pt.y.toFixed(0)}) isPointInFill: ${inFill} · isPointInStroke: ${onStroke}`;
+      show();
+    });
+    $('t').addEventListener('input', show);
+    $('info').style.whiteSpace = 'pre-line';
+    show();
+  </script>
+</body>
+</html>

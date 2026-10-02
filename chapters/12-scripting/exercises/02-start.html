@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 12-2 · Starter</title>
+</head>
+<body class="demo">
+  <!-- Hovering a dot grows it with JavaScript, and it jumps. Do it in CSS, animated, with no script. -->
+  <div class="stage">
+    <svg class="dots" width="240" height="80" viewBox="0 0 240 80" role="img" aria-label="Three dots">
+      <circle cx="40" cy="40" r="12" fill="#2563eb"/>
+      <circle cx="120" cy="40" r="12" fill="#2563eb"/>
+      <circle cx="200" cy="40" r="12" fill="#2563eb"/>
+    </svg>
+  </div>
+  <script>
+    document.querySelectorAll('.dots circle').forEach((dot) => {
+      dot.addEventListener('mouseenter', () => dot.setAttribute('r', 20));
+      dot.addEventListener('mouseleave', () => dot.setAttribute('r', 12));
+    });
+  </script>
+</body>
+</html>

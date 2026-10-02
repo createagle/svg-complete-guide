@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>11-2 Duplicate IDs Across Inline SVGs</title>
+  <style>
+    .stage svg { width: 140px; }
+    .stage figcaption code { font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--fg); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control"><input id="unique" type="checkbox"> Give each gradient its own id</label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg viewBox="0 0 100 100" role="img" aria-label="Blue badge">
+        <defs>
+          <linearGradient id="shine" x2="0" y2="1">
+            <stop offset="0" stop-color="#93c5fd"/>
+            <stop offset="1" stop-color="#1d4ed8"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="44" fill="url(#shine)"/>
+      </svg>
+      <figcaption><code class="ref"></code></figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 100 100" role="img" aria-label="Orange badge">
+        <defs>
+          <linearGradient id="shine" x2="0" y2="1">
+            <stop offset="0" stop-color="#fdba74"/>
+            <stop offset="1" stop-color="#c2410c"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="44" fill="url(#shine)"/>
+      </svg>
+      <figcaption><code class="ref"></code></figcaption>
+    </figure>
+  </div>
+  <script>
+    const figs = [...document.querySelectorAll('.stage figure')];
+    function update() {
+      const unique = document.getElementById('unique').checked;
+      figs.forEach((fig, i) => {
+        const id = unique ? `shine-${'ab'[i]}` : 'shine';
+        fig.querySelector('linearGradient').id = id;
+        fig.querySelector('circle').setAttribute('fill', `url(#${id})`);
+        fig.querySelector('.ref').textContent = `fill="url(#${id})"`;
+      });
+    }
+    document.getElementById('unique').addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

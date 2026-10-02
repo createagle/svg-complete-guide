@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 12-1 · Finished</title>
+</head>
+<body class="demo">
+  <div class="stage">
+    <svg id="chart" width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="Visits per day, Monday to Sunday">
+      <line x1="10" y1="180" x2="310" y2="180" stroke="currentColor"/>
+    </svg>
+  </div>
+  <script>
+    const data = [12, 19, 7, 15, 22, 9, 17];
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('chart');
+    const max = Math.max(...data);
+    data.forEach((value, i) => {
+      const h = (value / max) * 160;
+      const bar = document.createElementNS(NS, 'rect');
+      bar.setAttribute('x', 20 + i * 42);
+      bar.setAttribute('y', 180 - h);
+      bar.setAttribute('width', 30);
+      bar.setAttribute('height', h);
+      bar.setAttribute('rx', 4);
+      bar.setAttribute('fill', '#2563eb');
+      svg.append(bar);
+    });
+  </script>
+</body>
+</html>

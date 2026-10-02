@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- All icons sit at the same spot; only the one named in the URL fragment is shown -->
+  <style>
+    .icon { display: none; }
+    .icon:target { display: inline; }
+  </style>
+  <g id="sun" class="icon" fill="#f59e0b">
+    <circle cx="16" cy="16" r="6"/>
+    <path d="M16 3 V7 M16 25 V29 M3 16 H7 M25 16 H29 M6.8 6.8 L9.6 9.6 M22.4 22.4 L25.2 25.2 M6.8 25.2 L9.6 22.4 M22.4 9.6 L25.2 6.8"
+          stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <path id="moon" class="icon" d="M22 6 A11 11 0 1 0 26 22 A9 9 0 1 1 22 6 Z" fill="#6366f1"/>
+  <path id="cloud" class="icon" d="M9 24 H26 A5 5 0 0 0 25 14 A7 7 0 0 0 12 13 A5.5 5.5 0 0 0 9 24 Z" fill="#38bdf8"/>
+</svg>

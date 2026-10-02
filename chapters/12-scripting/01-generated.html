@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>12-1 A Pattern Generated with createElementNS</title>
+  <style>
+    .stage svg { width: 360px; }
+    #art circle { transition: r .2s ease; }
+    #art circle:hover { r: 10px; }
+    #info { font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+    input { accent-color: var(--accent); }
+    output { min-width: 4ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">count <input id="count" type="range" min="10" max="500" value="240"><output for="count"></output></label>
+    <label class="control">angle <input id="angle" type="range" min="130" max="145" step=".1" value="137.5"><output for="angle"></output></label>
+    <label class="control">dot size <input id="size" type="range" min="1" max="6" step=".5" value="3.5"><output for="size"></output></label>
+  </div>
+  <div class="stage">
+    <svg id="art" viewBox="-160 -160 320 320" role="img" aria-label="Dots arranged in a sunflower spiral"></svg>
+  </div>
+  <p id="info"></p>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const art = document.getElementById('art');
+    const $ = (id) => document.getElementById(id);
+    function draw() {
+      const n = +$('count').value, angle = +$('angle').value, size = +$('size').value;
+      document.querySelectorAll('output').forEach((o) => { o.value = $(o.htmlFor).value; });
+      art.replaceChildren();
+      const spread = 150 / Math.sqrt(n);
+      for (let i = 0; i < n; i++) {
+        const r = spread * Math.sqrt(i);
+        const t = (i * angle * Math.PI) / 180;
+        const dot = document.createElementNS(NS, 'circle');
+        dot.setAttribute('cx', (r * Math.cos(t)).toFixed(2));
+        dot.setAttribute('cy', (r * Math.sin(t)).toFixed(2));
+        dot.setAttribute('r', size);
+        dot.setAttribute('fill', `hsl(${(i / n) * 300} 75% 55%)`);
+        art.append(dot);
+      }
+      const box = art.getBBox();
+      $('info').textContent = `${art.childElementCount} circles · getBBox(): ${box.width.toFixed(0)} × ${box.height.toFixed(0)}`;
+    }
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', draw));
+    draw();
+  </script>
+</body>
+</html>

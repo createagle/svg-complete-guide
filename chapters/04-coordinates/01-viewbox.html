@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>4-1 viewBox Explorer</title>
+  <style>
+    .grid line { stroke: var(--border); stroke-width: 1; }
+    .grid .axis { stroke: var(--muted); }
+    .grid text { fill: var(--muted); font: 10px system-ui, sans-serif; }
+    .visible { fill: var(--accent); fill-opacity: .12; }
+    .vb { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+    .frame { display: inline-block; border: 2px solid var(--fg); line-height: 0; background: repeating-conic-gradient(var(--border) 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
+    .frame svg { display: block; max-width: none; }
+    .legend { display: flex; gap: 16px; justify-content: center; font-size: 13px; color: var(--muted); }
+    .swatch { display: inline-block; width: 14px; height: 10px; margin-right: 6px; vertical-align: middle; }
+    .swatch.vb-key { border: 2px dashed var(--accent); }
+    .swatch.vis-key { background: var(--accent); opacity: .3; }
+    select, input[type=range] { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <g id="scene">
+        <rect x="0" y="0" width="400" height="300" fill="#bae6fd"/>
+        <circle cx="320" cy="70" r="30" fill="#facc15"/>
+        <rect x="0" y="250" width="400" height="50" fill="#4ade80"/>
+        <rect x="80" y="160" width="120" height="90" fill="#f97316"/>
+        <polygon points="70,160 140,110 210,160" fill="#b91c1c"/>
+        <rect x="125" y="200" width="30" height="50" fill="#7c2d12"/>
+        <rect x="292" y="190" width="16" height="60" fill="#78350f"/>
+        <circle cx="300" cy="175" r="35" fill="#15803d"/>
+      </g>
+    </defs>
+  </svg>
+
+  <div class="controls">
+    <label class="control">min-x <input id="vx" type="range" min="-100" max="300" step="10" value="0"><output for="vx"></output></label>
+    <label class="control">min-y <input id="vy" type="range" min="-100" max="250" step="10" value="0"><output for="vy"></output></label>
+    <label class="control">width <input id="vw" type="range" min="50" max="600" step="10" value="400"><output for="vw"></output></label>
+    <label class="control">height <input id="vh" type="range" min="50" max="450" step="10" value="300"><output for="vh"></output></label>
+  </div>
+  <div class="controls">
+    <label class="control">Viewport
+      <select id="port">
+        <option value="240x180">240 × 180</option>
+        <option value="300x150">300 × 150</option>
+        <option value="180x180">180 × 180</option>
+        <option value="140x220">140 × 220</option>
+      </select>
+    </label>
+    <label class="control">Align
+      <select id="align">
+        <option>xMinYMin</option><option>xMidYMin</option><option>xMaxYMin</option>
+        <option>xMinYMid</option><option selected>xMidYMid</option><option>xMaxYMid</option>
+        <option>xMinYMax</option><option>xMidYMax</option><option>xMaxYMax</option>
+        <option>none</option>
+      </select>
+    </label>
+    <label class="control">Fit
+      <select id="fit"><option>meet</option><option>slice</option></select>
+    </label>
+  </div>
+
+  <div class="stage">
+    <figure>
+      <svg id="world" width="320" height="280" viewBox="-120 -110 640 560" role="img" aria-label="The whole canvas with the viewBox outlined">
+        <g class="grid" id="grid"></g>
+        <use href="#scene"/>
+        <rect class="visible" id="visible"/>
+        <rect class="vb" id="vb"/>
+      </svg>
+      <figcaption>Canvas (user coordinates)</figcaption>
+    </figure>
+    <figure>
+      <div class="frame"><svg id="view" width="240" height="180" viewBox="0 0 400 300" role="img" aria-label="What the viewport shows"><use href="#scene"/></svg></div>
+      <figcaption id="cap">Viewport 240 × 180</figcaption>
+    </figure>
+  </div>
+  <div class="legend"><span><i class="swatch vb-key"></i>viewBox</span><span><i class="swatch vis-key"></i>Visible area</span></div>
+
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const grid = document.getElementById('grid');
+    for (let v = -100; v <= 500; v += 50) {
+      for (const [x1, y1, x2, y2] of [[v, -100, v, 450], [-100, v, 500, v]]) {
+        if (y2 === v && v > 450) continue;
+        const l = document.createElementNS(NS, 'line');
+        Object.entries({ x1, y1, x2, y2 }).forEach(([k, n]) => l.setAttribute(k, n));
+        if (v === 0) l.classList.add('axis');
+        grid.append(l);
+      }
+      if (v >= 0 && v <= 400 && v % 100 === 0) {
+        for (const [x, y] of [[v + 3, -4], [-4, v + 4]]) {
+          if (x === -4 && v > 300) continue;
+          const t = document.createElementNS(NS, 'text');
+          t.setAttribute('x', x); t.setAttribute('y', y);
+          if (x === -4) t.setAttribute('text-anchor', 'end');
+          t.textContent = v; grid.append(t);
+        }
+      }
+    }
+    const $ = (id) => document.getElementById(id);
+    const set = (el, a) => Object.entries(a).forEach(([k, v]) => el.setAttribute(k, v));
+    function update() {
+      const [x, y, w, h] = ['vx', 'vy', 'vw', 'vh'].map((id) => +$(id).value);
+      document.querySelectorAll('output').forEach((o) => { o.value = $(o.htmlFor).value; });
+      const [W, H] = $('port').value.split('x').map(Number);
+      const align = $('align').value, fit = $('fit').value;
+      $('fit').disabled = align === 'none';
+      const par = align === 'none' ? 'none' : `${align} ${fit}`;
+      Object.assign($('view').style, { width: W + 'px', height: H + 'px' });
+      set($('view'), { width: W, height: H, viewBox: `${x} ${y} ${w} ${h}`, preserveAspectRatio: par });
+      set($('vb'), { x, y, width: w, height: h });
+      let vis = { x, y, width: w, height: h };
+      if (align !== 'none') {
+        const s = (fit === 'meet' ? Math.min : Math.max)(W / w, H / h);
+        const vw = W / s, vh = H / s;
+        const pos = (key, start, size, vsize) =>
+          align.includes(key + 'Min') ? start : align.includes(key + 'Mid') ? start + (size - vsize) / 2 : start + size - vsize;
+        vis = { x: pos('x', x, w, vw), y: pos('Y', y, h, vh), width: vw, height: vh };
+      }
+      set($('visible'), vis);
+      $('cap').innerHTML = `Viewport ${W} × ${H}<br>preserveAspectRatio="${par}"`;
+    }
+    document.querySelectorAll('input, select').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

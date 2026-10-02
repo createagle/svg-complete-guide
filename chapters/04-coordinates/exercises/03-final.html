@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 4-3 · Finished</title>
+  <style>
+    .stage { max-width: 720px; }
+    .frame { display: block; outline: 2px solid var(--fg); background: repeating-conic-gradient(var(--border) 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
+    .stage figcaption { font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .stage svg.frame { width: 200px; height: 100px; max-width: none; }
+    .stage svg.frame.own { width: 100px; }
+    .unknown { display: grid; place-items: center; width: 200px; height: 100px; font-size: 32px; color: var(--muted); }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+    <figure><svg class="frame own" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" role="img" aria-label="The drawing at its own size"><rect width="100" height="100" fill="#bae6fd"/><circle cx="50" cy="55" r="35" fill="#2563eb"/><circle cx="50" cy="12" r="8" fill="#f59e0b"/></svg><figcaption>viewBox="0 0 100 100"</figcaption></figure>
+  </div>
+  <div class="stage">
+    <figure><svg class="frame" xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 100 100" preserveAspectRatio="xMinYMid meet" role="img" aria-label="xMinYMid meet"><rect width="100" height="100" fill="#bae6fd"/><circle cx="50" cy="55" r="35" fill="#2563eb"/><circle cx="50" cy="12" r="8" fill="#f59e0b"/></svg><figcaption>xMinYMid meet</figcaption></figure>
+    <figure><svg class="frame" xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMid meet" role="img" aria-label="xMaxYMid meet"><rect width="100" height="100" fill="#bae6fd"/><circle cx="50" cy="55" r="35" fill="#2563eb"/><circle cx="50" cy="12" r="8" fill="#f59e0b"/></svg><figcaption>xMaxYMid meet</figcaption></figure>
+    <figure><svg class="frame" xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" role="img" aria-label="xMidYMid slice"><rect width="100" height="100" fill="#bae6fd"/><circle cx="50" cy="55" r="35" fill="#2563eb"/><circle cx="50" cy="12" r="8" fill="#f59e0b"/></svg><figcaption>xMidYMid slice</figcaption></figure>
+    <figure><svg class="frame" xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="none"><rect width="100" height="100" fill="#bae6fd"/><circle cx="50" cy="55" r="35" fill="#2563eb"/><circle cx="50" cy="12" r="8" fill="#f59e0b"/></svg><figcaption>none</figcaption></figure>
+  </div>
+</body>
+</html>

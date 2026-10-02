@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>6-2 Arc Flags</title>
+  <style>
+    .stage svg { width: 480px; border: 1px solid var(--border); border-radius: 8px; }
+    .ghost { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; opacity: .7; }
+    .arc { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; }
+    .pt { fill: var(--fg); }
+    .lbl { fill: var(--muted); font: 13px system-ui, sans-serif; }
+    figcaption code { font: 14px ui-monospace, Menlo, Consolas, monospace; color: var(--fg); }
+    input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">rx <input id="rx" type="range" min="20" max="200" value="100"><output for="rx"></output></label>
+    <label class="control">ry <input id="ry" type="range" min="20" max="200" value="70"><output for="ry"></output></label>
+    <label class="control">rotation <input id="rot" type="range" min="0" max="180" step="5" value="0"><output for="rot"></output></label>
+  </div>
+  <div class="controls">
+    <label class="control"><input id="large" type="checkbox"> large-arc-flag</label>
+    <label class="control"><input id="sweep" type="checkbox" checked> sweep-flag</label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg viewBox="0 0 400 300" role="img" aria-label="One of four possible arcs between two points">
+        <path class="ghost" id="g1"/><path class="ghost" id="g2"/>
+        <path class="ghost" id="g3"/><path class="ghost" id="g4"/>
+        <path class="arc" id="arc"/>
+        <circle class="pt" cx="140" cy="170" r="6"/>
+        <circle class="pt" cx="260" cy="130" r="6"/>
+        <text class="lbl" x="128" y="196" text-anchor="end">from</text>
+        <text class="lbl" x="272" y="122">to</text>
+      </svg>
+      <figcaption><code id="d"></code></figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      document.querySelectorAll('output').forEach((o) => { o.value = $(o.htmlFor).value; });
+      const rx = $('rx').value, ry = $('ry').value, rot = $('rot').value;
+      const arc = (l, s) => `M140 170 A${rx} ${ry} ${rot} ${l} ${s} 260 130`;
+      // The four ghost arcs together trace the two candidate ellipses
+      [[0, 0], [0, 1], [1, 0], [1, 1]].forEach(([l, s], i) => $('g' + (i + 1)).setAttribute('d', arc(l, s)));
+      const d = arc(+$('large').checked, +$('sweep').checked);
+      $('arc').setAttribute('d', d);
+      $('d').textContent = `<path d="${d}"/>`;
+    }
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>5-1 A Flat Scene from Basic Shapes</title>
+  <style>
+    .stage svg { width: 480px; border-radius: 8px; }
+    .art * { transition: opacity .2s; }
+    .art.picking > * { opacity: .15; }
+    .art.picking > .on { opacity: 1; }
+    .art.picking > :is(rect, circle, ellipse, polygon).on { stroke: var(--fg); stroke-width: 2; stroke-dasharray: 5 3; }
+    .art.picking > :is(line, polyline).on { stroke: var(--accent); }
+    select { accent-color: var(--accent); }
+    output { color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Highlight
+      <select id="pick">
+        <option value="">nothing</option>
+        <option>rect</option><option>circle</option><option>ellipse</option>
+        <option>line</option><option>polyline</option><option>polygon</option>
+      </select>
+    </label>
+    <span class="control"><output id="count"></output></span>
+  </div>
+  <div class="stage">
+    <svg viewBox="0 0 480 320" role="img" aria-label="Mountains, a sun, clouds, a tree, a fence and a river">
+      <g class="art" id="art">
+        <rect width="480" height="320" fill="#e0f2fe"/>
+        <circle cx="400" cy="70" r="36" fill="#fbbf24"/>
+        <ellipse cx="110" cy="74" rx="52" ry="18" fill="#fff"/>
+        <ellipse cx="140" cy="60" rx="34" ry="22" fill="#fff"/>
+        <polyline points="60,124 70,116 80,124" fill="none" stroke="#334155" stroke-width="2"/>
+        <polyline points="88,110 96,104 104,110" fill="none" stroke="#334155" stroke-width="2"/>
+        <polygon points="0,240 110,130 200,230 300,100 420,240 480,210 480,320 0,320" fill="#64748b"/>
+        <polygon points="300,100 280,126 300,118 320,126" fill="#fff"/>
+        <rect y="250" width="480" height="70" fill="#86efac"/>
+        <polyline points="0,304 80,288 160,300 240,284 320,298 400,282 480,294" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round"/>
+        <line x1="30" y1="262" x2="210" y2="262" stroke="#92400e" stroke-width="4"/>
+        <line x1="40" y1="248" x2="40" y2="280" stroke="#92400e" stroke-width="4"/>
+        <line x1="80" y1="248" x2="80" y2="280" stroke="#92400e" stroke-width="4"/>
+        <line x1="120" y1="248" x2="120" y2="280" stroke="#92400e" stroke-width="4"/>
+        <line x1="160" y1="248" x2="160" y2="280" stroke="#92400e" stroke-width="4"/>
+        <line x1="200" y1="248" x2="200" y2="280" stroke="#92400e" stroke-width="4"/>
+        <rect x="360" y="196" width="14" height="60" fill="#92400e"/>
+        <circle cx="367" cy="186" r="30" fill="#16a34a"/>
+        <rect x="240" y="232" width="64" height="30" rx="6" fill="#fde68a"/>
+        <line x1="272" y1="262" x2="272" y2="282" stroke="#92400e" stroke-width="4"/>
+      </g>
+    </svg>
+  </div>
+  <script>
+    const art = document.getElementById('art');
+    const pick = document.getElementById('pick');
+    const count = document.getElementById('count');
+    pick.addEventListener('input', () => {
+      const tag = pick.value;
+      art.classList.toggle('picking', !!tag);
+      let n = 0;
+      for (const el of art.children) {
+        const on = el.localName === tag;
+        el.classList.toggle('on', on);
+        n += on;
+      }
+      count.textContent = tag ? `${n} × <${tag}>` : `${art.children.length} shapes`;
+    });
+    pick.dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

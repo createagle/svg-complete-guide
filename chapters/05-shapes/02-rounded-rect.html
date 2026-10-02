@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>5-2 Rounded Corners: rx and ry</title>
+  <style>
+    .stage svg { width: 320px; }
+    .shape { fill: var(--accent); fill-opacity: .2; stroke: var(--accent); stroke-width: 2; }
+    .corner { fill: none; stroke: var(--muted); stroke-dasharray: 4 3; }
+    .bounds { fill: none; stroke: var(--border); }
+    figcaption code { font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--fg); }
+    input { accent-color: var(--accent); }
+    output { min-width: 3ch; color: var(--fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">rx <input id="rx" type="range" min="0" max="140" value="24"><output for="rx"></output></label>
+    <label class="control">ry <input id="ry" type="range" min="0" max="100" value="24"><output for="ry"></output></label>
+    <label class="control"><input id="auto" type="checkbox" checked> ry = auto</label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg viewBox="0 0 240 160" role="img" aria-label="A rounded rectangle">
+        <rect class="bounds" x="20" y="20" width="200" height="120"/>
+        <rect class="shape" id="r" x="20" y="20" width="200" height="120"/>
+        <ellipse class="corner" id="c"/>
+      </svg>
+      <figcaption><code id="code"></code><br><span id="used"></span></figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      const auto = $('auto').checked;
+      $('ry').disabled = auto;
+      const rx = +$('rx').value, ry = auto ? rx : +$('ry').value;
+      $('rx').nextElementSibling.value = rx;
+      $('ry').nextElementSibling.value = auto ? 'auto' : ry;
+      const r = $('r');
+      r.setAttribute('rx', rx);
+      if (auto) r.removeAttribute('ry'); else r.setAttribute('ry', ry);
+      // The browser clamps each radius to half the side it rounds
+      const ux = Math.min(rx, 100), uy = Math.min(ry, 60);
+      Object.entries({ cx: 20 + ux, cy: 20 + uy, rx: ux, ry: uy }).forEach(([k, v]) => $('c').setAttribute(k, v));
+      $('code').textContent = `<rect width="200" height="120" rx="${rx}"${auto ? '' : ` ry="${ry}"`}/>`;
+      $('used').textContent = `Drawn with rx = ${ux}, ry = ${uy}`;
+    }
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

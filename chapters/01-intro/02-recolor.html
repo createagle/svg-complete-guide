@@ -1,42 +1,29 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>改一行代码换颜色 · 第 1 章 · SVG 完全指南</title>
+  <title>Recolor an inline SVG with CSS</title>
   <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    .icon { width: 96px; height: 96px; color: var(--brand, #2563eb); transition: color .2s; }
+    .icon:hover { color: #16a34a; }
+  </style>
 </head>
-<body>
-<main>
-  <div class="breadcrumb">
-    <a href="../../">SVG 完全指南</a> / 第 1 章 认识 SVG ·
-    <a href="https://github.com/createagle/svg-complete-guide/blob/main/chapters/01-intro/02-recolor.html">查看源码</a>
+<body class="demo">
+  <label class="control">Color <input id="brand" type="color" value="#2563eb"></label>
+  <div class="stage">
+    <svg class="icon" viewBox="0 0 32 32" role="img" aria-label="Done">
+      <circle cx="16" cy="16" r="14" fill="currentColor"/>
+      <path d="M9 16.5l4.5 4.5L23 11" fill="none" stroke="#fff" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
   </div>
-  <h1>改一行代码换颜色</h1>
-  <p>内联 SVG 是 DOM 的一部分，CSS 能直接给它上色。圆的 <code>fill</code> 写成 <code>currentColor</code>，它就跟随 CSS 的 <code>color</code>。选一个颜色，或把鼠标移到图标上试试。</p>
-
-  <section class="demo">
-    <h2>示例 1-2 · 用 CSS 控制 SVG 颜色</h2>
-    <label class="controls">图标颜色 <input id="brand" type="color" value="#2563eb"></label>
-    <div class="stage" id="stage">
-      <style>
-        .icon { width: 96px; height: 96px; color: var(--brand, #2563eb); transition: color .2s; }
-        .icon:hover { color: #16a34a; }
-      </style>
-      <svg class="icon" viewBox="0 0 32 32" role="img" aria-label="完成">
-        <circle cx="16" cy="16" r="14" fill="currentColor"/>
-        <path d="M9 16.5l4.5 4.5L23 11" fill="none" stroke="#fff" stroke-width="3"
-              stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-  </section>
-</main>
-<script src="../../assets/demo.js"></script>
-<script>
-  const brand = document.getElementById('brand');
-  brand.addEventListener('input', () => {
-    document.getElementById('stage').style.setProperty('--brand', brand.value);
-  });
-</script>
+  <script>
+    const brand = document.getElementById('brand');
+    brand.addEventListener('input', () => {
+      document.body.style.setProperty('--brand', brand.value);
+    });
+  </script>
 </body>
 </html>

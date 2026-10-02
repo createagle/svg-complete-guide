@@ -1,22 +1,18 @@
-/* SVG 完全指南 · 示例页公共样式 */
+/* SVG Complete Guide · shared styles for demo pages and the index */
 :root {
-  --bg: #fafaf9;
+  --bg: #ffffff;
   --fg: #1c1917;
   --muted: #78716c;
-  --card: #ffffff;
   --border: #e7e5e4;
   --accent: #2563eb;
-  --code-bg: #f5f5f4;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #1c1917;
     --fg: #f5f5f4;
     --muted: #a8a29e;
-    --card: #292524;
     --border: #44403c;
     --accent: #60a5fa;
-    --code-bg: #0c0a09;
   }
 }
 
@@ -25,37 +21,34 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 16px/1.6 system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-main { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
 a { color: var(--accent); }
-h1 { font-size: 1.6rem; margin: 0 0 4px; }
-.breadcrumb { font-size: .9rem; color: var(--muted); margin-bottom: 16px; }
 
-/* 一个示例 = 渲染结果 + 源码 */
-.demo {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin: 24px 0;
-  overflow: hidden;
-}
-.demo > h2 { font-size: 1.05rem; margin: 0; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-.demo .stage { padding: 24px 16px; display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; align-items: flex-end; overflow-x: auto; }
-.demo .stage svg { max-width: 100%; height: auto; }
-.demo .stage figure { margin: 0; text-align: center; }
-.demo .stage figcaption { font-size: .85rem; color: var(--muted); margin-top: 8px; }
-.demo .controls { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; font-size: .9rem; }
-.demo pre {
-  margin: 0;
+/* Demo pages: nothing but the demo, centered, so they embed cleanly in an iframe */
+body.demo {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   padding: 16px;
-  background: var(--code-bg);
-  border-top: 1px solid var(--border);
-  overflow-x: auto;
-  font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
+.stage { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; align-items: flex-end; max-width: 100%; }
+.stage svg { max-width: 100%; height: auto; }
+.stage figure { margin: 0; text-align: center; }
+.stage figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.control { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
 
-/* 所有示例统一尊重"减少动态效果"设置 */
+/* Index page */
+main { max-width: 880px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.6rem; margin: 0 0 4px; }
+.chapters { list-style: none; padding: 0; }
+.chapters li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.chapters .examples { font-size: .9rem; color: var(--muted); }
+
+/* Every demo honors the reduced-motion setting */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -64,8 +57,3 @@ h1 { font-size: 1.6rem; margin: 0 0 4px; }
     scroll-behavior: auto !important;
   }
 }
-
-/* 首页章节列表 */
-.chapters { list-style: none; padding: 0; }
-.chapters li { padding: 10px 0; border-bottom: 1px solid var(--border); }
-.chapters .examples { font-size: .9rem; color: var(--muted); }

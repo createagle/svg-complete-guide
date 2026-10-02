@@ -8,9 +8,8 @@
 
 ```text
 index.html                     # 示例总目录（按篇、章导航）
-assets/                        # 公共样式与示例外壳
-  style.css                    #   亮/暗色主题、示例卡片、prefers-reduced-motion
-  demo.js                      #   把 .demo .stage 中的代码原样显示在效果下方
+assets/
+  style.css                    # 公共样式：亮/暗色主题、居中演示布局、prefers-reduced-motion
 chapters/
   01-intro/
     README.md                  # 本章示例说明
@@ -26,11 +25,12 @@ chapters/
 
 - 示例链接：`https://createagle.github.io/svg-complete-guide/chapters/<章目录>/<示例>.html`
 - 查看源码：`https://github.com/createagle/svg-complete-guide/blob/main/chapters/<章目录>/<示例>.html`
+- 示例页只放演示本身（英文文案，无说明），可直接 iframe 内嵌；讲解在教程文档里。
 - 除第 41 章和框架章节外，示例都是零依赖的 HTML 页面，双击即可打开；统一支持暗色模式和 `prefers-reduced-motion`。
 
 ### 新增示例
 
-1. 复制一个现有示例页，修改 `<title>`、面包屑、标题和 `.stage` 里的代码。
+1. 复制一个现有示例页，修改英文 `<title>`、控件和 `.stage` 里的代码。
 2. 在本章 `README.md` 的表格里加一行。
 3. 在根目录 `index.html` 对应章节下加链接。
 
@@ -41,7 +41,7 @@ chapters/
 
 首次使用需在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
 
-本地预览（`demo.js` 读取原始源码需要 HTTP 环境，双击打开时会退回浏览器序列化的代码）：
+本地预览：
 
 ```sh
 python3 -m http.server 8000

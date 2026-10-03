@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>22-4 SVG Filters on HTML</title>
+  <style>
+    .card { width: 300px; max-width: 100%; border-radius: 14px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); }
+    .card img { display: block; width: 100%; height: auto; }
+    .card .body { padding: 12px 16px 16px; }
+    .card h3 { margin: 0 0 4px; font-size: 18px; }
+    .card p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+    .card button { font: inherit; padding: 6px 14px; border-radius: 999px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+    .count { font-size: 13px; color: var(--muted); }
+    .shadow-color { flood-color: #000; flood-opacity: .35; }
+    .stage { padding: 28px; background: #e7e5e4; border-radius: 16px; }
+    .card { background: #fff; color: #1c1917; border-color: #d6d3d1; }
+    .card p { color: #57534e; }
+    select { accent-color: var(--accent); }
+    .out { margin: 0; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">filter <select id="pick"><option value="none">none</option><option value="drop-shadow(0 8px 6px rgb(0 0 0 / .35))">CSS drop-shadow()</option><option value="url(#soft-shadow)" selected>SVG: url(#soft-shadow)</option><option value="url(#outline)">SVG: url(#outline)</option><option value="url(#wobble)">SVG: url(#wobble)</option><option value="url(#soft-shadow) grayscale(1)">SVG + CSS: url(#soft-shadow) grayscale(1)</option></select></label>
+  </div>
+  <!-- Filter definitions: a zero-size svg, not display:none -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+      <feOffset in="blur" dy="10" result="offset"/>
+      <feFlood class="shadow-color" result="color"/>
+      <feComposite in="color" in2="offset" operator="in" result="shadow"/>
+      <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="outline">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="thick"/>
+      <feFlood flood-color="#f59e0b" result="color"/>
+      <feComposite in="color" in2="thick" operator="in" result="ring"/>
+      <feMerge><feMergeNode in="ring"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="wobble">
+      <feTurbulence type="turbulence" baseFrequency="0.015" numOctaves="2" seed="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+  <div class="stage">
+    <article id="card" class="card">
+      <img src="photo.jpg" width="480" height="320" alt="Flat illustration of mountains, a sun, a tree and a river">
+      <div class="body">
+        <h3>Mountain Lake</h3>
+        <p>Plain HTML: the text stays selectable and the button still works.</p>
+        <button id="btn" type="button">Book now</button> <span id="count" class="count"></span>
+      </div>
+    </article>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let clicks = 0;
+    $('btn').addEventListener('click', () => { clicks += 1; $('count').textContent = 'Clicked ' + clicks + '×'; });
+    function update() {
+      $('card').style.filter = $('pick').value;
+      $('out').textContent = '.card { filter: ' + $('pick').value + '; }';
+    }
+    $('pick').addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

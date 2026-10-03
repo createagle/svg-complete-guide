@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>22-3 color-interpolation-filters</title>
+  <style>
+    .col { display: flex; flex-direction: column; gap: 10px; }
+    .col svg, .pair { display: block; border-radius: 6px; overflow: hidden; outline: 1px solid var(--border); }
+    .pair { width: 150px; height: 64px; position: relative; overflow: hidden; }
+    .pair::before { content: ""; position: absolute; inset: -100px; background: linear-gradient(90deg, var(--a) 50%, var(--b) 50%); filter: blur(var(--blur, 16px)); }
+    input { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">stdDeviation <input id="std" type="range" min="0" max="30" value="16"><output id="stdOut">16</output></label>
+  </div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <!-- The color blocks reach far past the visible 150×64 area, so the blur never sees a transparent edge -->
+    <filter id="lin"><feGaussianBlur class="gb" stdDeviation="16"/></filter>
+    <filter id="srgb" color-interpolation-filters="sRGB"><feGaussianBlur class="gb" stdDeviation="16"/></filter>
+  </svg>
+  <div class="stage" role="img" aria-label="Three color pairs blurred in linearRGB, in sRGB and with CSS blur()">
+    <figure>
+      <div class="col"><svg width="150" height="64" viewBox="0 0 150 64" aria-hidden="true"><g filter="url(#lin)"><rect x="-100" y="-100" width="175" height="264" fill="#ef4444"/><rect x="75" y="-100" width="175" height="264" fill="#22c55e"/></g></svg><svg width="150" height="64" viewBox="0 0 150 64" aria-hidden="true"><g filter="url(#lin)"><rect x="-100" y="-100" width="175" height="264" fill="#2563eb"/><rect x="75" y="-100" width="175" height="264" fill="#facc15"/></g></svg><svg width="150" height="64" viewBox="0 0 150 64" aria-hidden="true"><g filter="url(#lin)"><rect x="-100" y="-100" width="175" height="264" fill="#000000"/><rect x="75" y="-100" width="175" height="264" fill="#ffffff"/></g></svg></div>
+      <figcaption>SVG filter · linearRGB (default)</figcaption>
+    </figure>
+    <figure>
+      <div class="col"><svg width="150" height="64" viewBox="0 0 150 64" aria-hidden="true"><g filter="url(#srgb)"><rect x="-100" y="-100" width="175" height="264" fill="#ef4444"/><rect x="75" y="-100" width="175" height="264" fill="#22c55e"/></g></svg><svg width="150" height="64" viewBox="0 0 150 64" aria-hidden="true"><g filter="url(#srgb)"><rect x="-100" y="-100" width="175" height="264" fill="#2563eb"/><rect x="75" y="-100" width="175" height="264" fill="#facc15"/></g></svg><svg width="150" height="64" viewBox="0 0 150 64" aria-hidden="true"><g filter="url(#srgb)"><rect x="-100" y="-100" width="175" height="264" fill="#000000"/><rect x="75" y="-100" width="175" height="264" fill="#ffffff"/></g></svg></div>
+      <figcaption>SVG filter · sRGB</figcaption>
+    </figure>
+    <figure>
+      <div class="col"><div class="pair" style="--a:#ef4444;--b:#22c55e"></div><div class="pair" style="--a:#2563eb;--b:#facc15"></div><div class="pair" style="--a:#000000;--b:#ffffff"></div></div>
+      <figcaption>CSS blur() on HTML</figcaption>
+    </figure>
+  </div>
+  <script>
+    const std = document.getElementById('std');
+    std.addEventListener('input', () => {
+      document.querySelectorAll('.gb').forEach((g) => g.setAttribute('stdDeviation', std.value));
+      document.documentElement.style.setProperty('--blur', std.value + 'px');
+      document.getElementById('stdOut').value = std.value;
+    });
+  </script>
+</body>
+</html>

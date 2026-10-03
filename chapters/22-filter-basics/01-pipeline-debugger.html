@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>22-1 Filter Pipeline Debugger</title>
+  <style>
+    .checker { background: repeating-conic-gradient(#e7e5e4 0 25%, #fafaf9 0 50%) 0 0 / 16px 16px; }
+    .debugger { display: grid; grid-template-columns: minmax(0, 380px) 320px; gap: 16px; max-width: 716px; align-items: start; }
+    #code { width: 100%; height: 232px; resize: vertical; font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; tab-size: 2; white-space: pre; }
+    .view { margin: 0; }
+    .view svg { display: block; border-radius: 8px; border: 1px solid var(--border); max-width: 100%; height: auto; }
+    .view figcaption { font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); margin-top: 6px; }
+    .msg:empty { display: none; }
+    .msg { grid-column: 1 / -1; margin: 0; font-size: 13px; color: #dc2626; }
+    .steps { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(164px, 1fr)); gap: 10px; }
+    .step { width: 100%; display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 6px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); font: 11.5px/1.4 ui-monospace, Menlo, Consolas, monospace; cursor: pointer; }
+    .step svg { display: block; width: 100%; height: auto; border-radius: 4px; margin-bottom: 3px; }
+    .step .tag { font-weight: 700; }
+    .step .src { color: var(--muted); }
+    .step .bad { color: #dc2626; font-weight: 700; }
+    .step .res { color: var(--accent); }
+    .step[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .step.is-input { border-color: #16a34a; box-shadow: 0 0 0 2px #16a34a55; }
+    .step.is-output { border-color: #d97706; box-shadow: 0 0 0 2px #d9770655; }
+    @media (max-width: 720px) { .debugger { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Preset
+      <select id="preset">
+        <option value="shadow">Drop shadow</option>
+        <option value="glow">Glow</option>
+        <option value="outline">Outline</option>
+        <option value="typo">Broken: typo in a result name</option>
+      </select>
+    </label>
+    <label class="control"><input id="region" type="checkbox" checked> Show filter region</label>
+  </div>
+  <div class="stage">
+    <div class="debugger">
+      <textarea id="code" spellcheck="false" aria-label="Filter markup (editable)"></textarea>
+      <figure class="view">
+        <svg id="big" class="checker" width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="Output of the selected step">
+          <use id="bigUse" href="#art"/>
+          <rect id="regionBox" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6 4"/>
+        </svg>
+        <figcaption id="cap"></figcaption>
+      </figure>
+      <p id="msg" class="msg" role="status"></p>
+      <ol id="steps" class="steps"></ol>
+    </div>
+  </div>
+  <!-- The source graphic and the generated per-step filters live here (not display:none, or filters stop working) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs id="defs">
+      <g id="art">
+        <circle cx="104" cy="100" r="46" fill="#f59e0b"/>
+        <text x="160" y="124" font-family="system-ui, sans-serif" font-size="72" font-weight="800" fill="#2563eb">fx</text>
+      </g>
+    </defs>
+  </svg>
+  <script>
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const PRESETS = {
+      "shadow": "<filter id=\"fx\" x=\"-20%\" y=\"-20%\" width=\"150%\" height=\"150%\">\n  <feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"4\" result=\"blur\"/>\n  <feOffset in=\"blur\" dx=\"8\" dy=\"8\" result=\"offset\"/>\n  <feFlood flood-color=\"#1e3a8a\" flood-opacity=\".5\" result=\"color\"/>\n  <feComposite in=\"color\" in2=\"offset\" operator=\"in\" result=\"shadow\"/>\n  <feMerge>\n    <feMergeNode in=\"shadow\"/>\n    <feMergeNode in=\"SourceGraphic\"/>\n  </feMerge>\n</filter>",
+      "glow": "<filter id=\"fx\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\">\n  <feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"10\" result=\"wide\"/>\n  <feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"3\" result=\"tight\"/>\n  <feMerge>\n    <feMergeNode in=\"wide\"/>\n    <feMergeNode in=\"tight\"/>\n    <feMergeNode in=\"SourceGraphic\"/>\n  </feMerge>\n</filter>",
+      "outline": "<filter id=\"fx\">\n  <feMorphology in=\"SourceAlpha\" operator=\"dilate\" radius=\"4\" result=\"thick\"/>\n  <feFlood flood-color=\"#111827\" result=\"ink\"/>\n  <feComposite in=\"ink\" in2=\"thick\" operator=\"in\" result=\"outline\"/>\n  <feMerge>\n    <feMergeNode in=\"outline\"/>\n    <feMergeNode in=\"SourceGraphic\"/>\n  </feMerge>\n</filter>",
+      "typo": "<filter id=\"fx\" x=\"-20%\" y=\"-20%\" width=\"150%\" height=\"150%\">\n  <feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"4\" result=\"blur\"/>\n  <feOffset in=\"blur\" dx=\"8\" dy=\"8\" result=\"offset\"/>\n  <feFlood flood-color=\"#1e3a8a\" flood-opacity=\".5\" result=\"color\"/>\n  <feComposite in=\"color\" in2=\"ofset\" operator=\"in\" result=\"shadow\"/>\n  <feMerge>\n    <feMergeNode in=\"shadow\"/>\n    <feMergeNode in=\"SourceGraphic\"/>\n  </feMerge>\n</filter>"
+    };
+    const SOURCES = ['SourceGraphic', 'SourceAlpha'];
+    const NO_INPUT = ['feFlood', 'feImage', 'feTurbulence'];
+    const $ = (id) => document.getElementById(id);
+    const defs = $('defs');
+    let steps = [], filterEl = null, selected = -1;
+
+    // Each step gets its own filter: the user's <filter> cut off after that primitive,
+    // so the step's result becomes the filter output.
+    function makeFilter(id, children) {
+      const f = document.importNode(filterEl, false);
+      f.id = id;
+      children.forEach((c) => f.appendChild(document.importNode(c, true)));
+      f.dataset.dbg = '';
+      defs.appendChild(f);
+    }
+    function inputsOf(el) {
+      if (el.localName === 'feMerge') return [...el.children].map((n, k) => ({ attr: 'node ' + (k + 1), value: n.getAttribute('in') }));
+      if (NO_INPUT.includes(el.localName)) return [];
+      const list = [{ attr: 'in', value: el.getAttribute('in') }];
+      if (el.hasAttribute('in2') || ['feComposite', 'feBlend', 'feDisplacementMap'].includes(el.localName)) list.push({ attr: 'in2', value: el.getAttribute('in2') });
+      return list;
+    }
+    function build() {
+      defs.querySelectorAll('[data-dbg]').forEach((n) => n.remove());
+      steps = []; filterEl = null; $('msg').textContent = '';
+      const doc = new DOMParser().parseFromString('<svg xmlns="' + SVGNS + '">' + $('code').value + '</svg>', 'image/svg+xml');
+      if (doc.querySelector('parsererror')) return render('The markup is not well-formed XML.');
+      filterEl = doc.querySelector('filter');
+      if (!filterEl) return render('No <filter> element found.');
+      filterEl.querySelectorAll('*').forEach((n) => [...n.attributes].forEach((a) => { if (/^on/i.test(a.name)) n.removeAttribute(a.name); }));
+      const prims = [...filterEl.children].filter((c) => c.localName.startsWith('fe'));
+      if (!prims.length) return render('The filter has no primitives, so the element is not rendered at all.');
+      makeFilter('dbg-SourceGraphic', [doc.createElementNS(SVGNS, 'feOffset')]);
+      const a = doc.createElementNS(SVGNS, 'feOffset'); a.setAttribute('in', 'SourceAlpha');
+      makeFilter('dbg-SourceAlpha', [a]);
+      const named = {};
+      prims.forEach((el, i) => {
+        const prev = i ? i - 1 : 'SourceGraphic';
+        const ins = inputsOf(el).map((x) => {
+          if (x.value == null || x.value === '') return { ...x, from: prev, implicit: true };
+          if (SOURCES.includes(x.value)) return { ...x, from: x.value };
+          if (x.value in named) return { ...x, from: named[x.value] };
+          return { ...x, from: prev, missing: true };
+        });
+        const result = el.getAttribute('result');
+        steps.push({ el, ins, result, label: result || 'step ' + (i + 1) });
+        if (result) named[result] = i;
+        makeFilter('dbg-' + i, prims.slice(0, i + 1));
+      });
+      if (steps.some((s) => s.ins.some((x) => x.missing))) $('msg').textContent = 'A reference points to a result that does not exist. The browser silently uses the previous result instead.';
+      render();
+    }
+    const labelOf = (from) => typeof from === 'number' ? steps[from].label : from;
+    function thumb(filterId) {
+      return '<svg class="checker" viewBox="0 0 320 200" aria-hidden="true"><use href="#art" filter="url(#' + filterId + ')"/></svg>';
+    }
+    function render(error) {
+      if (error) $('msg').textContent = error;
+      const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      let html = SOURCES.map((s) => '<li><button class="step" type="button" data-key="' + s + '">' + thumb('dbg-' + s) + '<span class="tag">' + s + '</span><span class="src">built-in input</span></button></li>').join('');
+      html += steps.map((s, i) => {
+        const params = [...s.el.attributes].filter((a) => !['in', 'in2', 'result'].includes(a.name)).map((a) => a.name + '=' + a.value).join(' ');
+        const ins = s.ins.map((x) => x.missing
+          ? '<span class="bad">' + x.attr + ': "' + esc(x.value) + '" not found → ' + esc(labelOf(x.from)) + '</span>'
+          : '<span class="src">' + x.attr + ': ' + esc(labelOf(x.from)) + (x.implicit ? ' (implicit)' : '') + '</span>').join('');
+        return '<li><button class="step" type="button" data-key="' + i + '">' + thumb('dbg-' + i) +
+          '<span class="tag">' + (i + 1) + '. &lt;' + s.el.localName + '&gt;</span>' + ins +
+          (params ? '<span class="src">' + esc(params) + '</span>' : '') +
+          '<span class="res">→ ' + esc(s.label) + (i === steps.length - 1 ? ' (filter output)' : '') + '</span></button></li>';
+      }).join('');
+      $('steps').innerHTML = steps.length ? html : '';
+      $('steps').querySelectorAll('.step').forEach((b) => {
+        b.addEventListener('click', () => select(b.dataset.key));
+        b.addEventListener('pointerenter', () => trace(b.dataset.key));
+        b.addEventListener('focus', () => trace(b.dataset.key));
+        b.addEventListener('pointerleave', () => trace(null));
+        b.addEventListener('blur', () => trace(null));
+      });
+      select(steps.length ? String(steps.length - 1) : null);
+    }
+    // Highlight what feeds a step (green) and what consumes it (orange)
+    function trace(key) {
+      const cards = [...$('steps').querySelectorAll('.step')];
+      cards.forEach((c) => c.classList.remove('is-input', 'is-output'));
+      if (key == null) return;
+      const k = isNaN(key) ? key : +key;
+      const card = (x) => cards.find((c) => c.dataset.key === String(x));
+      if (typeof k === 'number') steps[k].ins.forEach((x) => card(x.from)?.classList.add('is-input'));
+      steps.forEach((s, j) => { if (s.ins.some((x) => x.from === k)) card(j)?.classList.add('is-output'); });
+    }
+    function select(key) {
+      selected = key;
+      $('steps').querySelectorAll('.step').forEach((b) => b.setAttribute('aria-pressed', b.dataset.key === key));
+      // Nothing to show (broken markup or an empty filter): the element would not be drawn either
+      $('bigUse').style.visibility = key == null ? 'hidden' : '';
+      if (key == null) { $('cap').textContent = ''; $('regionBox').setAttribute('width', 0); return; }
+      $('bigUse').setAttribute('filter', 'url(#dbg-' + key + ')');
+      const last = key === String(steps.length - 1);
+      $('cap').textContent = isNaN(key) ? key : (last ? 'Filter output: ' : 'After step ' + (+key + 1) + ': ') + steps[+key].label;
+      drawRegion();
+    }
+    // The filter region, resolved the same way the browser does
+    function drawRegion() {
+      const box = $('regionBox');
+      if (!filterEl || !$('region').checked) { box.setAttribute('width', 0); return; }
+      const bb = defs.querySelector('#art').getBBox();
+      const obb = (filterEl.getAttribute('filterUnits') || 'objectBoundingBox') === 'objectBoundingBox';
+      const get = (name, def, origin, size, view) => {
+        const s = (filterEl.getAttribute(name) || def).trim();
+        const pct = s.endsWith('%'), n = parseFloat(s) / (pct ? 100 : 1);
+        if (obb) return origin + n * size;
+        return pct ? n * view : n;
+      };
+      const x = get('x', '-10%', bb.x, bb.width, 320), y = get('y', '-10%', bb.y, bb.height, 200);
+      const w = get('width', '120%', 0, bb.width, 320), h = get('height', '120%', 0, bb.height, 200);
+      Object.entries({ x, y, width: Math.max(0, w), height: Math.max(0, h) }).forEach(([k, v]) => box.setAttribute(k, v));
+    }
+    let timer;
+    $('code').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(build, 250); });
+    $('preset').addEventListener('input', () => { $('code').value = PRESETS[$('preset').value]; build(); });
+    $('region').addEventListener('input', drawRegion);
+    $('code').value = PRESETS.shadow;
+    build();
+  </script>
+</body>
+</html>

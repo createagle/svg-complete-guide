@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>22-2 Filter Region</title>
+  <style>
+    .shape { fill: var(--accent); }
+    .line { stroke: var(--accent); stroke-width: 12; stroke-linecap: round; }
+    .control output { min-width: 3.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .out { margin: 0; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">filterUnits
+      <select id="units"><option>objectBoundingBox</option><option>userSpaceOnUse</option></select>
+    </label>
+    <label class="control">stdDeviation <input id="std" type="range" min="0" max="20" value="8"><output id="stdOut"></output></label>
+    <label class="control">x <input id="x" type="range"><output id="xOut"></output></label>
+    <label class="control">y <input id="y" type="range"><output id="yOut"></output></label>
+    <label class="control">width <input id="w" type="range"><output id="wOut"></output></label>
+    <label class="control">height <input id="h" type="range"><output id="hOut"></output></label>
+  </div>
+  <div class="stage">
+    <svg id="canvas" width="480" height="260" viewBox="0 0 480 260" role="img" aria-label="A circle, a thin bar and a horizontal line, all blurred by one filter whose region is outlined">
+      <defs>
+        <filter id="blur"><feGaussianBlur id="gb" stdDeviation="8"/></filter>
+      </defs>
+      <g class="shapes">
+        <circle class="shape" cx="110" cy="130" r="64" filter="url(#blur)"/>
+        <rect class="shape" x="220" y="76" width="230" height="16" rx="2" filter="url(#blur)"/>
+        <line class="line" x1="230" y1="184" x2="440" y2="184" filter="url(#blur)"/>
+      </g>
+      <g id="regions" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6 4"></g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const filter = $('blur');
+    // Slider ranges and defaults per unit system: fractions as % for objectBoundingBox, user units for userSpaceOnUse
+    const RANGES = {
+      objectBoundingBox: { x: [-60, 0, -10], y: [-60, 0, -10], w: [100, 220, 120], h: [100, 220, 120], fmt: (v) => v + '%' },
+      userSpaceOnUse: { x: [-20, 200, 20], y: [-20, 140, 40], w: [40, 500, 440], h: [20, 280, 180], fmt: (v) => String(v) },
+    };
+    function setUnits() {
+      const r = RANGES[$('units').value];
+      ['x', 'y', 'w', 'h'].forEach((k) => { const [min, max, val] = r[k]; Object.assign($(k), { min, max, value: val }); });
+      update();
+    }
+    function update() {
+      const units = $('units').value, fmt = RANGES[units].fmt;
+      const v = { x: fmt($('x').value), y: fmt($('y').value), width: fmt($('w').value), height: fmt($('h').value) };
+      filter.setAttribute('filterUnits', units);
+      Object.entries(v).forEach(([k, val]) => filter.setAttribute(k, val));
+      $('gb').setAttribute('stdDeviation', $('std').value);
+      $('stdOut').value = $('std').value;
+      $('xOut').value = v.x; $('yOut').value = v.y; $('wOut').value = v.width; $('hOut').value = v.height;
+      // Outline the region each shape actually gets
+      const regions = $('regions'); regions.innerHTML = '';
+      const rect = (x, y, w, h) => { if (w <= 0 || h <= 0) return; const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); Object.entries({ x, y, width: w, height: h }).forEach(([k, val]) => r.setAttribute(k, val)); regions.appendChild(r); };
+      const n = (k) => +$(k).value;
+      if (units === 'userSpaceOnUse') rect(n('x'), n('y'), n('w'), n('h'));
+      else document.querySelectorAll('.shapes > *').forEach((el) => {
+        const b = el.getBBox();
+        rect(b.x + b.width * n('x') / 100, b.y + b.height * n('y') / 100, b.width * n('w') / 100, b.height * n('h') / 100);
+      });
+      $('out').textContent = '<filter id="blur" filterUnits="' + units + '"\n        x="' + v.x + '" y="' + v.y + '" width="' + v.width + '" height="' + v.height + '">\n  <feGaussianBlur stdDeviation="' + $('std').value + '"/>\n</filter>';
+    }
+    $('units').addEventListener('input', setUnits);
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    setUnits();
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 22-1 · Starter</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="A glowing pill button whose glow is cut off into a rectangle">
+    <defs>
+      <filter id="glow">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="halo"/>
+        <feMerge>
+          <feMergeNode in="halo"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <g filter="url(#glow)">
+      <rect x="80" y="76" width="160" height="48" rx="24" fill="#8b5cf6"/>
+      <text x="160" y="107" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#fff">Glow</text>
+    </g>
+  </svg>
+  </div>
+</body>
+</html>

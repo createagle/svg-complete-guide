@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 22-3 · Finished</title>
+  <style>
+    .stage { padding: 32px; background: #e7e5e4; border-radius: 16px; }
+    .card { width: 240px; padding: 18px 20px; border-radius: 14px; background: #fff; color: #1c1917; display: flex; flex-direction: column; gap: 4px; filter: url(#lift); }
+    .card span { color: #78716c; font-size: 14px; }
+  </style>
+</head>
+<body class="demo">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <filter id="lift" x="-20%" y="-20%" width="140%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="blur"/>
+      <feOffset in="blur" dy="12" result="offset"/>
+      <feFlood flood-color="#2563eb" flood-opacity=".45" result="color"/>
+      <feComposite in="color" in2="offset" operator="in" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </svg>
+  <div class="stage">
+    <div class="card" role="img" aria-label="A white card floating on a soft blue shadow">
+      <strong>Weekly report</strong>
+      <span>12 tasks done · 3 in review</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 39-2 · Finished</title>
+  <style>
+    .spark { color: var(--fg); font: 13px system-ui, sans-serif; }
+    .spark polyline { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+    .spark text { fill: var(--muted); }
+  </style>
+</head>
+<body class="demo">
+  <svg class="spark" width="260" height="80" viewBox="-10 0 260 80" role="img" aria-labelledby="spark-title" aria-describedby="spark-desc">
+    <title id="spark-title">Temperature this week</title>
+    <desc id="spark-desc">Rising from 12 °C on Monday to 19 °C on Sunday, with a small dip on Wednesday.</desc>
+    <polyline points="0,52 40,40 80,44 120,26 160,30 200,14 240,10"/>
+    <g aria-hidden="true"><text x="0" y="74">Mon</text><text x="240" y="74" text-anchor="end">Sun</text></g>
+  </svg>
+</body>
+</html>

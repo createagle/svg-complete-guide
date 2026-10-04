@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 39-1 · Finished</title>
+  <style>
+    .toolbar { display: flex; gap: 10px; }
+    .toolbar button { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .toolbar button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .toolbar svg { fill: currentColor; }
+  </style>
+</head>
+<body class="demo">
+  <div class="toolbar">
+    <button type="button" aria-label="Share"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5 L15.4 17.5 M15.4 6.5 L8.6 10.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+    <button type="button" aria-label="Delete"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7 H20 M9 7 V4 H15 V7 M6 7 L7 20 H17 L18 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
+    <button type="button" aria-label="Settings"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2 V5 M12 19 V22 M2 12 H5 M19 12 H22 M4.9 4.9 L7 7 M17 17 L19.1 19.1 M4.9 19.1 L7 17 M17 7 L19.1 4.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+</body>
+</html>

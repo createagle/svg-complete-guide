@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>39-2 Forced Colors and Reduced Motion</title>
+  <style>
+    .col { display: grid; justify-items: center; gap: 18px; padding: 18px 24px; border: 1px solid var(--border); border-radius: 14px; }
+    .icon-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+    .arc { transform-origin: 24px 24px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(1turn); } }
+    .good .track { stroke: color-mix(in srgb, currentColor 20%, transparent); }
+    .good .arc { stroke: var(--accent); }
+    .good .dot { fill: #16a34a; }
+    .good .tick { stroke: #fff; }
+    .good .still { display: none; font: 700 16px system-ui, sans-serif; fill: currentColor; }
+    /* Forced colors: every part of the drawing gets a system color, so nothing disappears */
+    @media (forced-colors: active) {
+      .good .track { stroke: GrayText; }
+      .good .arc { stroke: Highlight; }
+      .good .dot { fill: CanvasText; }
+      .good .tick { stroke: Canvas; }
+    }
+    /* Reduced motion: no spinning; a still "…" says the same thing */
+    @media (prefers-reduced-motion: reduce) {
+      .good .arc { animation: none; stroke-dasharray: none; stroke-opacity: .35; }
+      .good .still { display: inline; }
+    }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+    <figure class="col bad">
+      <button class="icon-btn" type="button" aria-label="Add to favorites"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><g fill="#1f2937"><path d="M12 3 L14.6 9.2 L21 9.6 L16 13.8 L17.6 20.4 L12 16.8 L6.4 20.4 L8 13.8 L3 9.6 L9.4 9.2 Z"/></g></svg></button>
+      <svg class="loader" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="#e5e7eb" stroke-width="6"/><circle class="arc" cx="24" cy="24" r="18" fill="none" stroke="#2563eb" stroke-width="6" stroke-dasharray="30 200" stroke-linecap="round"/></svg>
+      <span class="badge"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="#16a34a"/></svg> Online</span>
+      <figcaption>Hard-coded colors</figcaption>
+    </figure>
+    <figure class="col good">
+      <button class="icon-btn" type="button" aria-label="Add to favorites"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><path d="M12 3 L14.6 9.2 L21 9.6 L16 13.8 L17.6 20.4 L12 16.8 L6.4 20.4 L8 13.8 L3 9.6 L9.4 9.2 Z"/></g></svg></button>
+      <svg class="loader" width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="Loading"><circle class="track" cx="24" cy="24" r="18" fill="none" stroke-width="6"/><circle class="arc" cx="24" cy="24" r="18" fill="none" stroke-width="6" stroke-dasharray="30 200" stroke-linecap="round"/><text class="still" x="24" y="29" text-anchor="middle">…</text></svg>
+      <span class="badge"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle class="dot" cx="7" cy="7" r="6"/><path class="tick" d="M4 7.2 L6.2 9.4 L10 5" fill="none" stroke-width="1.8" stroke-linecap="round"/></svg> Online</span>
+      <figcaption>currentColor, system colors, motion-safe</figcaption>
+    </figure>
+  </div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 40-2 · Finished</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    #ring circle { fill: var(--accent); }
+    #ring { transform-origin: 160px 160px; animation: turn 25s linear infinite; }
+    @keyframes turn { to { transform: rotate(1turn); } }
+  </style>
+</head>
+<body class="demo">
+  <svg width="320" height="320" viewBox="0 0 320 320" role="img" aria-label="A ring of dots turning">
+    <g id="ring"></g>
+  </svg>
+  <pre id="out" class="out" role="status"></pre>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg', ring = document.getElementById('ring');
+    const dots = Array.from({ length: 2400 }, (_, i) => ({ a: i / 2400 * Math.PI * 2, r: 50 + (i % 24) * 4.4 }));
+    const els = dots.map((d) => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('r', 1.6); ring.append(c); return c; });
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Frame time readout: the average gap between the last 60 frames
+    const gaps = []; let last = 0;
+    function meter(now) {
+      if (last) { gaps.push(now - last); if (gaps.length > 60) gaps.shift(); }
+      last = now;
+      const avg = gaps.reduce((s, g) => s + g, 0) / (gaps.length || 1);
+      document.getElementById('out').textContent = 'frame time: ' + avg.toFixed(1) + ' ms';
+    }
+    // Place the dots once; afterwards only the group turns
+    els.forEach((el, i) => {
+      const d = dots[i];
+      el.setAttribute('cx', 160 + Math.cos(d.a) * d.r);
+      el.setAttribute('cy', 160 + Math.sin(d.a) * d.r);
+    });
+    (function frame(now) { meter(now); requestAnimationFrame(frame); })(performance.now());
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 40-1 · Starter</title>
+  <style>
+    .stage { flex-direction: column; align-items: center; color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <figure class="stage">
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" width="120px" height="120px" viewBox="0 0 120 120" enable-background="new 0 0 120 120" xml:space="preserve" role="img" aria-labelledby="bell-title">
+      <title id="bell-title">Notifications</title>
+      <!-- Generator: Adobe Illustrator 27.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) -->
+      <desc>Created with Illustrator.</desc>
+      <defs></defs>
+      <g id="Icons">
+        <g id="Bell">
+          <g>
+            <path fill="#2563EB" fill-opacity="1.000000" stroke="none" stroke-width="1.000000" d="M60.000000,14.000000 C77.120000,14.000000 88.000000,27.400000 88.000000,46.000000 L88.000000,68.000000 L98.000000,82.000000 L22.000000,82.000000 L32.000000,68.000000 L32.000000,46.000000 C32.000000,27.400000 42.880000,14.000000 60.000000,14.000000 Z"/>
+            <circle fill="#2563EB" fill-opacity="1.000000" stroke="none" cx="60.000000" cy="96.000000" r="10.000000"/>
+          </g>
+        </g>
+        <g id="Empty" display="none"><rect x="0" y="0" width="120" height="120" fill="#FFFFFF"/></g>
+      </g>
+    </svg>
+    <figcaption id="size"></figcaption>
+  </figure>
+  <script>
+    // Show how many bytes of markup the drawing costs
+    const svg = document.querySelector('.stage svg');
+    document.getElementById('size').textContent = new TextEncoder().encode(svg.outerHTML).length + ' bytes of markup';
+  </script>
+</body>
+</html>

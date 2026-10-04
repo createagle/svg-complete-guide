@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 40-1 · Finished</title>
+  <style>
+    .stage { flex-direction: column; align-items: center; color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <figure class="stage">
+    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" role="img" aria-labelledby="bell-title">
+      <title id="bell-title">Notifications</title>
+      <path fill="currentColor" d="M60 14c17.1 0 28 13.4 28 32v22l10 14H22l10-14V46c0-18.6 10.9-32 28-32Z"/>
+      <circle cx="60" cy="96" r="10" fill="currentColor"/>
+    </svg>
+    <figcaption id="size"></figcaption>
+  </figure>
+  <script>
+    // Show how many bytes of markup the drawing costs
+    const svg = document.querySelector('.stage svg');
+    document.getElementById('size').textContent = new TextEncoder().encode(svg.outerHTML).length + ' bytes of markup';
+  </script>
+</body>
+</html>

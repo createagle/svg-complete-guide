@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>41-2 Export Checklist</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    input, select { accent-color: var(--accent); }
+    .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; width: min(980px, 100%); }
+    .left { display: grid; gap: 10px; justify-items: center; }
+    #preview { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+    #src { width: 100%; min-height: 260px; font: 12px/1.45 ui-monospace, Menlo, Consolas, monospace; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); }
+    .report { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; align-content: start; font-size: 14px; }
+    .report li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; }
+    .report .mark { font-weight: 700; text-align: center; }
+    .report .ok .mark { color: #16a34a; } .report .warn .mark { color: #d97706; } .report .bad .mark { color: #dc2626; }
+    .report small { display: block; color: var(--muted); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Sample <select id="sample"><option>Figma export</option><option>Illustrator export</option><option>Clean icon</option></select></label>
+  </div>
+  <div class="cols">
+    <div class="left">
+      <img id="preview" width="96" height="96" alt="Preview of the SVG being checked">
+      <textarea id="src" spellcheck="false" aria-label="SVG to check"></textarea>
+    </div>
+    <ul id="report" class="report" aria-live="polite"></ul>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const SAMPLES = {"Figma export": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g id=\"icon/heart\" clip-path=\"url(#clip0_12_7)\">\n<path id=\"Vector\" d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z\" stroke=\"#111827\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n</g>\n<defs>\n<clipPath id=\"clip0_12_7\">\n<rect width=\"24\" height=\"24\" fill=\"white\"/>\n</clipPath>\n</defs>\n</svg>", "Illustrator export": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!-- Generator: Adobe Illustrator 28.0.0, SVG Export Plug-In -->\n<svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n\t width=\"64px\" height=\"64px\" viewBox=\"0 0 64 64\" style=\"enable-background:new 0 0 64 64;\" xml:space=\"preserve\">\n<style type=\"text/css\">\n\t.st0{fill:#E11D48;}\n\t.st1{font-family:'Inter-Bold';font-size:14px;}\n</style>\n<circle class=\"st0\" cx=\"32\" cy=\"32\" r=\"28\"/>\n<text transform=\"matrix(1 0 0 1 18.5 37)\" class=\"st1\">NEW</text>\n<image width=\"16\" height=\"16\" xlink:href=\"data:image/png;base64,iVBORw0KGgo=\" transform=\"matrix(1 0 0 1 4 4)\"></image>\n</svg>", "Clean icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z\"/></svg>"};
+    // Each rule looks at the parsed document and returns [level, title, detail]
+    const RULES = [
+      (svg) => svg.hasAttribute('viewBox') ? ['ok', 'Has a viewBox', 'It scales with CSS.'] : ['bad', 'No viewBox', 'Without one the drawing cannot scale. Export with it or add it.'],
+      (svg) => svg.hasAttribute('width') || svg.hasAttribute('height') ? ['warn', 'Fixed width/height: ' + (svg.getAttribute('width') || '?') + ' × ' + (svg.getAttribute('height') || '?'), 'Fine for <img>; for inline icons size them with CSS (SVGO removeDimensions).'] : ['ok', 'No fixed size', 'CSS decides the size.'],
+      (svg, doc) => {
+        const colors = new Set();
+        doc.querySelectorAll('*').forEach((el) => ['fill', 'stroke'].forEach((a) => { const v = el.getAttribute(a); if (v && !/^(none|currentColor|transparent|url\()/i.test(v)) colors.add(v); }));
+        doc.querySelectorAll('style').forEach((s) => (s.textContent.match(/(?:fill|stroke)\s*:\s*([^;}]+)/g) || []).forEach((m) => colors.add(m.split(':')[1].trim())));
+        return colors.size ? ['warn', 'Hard-coded colors: ' + [...colors].join(', '), 'An icon that should follow the text color needs currentColor (SVGO convertColors: currentColor).'] : ['ok', 'No hard-coded colors', 'Fills and strokes can follow currentColor.'];
+      },
+      (svg, doc) => doc.querySelector('text') ? ['warn', 'Live <text> elements', 'The font may be missing on the viewer\'s device. Outline the text, or make sure the font loads.'] : ['ok', 'No live text', ''],
+      (svg, doc) => doc.querySelector('image') ? ['warn', 'Embedded raster <image>', 'It does not scale like vectors and often bloats the file.'] : ['ok', 'No embedded raster images', ''],
+      (svg, doc) => doc.querySelector('style') ? ['warn', '<style> element with class names', 'Classes like .st0 clash when two exports are inlined in one page. Inline the styles (SVGO inlineStyles).'] : ['ok', 'No <style> element', ''],
+      (svg, doc) => { const ids = [...doc.querySelectorAll('[id]')].map((e) => e.id); return ids.length ? ['warn', 'ids: ' + ids.join(', '), 'Inlining the file twice duplicates them. Remove unused ids and prefix the rest (SVGO cleanupIds, prefixIds).'] : ['ok', 'No ids', '']; },
+      (svg, doc, text) => /<\?xml|<!--|xml:space|enable-background|xmlns:xlink|x="0px"/.test(text) ? ['warn', 'Editor leftovers', 'XML declaration, comments, enable-background, x="0px"… SVGO preset-default removes them.'] : ['ok', 'No editor leftovers', ''],
+      (svg, doc) => doc.querySelector('script, foreignObject, [onload], [onclick], [onerror]') ? ['bad', 'Script or foreignObject', 'Never ship these from a design tool. See chapter 42.'] : ['ok', 'No script or foreignObject', ''],
+    ];
+    function check() {
+      const text = $('src').value;
+      $('preview').src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(text);
+      const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+      const svg = doc.documentElement;
+      const items = svg.nodeName !== 'svg' ? [['bad', 'Not a valid SVG document', (doc.querySelector('parsererror') || {}).textContent || '']] : RULES.map((r) => r(svg, doc, text));
+      const mark = { ok: '✓', warn: '!', bad: '✗' };
+      $('report').replaceChildren(...items.map(([lvl, title, detail]) => {
+        const li = document.createElement('li'); li.className = lvl;
+        li.innerHTML = '<span class="mark" aria-hidden="true"></span><span><strong></strong><small></small></span>';
+        li.querySelector('.mark').textContent = mark[lvl];
+        li.querySelector('strong').textContent = ({ ok: 'OK: ', warn: 'Check: ', bad: 'Fix: ' })[lvl] + title;
+        li.querySelector('small').textContent = detail;
+        return li;
+      }));
+    }
+    $('sample').addEventListener('input', () => { $('src').value = SAMPLES[$('sample').value]; check(); });
+    $('src').addEventListener('input', check);
+    $('src').value = SAMPLES[$('sample').value]; check();
+  </script>
+</body>
+</html>

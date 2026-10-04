@@ -1,0 +1,23 @@
+{
+  "name": "svg-toolchain-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.139",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "svgo": "^4.1.0",
+    "unplugin-icons": "^24.0.0",
+    "vite": "^8.3.2",
+    "vite-plugin-svgr": "^5.2.0"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

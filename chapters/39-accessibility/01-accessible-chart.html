@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>39-1 Accessible vs Inaccessible Chart</title>
+  <style>
+    .chart { color: var(--fg); font: 13px system-ui, sans-serif; }
+    .chart text { fill: currentColor; }
+    .chart .cap { font-weight: 600; font-size: 15px; }
+    .chart .small { font-size: 11px; fill: var(--muted); }
+    .good { --bar: #2563eb; --bar-soft: #bfdbfe; }
+    @media (prefers-color-scheme: dark) { .good { --bar: #60a5fa; --bar-soft: #1e3a8a; } }
+    .bar { outline: none; }
+    .bar .value { font-size: 12px; font-weight: 600; }
+    .bar:focus-visible rect { stroke: currentColor; stroke-width: 3; }
+    /* Windows High Contrast and other forced-color modes: fall back to system colors */
+    @media (forced-colors: active) {
+      .good { --bar: CanvasText; --bar-soft: Canvas; }
+      .bar:focus-visible rect { stroke: Highlight; }
+    }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+    <figure>
+    <svg class="chart" width="300" height="220" viewBox="0 0 300 220">
+      <text x="10" y="20" class="cap">Orders per quarter</text>
+      <line x1="40" y1="180" x2="290" y2="180" stroke="currentColor" stroke-opacity=".4"/>
+      <rect x="50" y="60" width="40" height="120" fill="#16a34a"/>
+      <text x="70" y="198" text-anchor="middle">Q1</text>
+      <rect x="112" y="100" width="40" height="80" fill="#dc2626"/>
+      <text x="132" y="198" text-anchor="middle">Q2</text>
+      <rect x="174" y="45" width="40" height="135" fill="#16a34a"/>
+      <text x="194" y="198" text-anchor="middle">Q3</text>
+      <rect x="236" y="85" width="40" height="95" fill="#dc2626"/>
+      <text x="256" y="198" text-anchor="middle">Q4</text>
+    </svg>
+    <figcaption>Before: color-only, no name, no structure</figcaption>
+    </figure>
+    <figure>
+    <svg class="chart good" width="300" height="220" viewBox="0 0 300 220" role="group" aria-labelledby="chart-title" aria-describedby="chart-desc">
+      <title id="chart-title">Orders per quarter</title>
+      <desc id="chart-desc">Target is 100 orders. Q1 and Q3 are above target; Q2 and Q4 are below.</desc>
+      <defs>
+        <pattern id="below" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="6" height="6" fill="var(--bar-soft)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--bar)" stroke-width="3"/>
+        </pattern>
+      </defs>
+      <text x="10" y="20" class="cap" aria-hidden="true">Orders per quarter</text>
+      <g aria-hidden="true">
+        <line x1="40" y1="180" x2="290" y2="180" stroke="currentColor" stroke-opacity=".4"/>
+        <line x1="40" y1="80" x2="290" y2="80" stroke="currentColor" stroke-dasharray="5 4"/>
+        <text x="36" y="84" text-anchor="end" class="small">100</text>
+        <line x1="222" y1="16" x2="246" y2="16" stroke="currentColor" stroke-dasharray="5 4"/>
+        <text x="290" y="20" text-anchor="end" class="small">target</text>
+      <text x="70" y="198" text-anchor="middle">Q1</text>
+      <text x="132" y="198" text-anchor="middle">Q2</text>
+      <text x="194" y="198" text-anchor="middle">Q3</text>
+      <text x="256" y="198" text-anchor="middle">Q4</text>
+      </g>
+      <g role="list">
+      <g class="bar" role="listitem" tabindex="0" aria-label="Q1: 120 orders, above target">
+        <rect x="50" y="60" width="40" height="120" fill="var(--bar)"/>
+        <text class="value" x="70" y="54" text-anchor="middle">120</text>
+      </g>
+      <g class="bar" role="listitem" tabindex="0" aria-label="Q2: 80 orders, below target">
+        <rect x="112" y="100" width="40" height="80" fill="url(#below)"/>
+        <text class="value" x="132" y="94" text-anchor="middle">80</text>
+      </g>
+      <g class="bar" role="listitem" tabindex="0" aria-label="Q3: 135 orders, above target">
+        <rect x="174" y="45" width="40" height="135" fill="var(--bar)"/>
+        <text class="value" x="194" y="39" text-anchor="middle">135</text>
+      </g>
+      <g class="bar" role="listitem" tabindex="0" aria-label="Q4: 95 orders, below target">
+        <rect x="236" y="85" width="40" height="95" fill="url(#below)"/>
+        <text class="value" x="256" y="79" text-anchor="middle">95</text>
+      </g>
+      </g>
+    </svg>
+    <figcaption>After: named, described, keyboard reachable, not color-only</figcaption>
+    </figure>
+  </div>
+</body>
+</html>

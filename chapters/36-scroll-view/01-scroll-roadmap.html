@@ -19,7 +19,7 @@
       @media (prefers-reduced-motion: no-preference) {
         .route { stroke-dasharray: 1 2; animation: draw linear both; animation-timeline: --trip; }
         .me { display: inline; offset-path: path("M200 60 C360 140 360 260 200 320 S40 520 200 620 S360 820 200 920 S40 1120 200 1220 S300 1380 200 1440"); animation: travel linear both; animation-timeline: --trip; }
-        .stop { transform-box: fill-box; transform-origin: center; animation: pop ease-out both; animation-timeline: view(); animation-range: entry 20% cover 40%; }
+        .stop { transform-box: fill-box; transform-origin: center; animation: pop ease-out both; animation-timeline: --trip; animation-range: calc(var(--at) - 4%) var(--at); }
       }
     }
     @keyframes draw { from { stroke-dashoffset: 1.01; } to { stroke-dashoffset: 0; } }
@@ -33,23 +33,23 @@
     <svg class="map" width="400" height="1500" viewBox="0 0 400 1500" role="img" aria-label="A winding route with five milestones: Plan, Design, Build, Test and Launch">
       <path class="track" d="M200 60 C360 140 360 260 200 320 S40 520 200 620 S360 820 200 920 S40 1120 200 1220 S300 1380 200 1440"/>
       <path class="route" d="M200 60 C360 140 360 260 200 320 S40 520 200 620 S360 820 200 920 S40 1120 200 1220 S300 1380 200 1440" pathLength="1"/>
-        <g class="stop">
+        <g class="stop" style="--at: 19.8%">
           <circle cx="200" cy="320" r="14"/>
           <text x="226" y="326" text-anchor="start">Plan</text>
         </g>
-        <g class="stop">
+        <g class="stop" style="--at: 41.3%">
           <circle cx="200" cy="620" r="14"/>
           <text x="174" y="626" text-anchor="end">Design</text>
         </g>
-        <g class="stop">
+        <g class="stop" style="--at: 62.5%">
           <circle cx="200" cy="920" r="14"/>
           <text x="226" y="926" text-anchor="start">Build</text>
         </g>
-        <g class="stop">
+        <g class="stop" style="--at: 83.7%">
           <circle cx="200" cy="1220" r="14"/>
           <text x="174" y="1226" text-anchor="end">Test</text>
         </g>
-        <g class="stop">
+        <g class="stop" style="--at: 100%">
           <circle cx="200" cy="1440" r="14"/>
           <text x="226" y="1446" text-anchor="start">Launch</text>
         </g>

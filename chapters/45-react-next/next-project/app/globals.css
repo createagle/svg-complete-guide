@@ -1,0 +1,20 @@
+/* The same tokens and demo layout as assets/style.css in the repository root */
+:root { --bg: #ffffff; --fg: #1c1917; --muted: #78716c; --border: #e7e5e4; --accent: #2563eb; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1c1917; --fg: #f5f5f4; --muted: #a8a29e; --border: #44403c; --accent: #60a5fa; }
+}
+* { box-sizing: border-box; }
+body.demo { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px;
+  background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.stage { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; align-items: flex-end; max-width: 100%; }
+.stage figure { margin: 0; text-align: center; }
+.stage figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.chart { width: min(320px, 100%); height: auto; }
+.chart .bar { fill: var(--accent); }
+.chart .bar.dim { opacity: 0.35; }
+.chart .grid { stroke: var(--border); }
+.chart text { fill: var(--muted); font-size: 11px; }
+.chart .value { fill: var(--fg); font-weight: 600; }
+.logo { color: #7c3aed; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; } }
+.chart .bar { transition: opacity .2s; }

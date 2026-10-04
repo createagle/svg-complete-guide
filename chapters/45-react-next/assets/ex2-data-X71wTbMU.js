@@ -1,0 +1,1 @@
+var e=Array.from({length:13},(e,t)=>[20+t*43.3,120+Math.round(70*Math.sin(t*.9))]).map(([e,t],n)=>`${n?`L`:`M`}${e.toFixed(1)} ${t}`).join(` `);export{e as t};

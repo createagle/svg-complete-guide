@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-第 33–35 章、第 40 章和第 42 章示例用到的第三方构建文件，原样从 npm 复制而来（`svgo.min.js` 例外，见下文），所以示例离线、双击打开也能运行。
+第 33–35 章、第 40 章、第 42 章和第 47 章示例用到的第三方构建文件，原样从 npm 复制而来（`svgo.min.js` 例外，见下文），所以示例离线、双击打开也能运行。
 
 | 文件 | 包 | 版本 | 许可证 | 大小（gzip -9） |
 | --- | --- | --- | --- | --- |
@@ -14,6 +14,7 @@
 | `lottie_svg.min.js` | [lottie-web](https://www.npmjs.com/package/lottie-web) | 5.13.0 | MIT | 62.3 KB |
 | `svgo.min.js` | [svgo](https://www.npmjs.com/package/svgo) | 4.1.0 | MIT | 162.3 KB |
 | `purify.min.js` | [dompurify](https://www.npmjs.com/package/dompurify) | 3.4.16 | MPL-2.0 或 Apache-2.0 | 11.1 KB |
+| `d3.min.js` | [d3](https://www.npmjs.com/package/d3) | 7.9.0 | ISC | 90.2 KB |
 
 大小按完整的 UMD 包计算。用打包工具对 ES 模块版本做 tree-shaking，实际体积通常更小。
 

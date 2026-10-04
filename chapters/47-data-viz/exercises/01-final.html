@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 47-1 · Finished</title>
+  <style>
+    .chart { width: min(320px, 100%); height: auto; overflow: visible; }
+    .chart text { font: 11px system-ui, sans-serif; fill: var(--muted); }
+    .chart .grid { stroke: var(--border); }
+    .chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
+    .chart .dot { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
+    .chart .bar { fill: var(--accent); }
+    .chart { width: min(420px, 100%); }
+  </style>
+</head>
+<body class="demo">
+  <figure class="stage"><svg id="chart" class="chart" viewBox="0 0 320 200" role="img" aria-label="Monthly orders, January to June"></svg></figure>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    // Create an SVG element with attributes; strings and nodes after the attributes become its children
+    function el(tag, attrs = {}, ...kids) {
+      const n = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+      n.append(...kids);
+      return n;
+    }
+    // A linear scale: maps a value in the domain [d0, d1] to a position in the range [r0, r1]
+    const linear = ([d0, d1], [r0, r1]) => (v) => r0 + ((v - d0) * (r1 - r0)) / (d1 - d0);
+    const W = 320, H = 200, M = { top: 12, right: 12, bottom: 24, left: 34 };
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const values = [42, 58, 51, 73, 66, 89];
+    const svg = document.getElementById('chart');
+    const band = (W - M.left - M.right) / values.length;
+    // Round axis values: the step is 1, 2 or 5 times a power of ten, and the last tick covers the maximum
+    function niceTicks(max, count = 5) {
+      const raw = max / count;
+      const pow = 10 ** Math.floor(Math.log10(raw));
+      const step = [1, 2, 5, 10].map((m) => m * pow).find((s) => s >= raw);
+      const top = Math.ceil(max / step) * step;
+      return Array.from({ length: Math.round(top / step) + 1 }, (_, i) => i * step);
+    }
+    // Horizontal grid lines with their labels on the left
+    function yAxis(svg, ticks, y) {
+      for (const t of ticks) {
+        svg.append(el('line', { class: 'grid', x1: M.left, x2: W - M.right, y1: y(t), y2: y(t) }),
+          el('text', { x: M.left - 6, y: y(t), 'text-anchor': 'end', 'dominant-baseline': 'middle' }, String(t)));
+      }
+    }
+    const ticks = niceTicks(Math.max(...values));
+    const y = linear([0, ticks.at(-1)], [H - M.bottom, M.top]);
+    yAxis(svg, ticks, y);
+    values.forEach((v, i) => {
+      const x = M.left + i * band + band * 0.2;
+      svg.append(el('rect', { class: 'bar', x, y: y(v), width: band * 0.6, height: y(0) - y(v), rx: 2 }, el('title', {}, `${MONTHS[i]}: ${v}`)),
+        el('text', { x: x + band * 0.3, y: H - 6, 'text-anchor': 'middle' }, MONTHS[i]));
+    });
+  </script>
+</body>
+</html>

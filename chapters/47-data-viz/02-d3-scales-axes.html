@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>47-2 D3 Scales and Axes</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    .box { width: min(720px, 100%); }
+    #chart { display: block; }
+    #chart .tick text { fill: var(--muted); font-size: 11px; }
+    #chart .y-axis .tick line { stroke: var(--border); }
+    #chart .x-axis .domain, #chart .x-axis .tick line { stroke: var(--muted); }
+    #chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+    #chart .area { fill: var(--accent); fill-opacity: .15; }
+    .readout { margin: 0; font: 12.5px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+    select { font: inherit; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Curve <select id="curve">
+      <option value="curveLinear">curveLinear</option>
+      <option value="curveMonotoneX" selected>curveMonotoneX</option>
+      <option value="curveStep">curveStep</option>
+      <option value="curveBasis">curveBasis</option>
+      <option value="curveCatmullRom">curveCatmullRom</option>
+    </select></label>
+    <label class="control"><input id="nice" type="checkbox" checked> y.nice(6)</label>
+    <label class="control"><input id="area" type="checkbox" checked> Area</label>
+  </div>
+  <div id="box" class="box">
+    <svg id="chart" role="img" aria-label="Weekly average temperature, first half of 2026">
+      <g class="y-axis"></g><g class="x-axis"></g>
+      <path class="area"></path><path class="line"></path>
+    </svg>
+  </div>
+  <p id="out" class="readout"></p>
+  <script src="../../assets/vendor/d3.min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    // 26 weeks of made-up temperatures, the same every time the page loads
+    const data = Array.from({ length: 26 }, (_, i) => ({
+      date: new Date(2026, 0, 5 + i * 7),
+      value: Math.round((3.4 + 22 * Math.sin((i / 25) * Math.PI * 0.9) + 3 * Math.sin(i * 1.7 + 0.6)) * 10) / 10,
+    }));
+    const M = { top: 16, right: 16, bottom: 28, left: 40 }, H = 300;
+    const svg = d3.select('#chart');
+
+    function render() {
+      const W = $('box').clientWidth;
+      // Scales turn data into pixels: time on x, numbers on y
+      const x = d3.scaleTime().domain(d3.extent(data, (d) => d.date)).range([M.left, W - M.right]);
+      const y = d3.scaleLinear().domain(d3.extent(data, (d) => d.value)).range([H - M.bottom, M.top]);
+      // nice() rounds the domain outward; give it the same tick count as the axis below
+      if ($('nice').checked) y.nice(6);
+      const curve = d3[$('curve').value];
+      const line = d3.line().x((d) => x(d.date)).y((d) => y(d.value)).curve(curve);
+      const area = d3.area().x((d) => x(d.date)).y0(y.range()[0]).y1((d) => y(d.value)).curve(curve);
+
+      svg.attr('width', W).attr('height', H).attr('viewBox', [0, 0, W, H]);
+      // Axes are generated from the same scales; tickSize turns the y ticks into grid lines
+      svg.select('.x-axis').attr('transform', `translate(0,${H - M.bottom})`).call(d3.axisBottom(x).ticks(W / 90));
+      svg.select('.y-axis').attr('transform', `translate(${M.left},0)`)
+        .call(d3.axisLeft(y).ticks(6).tickSize(-(W - M.left - M.right)))
+        .call((g) => g.select('.domain').remove());
+      svg.select('.area').attr('d', $('area').checked ? area(data) : null);
+      svg.select('.line').attr('d', line(data));
+      $('out').textContent = 'y domain: [' + y.domain().join(', ') + ']';
+    }
+    for (const id of ['curve', 'nice', 'area']) $(id).addEventListener('input', render);
+    new ResizeObserver(render).observe($('box'));
+  </script>
+</body>
+</html>

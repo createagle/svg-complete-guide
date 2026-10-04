@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>47-4 SVG vs Canvas</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    .view { width: 480px; height: 300px; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; color: var(--accent); }
+    .view svg, .view canvas { display: block; width: 480px; height: 300px; }
+    .view circle { fill: currentColor; fill-opacity: .55; }
+    .view circle.hot { fill: #dc2626; fill-opacity: 1; }
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); white-space: pre; }
+    select { font: inherit; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Points <select id="n"><option>1000</option><option selected>5000</option><option>20000</option><option>50000</option></select></label>
+    <label class="control">Renderer <select id="mode"><option value="svg">SVG</option><option value="canvas">Canvas</option></select></label>
+    <button id="toggle" class="btn" type="button">Pause</button>
+  </div>
+  <div id="view" class="view"></div>
+  <pre id="out" class="out"></pre>
+  <script src="../../assets/vendor/d3.min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+    const W = 480, H = 300, R = 2.2;
+    let pts = [], nodes = [], ctx = null, hot = -1, buildMs = 0;
+    let running = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function build() {
+      const n = +$('n').value, mode = $('mode').value, t0 = performance.now();
+      // Every point drifts around its own center
+      pts = Array.from({ length: n }, (_, i) => ({ cx: Math.random() * W, cy: Math.random() * H, r: 4 + (i % 9), a: Math.random() * 6.28, s: 0.5 + (i % 5) / 5, x: 0, y: 0 }));
+      move(0);
+      hot = -1;
+      if (mode === 'svg') {
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        nodes = pts.map((p, i) => {
+          const c = document.createElementNS(NS, 'circle');
+          c.setAttribute('r', R); c.setAttribute('cx', p.x.toFixed(1)); c.setAttribute('cy', p.y.toFixed(1)); c.dataset.i = i;
+          return c;
+        });
+        svg.append(...nodes);
+        // SVG: every circle is an element, so the browser does the hit testing
+        svg.addEventListener('pointerover', (e) => { if (e.target.dataset.i) setHot(+e.target.dataset.i); });
+        svg.addEventListener('pointerleave', () => setHot(-1));
+        $('view').replaceChildren(svg);
+        ctx = null;
+      } else {
+        const canvas = document.createElement('canvas'), dpr = devicePixelRatio || 1;
+        canvas.width = W * dpr; canvas.height = H * dpr;
+        ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+        // Canvas: only pixels, so finding the point under the pointer is our job
+        canvas.addEventListener('pointermove', (e) => {
+          const r = canvas.getBoundingClientRect();
+          const tree = d3.quadtree(pts, (p) => p.x, (p) => p.y);
+          const p = tree.find(e.clientX - r.left, e.clientY - r.top, 6);
+          setHot(p ? pts.indexOf(p) : -1);
+        });
+        canvas.addEventListener('pointerleave', () => setHot(-1));
+        $('view').replaceChildren(canvas);
+        nodes = [];
+        draw();
+      }
+      buildMs = performance.now() - t0;
+    }
+    function setHot(i) {
+      if (nodes.length) { nodes[hot]?.classList.remove('hot'); nodes[i]?.classList.add('hot'); }
+      hot = i;
+      if (ctx && !running) draw();
+    }
+    function move(t) {
+      for (const p of pts) { const a = p.a + t * 0.0006 * p.s; p.x = p.cx + Math.cos(a) * p.r; p.y = p.cy + Math.sin(a) * p.r; }
+    }
+    const color = () => getComputedStyle($('view')).color;
+    function draw() {
+      if (nodes.length) {
+        for (let i = 0; i < nodes.length; i++) { nodes[i].setAttribute('cx', pts[i].x.toFixed(1)); nodes[i].setAttribute('cy', pts[i].y.toFixed(1)); }
+        return;
+      }
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = color(); ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      for (const p of pts) { ctx.moveTo(p.x + R, p.y); ctx.arc(p.x, p.y, R, 0, Math.PI * 2); }
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      if (pts[hot]) { ctx.fillStyle = '#dc2626'; ctx.beginPath(); ctx.arc(pts[hot].x, pts[hot].y, R, 0, Math.PI * 2); ctx.fill(); }
+    }
+    // Frame time: the average gap between the last 60 animation frames
+    const gaps = []; let last = 0;
+    function frame(now) {
+      if (last) { gaps.push(now - last); if (gaps.length > 60) gaps.shift(); }
+      last = now;
+      if (running) { move(now); draw(); }
+      const avg = gaps.reduce((s, g) => s + g, 0) / (gaps.length || 1);
+      $('out').textContent = `points: ${pts.length} · elements in the view: ${$('view').querySelectorAll('*').length}\n` +
+        `build: ${buildMs.toFixed(0)} ms · frame time: ${avg.toFixed(1)} ms (${(1000 / avg).toFixed(0)} fps)${running ? '' : ' · paused'}`;
+      requestAnimationFrame(frame);
+    }
+    $('toggle').textContent = running ? 'Pause' : 'Play';
+    $('toggle').addEventListener('click', () => { running = !running; $('toggle').textContent = running ? 'Pause' : 'Play'; });
+    $('n').addEventListener('input', build);
+    $('mode').addEventListener('input', build);
+    build();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

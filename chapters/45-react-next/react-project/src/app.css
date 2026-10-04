@@ -1,0 +1,11 @@
+/* Let the rendered elements lay out as direct children of body.demo */
+#root { display: contents; }
+input, select { accent-color: var(--accent); }
+.btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+.track { stroke: var(--border); }
+.ring { margin: 0; text-align: center; }
+.ring figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.ring code { font: 12px ui-monospace, Menlo, Consolas, monospace; }
+.spark-box { width: min(560px, 100%); }
+.spark-box svg { display: block; }
+.readout { font: 12.5px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }

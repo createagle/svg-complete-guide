@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>47-1 Hand-Written Charts</title>
+  <style>
+    .chart { width: min(320px, 100%); height: auto; overflow: visible; }
+    .chart text { font: 11px system-ui, sans-serif; fill: var(--muted); }
+    .chart .grid { stroke: var(--border); }
+    .chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
+    .chart .dot { fill: var(--bg); stroke: var(--accent); stroke-width: 2; }
+    .chart .bar { fill: var(--accent); }
+    .chart.donut { width: min(200px, 100%); }
+    .slice { stroke: var(--bg); stroke-width: 2; }
+    .slice-label { fill: #fff !important; font-weight: 600; }
+    .chart .total { font-size: 22px; font-weight: 700; fill: var(--fg); }
+    .legend { display: flex; gap: 12px; justify-content: center; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--c); margin-right: 4px; }
+    select { font: inherit; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Year <select id="year"><option>2025</option><option selected>2026</option></select></label>
+  </div>
+  <div class="stage">
+    <figure><svg id="line" class="chart" viewBox="0 0 320 200" role="img" aria-labelledby="line-cap"></svg><figcaption id="line-cap">Monthly orders</figcaption></figure>
+    <figure><svg id="bar" class="chart" viewBox="0 0 320 200" role="img" aria-labelledby="bar-cap"></svg><figcaption id="bar-cap">Monthly orders</figcaption></figure>
+    <figure><svg id="donut" class="chart donut" viewBox="0 0 200 200" role="img" aria-labelledby="donut-cap"></svg><figcaption id="donut-cap">Orders by channel</figcaption><div id="legend" class="legend"></div></figure>
+  </div>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    // Create an SVG element with attributes; strings and nodes after the attributes become its children
+    function el(tag, attrs = {}, ...kids) {
+      const n = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+      n.append(...kids);
+      return n;
+    }
+    // A linear scale: maps a value in the domain [d0, d1] to a position in the range [r0, r1]
+    const linear = ([d0, d1], [r0, r1]) => (v) => r0 + ((v - d0) * (r1 - r0)) / (d1 - d0);
+    const W = 320, H = 200, M = { top: 12, right: 12, bottom: 24, left: 34 };
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const DATA = {
+      2025: { orders: [38, 44, 41, 55, 60, 64], channels: [['Web', 40, '#2563eb'], ['Store', 42, '#7c3aed'], ['Partner', 18, '#ea580c']] },
+      2026: { orders: [42, 58, 51, 73, 66, 89], channels: [['Web', 48, '#2563eb'], ['Store', 32, '#7c3aed'], ['Partner', 20, '#ea580c']] },
+    };
+    // Round axis values: the step is 1, 2 or 5 times a power of ten, and the last tick covers the maximum
+    function niceTicks(max, count = 5) {
+      const raw = max / count;
+      const pow = 10 ** Math.floor(Math.log10(raw));
+      const step = [1, 2, 5, 10].map((m) => m * pow).find((s) => s >= raw);
+      const top = Math.ceil(max / step) * step;
+      return Array.from({ length: Math.round(top / step) + 1 }, (_, i) => i * step);
+    }
+    // Horizontal grid lines with their labels on the left
+    function yAxis(svg, ticks, y) {
+      for (const t of ticks) {
+        svg.append(el('line', { class: 'grid', x1: M.left, x2: W - M.right, y1: y(t), y2: y(t) }),
+          el('text', { x: M.left - 6, y: y(t), 'text-anchor': 'end', 'dominant-baseline': 'middle' }, String(t)));
+      }
+    }
+
+    function lineChart(svg, values) {
+      const ticks = niceTicks(Math.max(...values));
+      const x = linear([0, values.length - 1], [M.left + 10, W - M.right - 10]);
+      const y = linear([0, ticks.at(-1)], [H - M.bottom, M.top]);
+      svg.replaceChildren();
+      yAxis(svg, ticks, y);
+      const d = values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+      svg.append(el('path', { class: 'line', d }));
+      values.forEach((v, i) => svg.append(
+        el('circle', { class: 'dot', cx: x(i), cy: y(v), r: 3.5 }, el('title', {}, `${MONTHS[i]}: ${v}`)),
+        el('text', { x: x(i), y: H - 6, 'text-anchor': 'middle' }, MONTHS[i])));
+    }
+
+    function barChart(svg, values) {
+      const ticks = niceTicks(Math.max(...values));
+      const y = linear([0, ticks.at(-1)], [H - M.bottom, M.top]);
+      const band = (W - M.left - M.right) / values.length;
+      svg.replaceChildren();
+      yAxis(svg, ticks, y);
+      values.forEach((v, i) => {
+        const x = M.left + i * band + band * 0.2;
+        svg.append(el('rect', { class: 'bar', x, y: y(v), width: band * 0.6, height: y(0) - y(v), rx: 2 }, el('title', {}, `${MONTHS[i]}: ${v}`)),
+          el('text', { x: x + band * 0.3, y: H - 6, 'text-anchor': 'middle' }, MONTHS[i]));
+      });
+    }
+
+    // One ring segment from angle a0 to a1, in radians, 0 at 12 o'clock, clockwise
+    function arcPath(cx, cy, r0, r1, a0, a1) {
+      const pt = (r, a) => `${(cx + r * Math.sin(a)).toFixed(2)} ${(cy - r * Math.cos(a)).toFixed(2)}`;
+      const large = a1 - a0 > Math.PI ? 1 : 0;
+      return `M${pt(r1, a0)} A${r1} ${r1} 0 ${large} 1 ${pt(r1, a1)} L${pt(r0, a1)} A${r0} ${r0} 0 ${large} 0 ${pt(r0, a0)} Z`;
+    }
+
+    function donut(svg, parts) {
+      const total = parts.reduce((s, [, v]) => s + v, 0);
+      let a0 = 0;
+      svg.replaceChildren();
+      for (const [name, v, color] of parts) {
+        const a1 = a0 + (v / total) * 2 * Math.PI, mid = (a0 + a1) / 2, pct = Math.round((v / total) * 100) + '%';
+        svg.append(el('path', { class: 'slice', d: arcPath(100, 100, 52, 86, a0, a1), fill: color }, el('title', {}, `${name}: ${pct}`)),
+          el('text', { class: 'slice-label', x: 100 + 69 * Math.sin(mid), y: 100 - 69 * Math.cos(mid), 'text-anchor': 'middle', 'dominant-baseline': 'central' }, pct));
+        a0 = a1;
+      }
+      svg.append(el('text', { class: 'total', x: 100, y: 100, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, String(total)));
+    }
+
+    const $ = (id) => document.getElementById(id);
+    function render() {
+      const data = DATA[$('year').value];
+      lineChart($('line'), data.orders);
+      barChart($('bar'), data.orders);
+      donut($('donut'), data.channels);
+      $('legend').replaceChildren(...data.channels.map(([name, , c]) => {
+        const s = document.createElement('span'); s.innerHTML = `<i style="--c:${c}"></i>${name}`; return s;
+      }));
+    }
+    $('year').addEventListener('input', render);
+    render();
+  </script>
+</body>
+</html>

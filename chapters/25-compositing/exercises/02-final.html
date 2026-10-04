@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 25-2 · Finished</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river, tinted orange with feBlend multiply">
+    <defs>
+      <filter id="tint" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feFlood flood-color="#f97316" result="color"/>
+        <feBlend in="color" in2="SourceGraphic" mode="multiply"/>
+      </filter>
+    </defs>
+    <image href="../photo.jpg" width="480" height="320" filter="url(#tint)"/>
+  </svg>
+  </div>
+</body>
+</html>

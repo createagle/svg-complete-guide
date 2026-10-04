@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 24-1 · Finished</title>
+  <style>
+    .stage img { display: block; filter: grayscale(1); }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+    <figure>
+      <svg width="240" height="160" viewBox="0 0 480 320" role="img" aria-label="A sunset scene in SVG grayscale, matching the CSS version">
+        <defs>
+          <filter id="gray" color-interpolation-filters="sRGB">
+            <feColorMatrix type="saturate" values="0"/>
+          </filter>
+        </defs>
+        <image href="../scene.svg" width="480" height="320" filter="url(#gray)"/>
+      </svg>
+      <figcaption>SVG filter</figcaption>
+    </figure>
+    <figure>
+      <img src="../scene.svg" width="240" height="160" alt="Sunset over green hills, in CSS grayscale">
+      <figcaption>CSS grayscale(1)</figcaption>
+    </figure>
+  </div>
+</body>
+</html>

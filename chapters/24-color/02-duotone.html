@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>24-2 Duotone Image Filter</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .stage img { display: block; border-radius: 8px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Preset <select id="preset"><option value="#1e1b4b #f472b6">Night / Pink</option><option value="#3b0764 #facc15">Plum / Lemon</option><option value="#064e3b #fef3c7">Forest / Cream</option><option value="#7f1d1d #93c5fd">Wine / Sky</option></select></label>
+    <label class="control">Shadows <input id="dark" type="color" value="#1e1b4b"></label>
+    <label class="control"><input id="useMid" type="checkbox"> Midtones <input id="mid" type="color" value="#0ea5e9"></label>
+    <label class="control">Highlights <input id="light" type="color" value="#f472b6"></label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river, in two colors">
+        <defs>
+          <filter id="duotone" color-interpolation-filters="sRGB">
+            <feColorMatrix type="saturate" values="0"/>
+            <feComponentTransfer>
+              <feFuncR id="fr" type="table"/>
+              <feFuncG id="fg" type="table"/>
+              <feFuncB id="fb" type="table"/>
+            </feComponentTransfer>
+          </filter>
+        </defs>
+        <image href="photo.jpg" width="480" height="320" filter="url(#duotone)"/>
+      </svg>
+    </figure>
+    <figure>
+      <img src="photo.jpg" width="160" height="107" alt="Flat illustration of mountains, a sun, a tree and a river, original colors">
+      <figcaption>Original</figcaption>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const ch = (hex, i) => Math.round(parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255 * 1000) / 1000;
+    // Gray 0 → shadow color, gray 1 → highlight color (and gray .5 → midtone color when enabled)
+    function update() {
+      const stops = [$('dark').value, ...($('useMid').checked ? [$('mid').value] : []), $('light').value];
+      const lines = ['R', 'G', 'B'].map((c, i) => {
+        const vals = stops.map((h) => ch(h, i)).join(' ');
+        $('f' + c.toLowerCase()).setAttribute('tableValues', vals);
+        return '    <feFunc' + c + ' type="table" tableValues="' + vals + '"/>';
+      });
+      $('out').textContent = '<filter id="duotone" color-interpolation-filters="sRGB">\n  <feColorMatrix type="saturate" values="0"/>\n  <feComponentTransfer>\n' + lines.join('\n') + '\n  </feComponentTransfer>\n</filter>';
+    }
+    $('preset').addEventListener('input', () => { const [a, b] = $('preset').value.split(' '); $('dark').value = a; $('light').value = b; update(); });
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

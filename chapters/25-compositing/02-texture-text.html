@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>25-2 Texture on Text</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Texture <select id="tex"><option value="photo">Photo (feImage)</option><option value="noise">Noise (feTurbulence)</option><option value="stripes">Stripes (feImage + feTile)</option></select></label>
+    <label class="control">feBlend mode <select id="mode"><option>normal</option><option selected>multiply</option><option>screen</option><option>overlay</option><option>darken</option><option>lighten</option><option>color-dodge</option><option>color-burn</option><option>hard-light</option><option>soft-light</option><option>difference</option><option>exclusion</option><option>hue</option><option>saturation</option><option>color</option><option>luminosity</option></select></label>
+    <label class="control">Text color <input id="ink" type="color" value="#7c3aed"></label>
+  </div>
+  <div class="stage">
+    <svg width="560" height="220" viewBox="0 0 560 220" role="img" aria-label="Large text filled with a blended texture">
+      <defs>
+        <filter id="textured" filterUnits="userSpaceOnUse" x="0" y="0" width="560" height="220" color-interpolation-filters="sRGB">
+          <feImage id="photo" href="photo.jpg" x="0" y="0" width="560" height="220" preserveAspectRatio="xMidYMid slice" result="photo"/>
+          <feTurbulence id="noise" type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="4" result="noise"/>
+          <feImage id="tile" href="stripe-cell.svg" x="0" y="0" width="16" height="16" result="cell"/>
+          <feTile id="tiles" in="cell" result="stripes"/>
+          <feBlend id="blend" in="photo" in2="SourceGraphic" mode="multiply" result="mixed"/>
+          <feComposite in="mixed" in2="SourceGraphic" operator="in"/>
+        </filter>
+      </defs>
+      <text id="word" x="280" y="160" text-anchor="middle" font-family="system-ui, sans-serif" font-size="150" font-weight="900" fill="#7c3aed" filter="url(#textured)">WILD</text>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update() {
+      const tex = $('tex').value, mode = $('mode').value;
+      $('blend').setAttribute('in', tex);
+      $('blend').setAttribute('mode', mode);
+      $('word').setAttribute('fill', $('ink').value);
+      const source = {
+        photo: '<feImage href="photo.jpg" x="0" y="0" width="560" height="220"\n         preserveAspectRatio="xMidYMid slice" result="photo"/>',
+        noise: '<feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="4" result="noise"/>',
+        stripes: '<feImage href="stripe-cell.svg" x="0" y="0" width="16" height="16" result="cell"/>\n<feTile in="cell" result="stripes"/>',
+      }[tex];
+      $('out').textContent = source + '\n<feBlend in="' + tex + '" in2="SourceGraphic" mode="' + mode + '" result="mixed"/>\n<feComposite in="mixed" in2="SourceGraphic" operator="in"/>';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

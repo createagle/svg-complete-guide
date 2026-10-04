@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 23-3 · Starter</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="360" height="200" viewBox="0 0 360 200" role="img" aria-label="A red ball blurred evenly in every direction">
+    <defs>
+      <filter id="motion">
+        <feGaussianBlur stdDeviation="6"/>
+      </filter>
+    </defs>
+    <rect width="360" height="200" rx="16" fill="#f1f5f9"/>
+    <line x1="20" y1="170" x2="340" y2="170" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="200" cy="110" r="44" fill="#ef4444" filter="url(#motion)"/>
+  </svg>
+  </div>
+</body>
+</html>

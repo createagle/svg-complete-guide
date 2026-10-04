@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 25-1 · Finished</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="A search field that looks pressed into the card, with a shadow inside its top edge">
+    <defs>
+      <filter id="inset">
+        <feFlood flood-color="#0f172a" flood-opacity=".35" result="ink"/>
+        <feComposite in="ink" in2="SourceAlpha" operator="out" result="outside"/>
+        <feGaussianBlur in="outside" stdDeviation="3" result="soft"/>
+        <feOffset in="soft" dy="3" result="moved"/>
+        <feComposite in="moved" in2="SourceAlpha" operator="in" result="inner"/>
+        <feMerge>
+          <feMergeNode in="SourceGraphic"/>
+          <feMergeNode in="inner"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <rect width="320" height="200" rx="16" fill="#e2e8f0"/>
+    <rect x="60" y="72" width="200" height="56" rx="28" fill="#f8fafc" filter="url(#inset)"/>
+    <text x="84" y="106" font-family="system-ui, sans-serif" font-size="16" fill="#94a3b8">Search…</text>
+  </svg>
+  </div>
+</body>
+</html>

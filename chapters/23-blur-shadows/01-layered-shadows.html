@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>23-1 Layered Shadows</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Shape <select id="shape"><option value="card">Card</option><option value="icon">Star icon</option><option value="text">Text</option></select></label>
+    <label class="control">Layers <input id="layers" type="range" min="1" max="6" value="5"><output id="layersOut"></output></label>
+    <label class="control">Elevation <input id="elev" type="range" min="0" max="48" value="24"><output id="elevOut"></output></label>
+    <label class="control">Color <input id="color" type="color" value="#0f172a"></label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg width="300" height="240" viewBox="-150 -120 300 240" role="img" aria-label="The shape with a single drop shadow">
+        <defs><filter id="single" x="-50%" y="-50%" width="200%" height="220%"></filter></defs>
+        <rect x="-150" y="-120" width="300" height="240" rx="14" fill="#f1f5f9"/>
+        <g class="shape" filter="url(#single)"></g>
+      </svg>
+      <figcaption>1 layer</figcaption>
+    </figure>
+    <figure>
+      <svg width="300" height="240" viewBox="-150 -120 300 240" role="img" aria-label="The same shape with layered drop shadows">
+        <defs><filter id="layered" x="-50%" y="-50%" width="200%" height="220%"></filter></defs>
+        <rect x="-150" y="-120" width="300" height="240" rx="14" fill="#f1f5f9"/>
+        <g class="shape" filter="url(#layered)"></g>
+      </svg>
+      <figcaption id="cap">Layered</figcaption>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const SHAPES = {"card": "<rect x=\"-90\" y=\"-60\" width=\"180\" height=\"120\" rx=\"16\" fill=\"#fff\"/><circle cx=\"-50\" cy=\"-20\" r=\"18\" fill=\"#f59e0b\"/><rect x=\"-20\" y=\"-28\" width=\"80\" height=\"9\" rx=\"4.5\" fill=\"#a8a29e\"/><rect x=\"-20\" y=\"-12\" width=\"52\" height=\"9\" rx=\"4.5\" fill=\"#d6d3d1\"/><rect x=\"-66\" y=\"22\" width=\"132\" height=\"14\" rx=\"7\" fill=\"#2563eb\"/>", "icon": "<path d=\"M0 -70 L20 -24 L68 -22 L31 9 L43 58 L0 31 L-43 58 L-31 9 L-68 -22 L-20 -24 Z\" fill=\"#facc15\"/>", "text": "<text y=\"24\" text-anchor=\"middle\" font-family=\"system-ui, sans-serif\" font-size=\"76\" font-weight=\"800\" fill=\"#fff\">Aa</text>"};
+    const $ = (id) => document.getElementById(id);
+    const r = (v) => Math.round(v * 10) / 10;
+    // Each layer doubles the previous one's offset and blur; all layers share the total opacity
+    function layers(n, e) {
+      return Array.from({ length: n }, (_, i) => {
+        const f = 2 ** i / 2 ** (n - 1);
+        return { dy: r(e * f), sd: r(e * f / 2), op: r(0.4 / Math.sqrt(n) * 100) / 100 };
+      });
+    }
+    function markup(list, color) {
+      // Every layer reads SourceGraphic; without in="…" a layer would shadow the previous layer's result
+      const drops = list.map((l, i) => '  <feDropShadow' + (i ? ' in="SourceGraphic"' : '') + ' dx="0" dy="' + l.dy + '" stdDeviation="' + l.sd + '" flood-color="' + color + '" flood-opacity="' + l.op + '" result="s' + (i + 1) + '"/>');
+      if (list.length === 1) return drops[0].replace(' result="s1"', '');
+      return drops.join('\n') + '\n  <feMerge>' + list.map((_, i) => '<feMergeNode in="s' + (i + 1) + '"/>').join('') + '</feMerge>';
+    }
+    function update() {
+      const n = +$('layers').value, e = +$('elev').value, color = $('color').value;
+      $('layersOut').value = n; $('elevOut').value = e;
+      $('cap').textContent = n + (n === 1 ? ' layer' : ' layers');
+      document.querySelectorAll('.shape').forEach((g) => { g.innerHTML = SHAPES[$('shape').value]; });
+      const single = markup([{ dy: e, sd: r(e / 2), op: 0.4 }], color);
+      const many = markup(layers(n, e), color);
+      $('single').innerHTML = single;
+      $('layered').innerHTML = many;
+      $('out').textContent = '<filter id="shadow" x="-50%" y="-50%" width="200%" height="220%">\n' + many + '\n</filter>';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

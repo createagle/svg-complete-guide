@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>25-1 feComposite Operators</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .checker { background: repeating-conic-gradient(#e7e5e4 0 25%, #fafaf9 0 50%) 0 0 / 16px 16px; border-radius: 8px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">operator <select id="op"><option>over</option><option selected>in</option><option>out</option><option>atop</option><option>xor</option><option>lighter</option><option>arithmetic</option></select></label>
+    <label class="control" data-arith>k1 <input id="k1" type="range" min="-1" max="2" step="0.05" value="0"><output></output></label><label class="control" data-arith>k2 <input id="k2" type="range" min="-1" max="2" step="0.05" value="0.5"><output></output></label><label class="control" data-arith>k3 <input id="k3" type="range" min="-1" max="2" step="0.05" value="0.5"><output></output></label><label class="control" data-arith>k4 <input id="k4" type="range" min="-1" max="2" step="0.05" value="0"><output></output></label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg class="checker" width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="The two inputs: an orange circle (in) and a blue square (in2)">
+        <rect x="80" y="80" width="100" height="100" rx="10" fill="#2563eb"/>
+        <circle cx="80" cy="80" r="60" fill="#f97316"/>
+      </svg>
+      <figcaption>in = circle · in2 = square</figcaption>
+    </figure>
+    <figure>
+      <svg class="checker" width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="Result of feComposite">
+        <defs>
+          <filter id="comp" filterUnits="userSpaceOnUse" x="0" y="0" width="200" height="200" color-interpolation-filters="sRGB">
+            <feImage href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='80' cy='80' r='60' fill='%23f97316'/%3E%3C/svg%3E" x="0" y="0" width="200" height="200" result="circle"/>
+            <feComposite id="fe" in="circle" in2="SourceGraphic" operator="in"/>
+          </filter>
+        </defs>
+        <g filter="url(#comp)">
+          <rect x="80" y="80" width="100" height="100" rx="10" fill="#2563eb"/>
+        </g>
+      </svg>
+      <figcaption id="cap">Result</figcaption>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    // What each operator keeps (Porter-Duff), shown as a caption
+    const NOTES = { over: 'circle on top of square', in: 'circle, only where the square is', out: 'circle, only where the square is not', atop: 'square, with the circle painted only inside it', xor: 'both, minus the overlap', lighter: 'colors added together', arithmetic: 'k1·in·in2 + k2·in + k3·in2 + k4' };
+    function update() {
+      const op = $('op').value, fe = $('fe');
+      fe.setAttribute('operator', op);
+      document.querySelectorAll('[data-arith]').forEach((el) => { el.hidden = op !== 'arithmetic'; });
+      let attrs = '';
+      ['k1', 'k2', 'k3', 'k4'].forEach((k) => { $(k).nextElementSibling.value = $(k).value; if (op === 'arithmetic') { fe.setAttribute(k, $(k).value); attrs += ' ' + k + '="' + $(k).value + '"'; } else fe.removeAttribute(k); });
+      $('cap').textContent = NOTES[op];
+      $('out').textContent = '<feComposite in="circle" in2="SourceGraphic" operator="' + op + '"' + attrs + '/>';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

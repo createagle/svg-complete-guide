@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>23-3 Blur Lab</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">stdDeviation x <input id="sx" type="range" min="0" max="30" value="8"><output id="sxOut"></output></label>
+    <label class="control">y <input id="sy" type="range" min="0" max="30" value="8"><output id="syOut"></output></label>
+    <label class="control"><input id="lock" type="checkbox" checked> Same x and y</label>
+    <label class="control"><input id="hard" type="checkbox"> Keep edges sharp</label>
+  </div>
+  <div class="stage">
+    <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="A blurred flat illustration of mountains and a lake">
+      <defs>
+        <filter id="soft">
+          <feGaussianBlur id="gb" stdDeviation="8"/>
+        </filter>
+        <filter id="sharp" x="0" y="0" width="1" height="1">
+          <feGaussianBlur id="gb2" stdDeviation="8"/>
+          <feComponentTransfer>
+            <feFuncA type="table" tableValues="1 1"/>
+          </feComponentTransfer>
+        </filter>
+      </defs>
+      <image id="img" href="photo.jpg" width="480" height="320" filter="url(#soft)"/>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function update(e) {
+      if ($('lock').checked) {
+        if (e && e.target === $('sy')) $('sx').value = $('sy').value; else $('sy').value = $('sx').value;
+      }
+      const std = $('sx').value === $('sy').value ? $('sx').value : $('sx').value + ' ' + $('sy').value;
+      $('gb').setAttribute('stdDeviation', std); $('gb2').setAttribute('stdDeviation', std);
+      $('sxOut').value = $('sx').value; $('syOut').value = $('sy').value;
+      const hard = $('hard').checked;
+      $('img').setAttribute('filter', hard ? 'url(#sharp)' : 'url(#soft)');
+      $('out').textContent = hard
+        ? '<filter id="sharp" x="0" y="0" width="1" height="1">\n  <feGaussianBlur stdDeviation="' + std + '"/>\n  <feComponentTransfer>\n    <feFuncA type="table" tableValues="1 1"/>\n  </feComponentTransfer>\n</filter>'
+        : '<filter id="soft">\n  <feGaussianBlur stdDeviation="' + std + '"/>\n</filter>';
+    }
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

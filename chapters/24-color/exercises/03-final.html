@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 24-3 · Finished</title>
+</head>
+<body class="demo">
+  <div class="stage">
+    <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Sunset over green hills, reduced to four levels per channel">
+      <defs>
+        <filter id="poster" color-interpolation-filters="sRGB">
+          <feComponentTransfer>
+            <feFuncR type="discrete" tableValues="0 .33 .67 1"/>
+            <feFuncG type="discrete" tableValues="0 .33 .67 1"/>
+            <feFuncB type="discrete" tableValues="0 .33 .67 1"/>
+          </feComponentTransfer>
+        </filter>
+      </defs>
+      <image href="../scene.svg" width="480" height="320" filter="url(#poster)"/>
+    </svg>
+  </div>
+</body>
+</html>

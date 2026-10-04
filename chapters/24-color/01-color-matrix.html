@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>24-1 Color Matrix Playground</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .stage { align-items: center; }
+    .matrix { display: grid; grid-template-columns: 2em repeat(5, 3.6em); gap: 4px; align-items: center; justify-items: center; font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+    .cell { width: 3.6em; padding: 3px 2px; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; text-align: right; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Preset <select id="preset"><option value="identity">Identity</option><option value="gray">Grayscale: type="saturate" values="0"</option><option value="sat">More saturation: type="saturate" values="2"</option><option value="hue">Hue rotate: type="hueRotate" values="90"</option><option value="sepia">Sepia</option><option value="invert">Invert</option><option value="contrast">Contrast × 1.5</option><option value="swap">Swap red and blue</option><option value="l2a">Luminance to alpha: type="luminanceToAlpha"</option><option value="custom">Custom</option></select></label>
+    <label class="control"><input id="lin" type="checkbox"> color-interpolation-filters: linearRGB</label>
+  </div>
+  <div class="stage">
+    <div class="matrix" role="group" aria-label="Color matrix: rows R, G, B, A; columns R, G, B, A, offset">
+    </div>
+    <figure>
+      <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river, filtered">
+        <defs>
+          <filter id="cm" color-interpolation-filters="sRGB"><feColorMatrix id="fe"/></filter>
+          <linearGradient id="spectrum"><stop offset="0" stop-color="#f00"/><stop offset=".17" stop-color="#ff0"/><stop offset=".33" stop-color="#0f0"/><stop offset=".5" stop-color="#0ff"/><stop offset=".67" stop-color="#00f"/><stop offset=".83" stop-color="#f0f"/><stop offset="1" stop-color="#f00"/></linearGradient>
+        </defs>
+        <g filter="url(#cm)">
+          <image href="photo.jpg" width="480" height="280"/>
+          <rect y="280" width="480" height="40" fill="url(#spectrum)"/>
+        </g>
+      </svg>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const PRESETS = {"identity": ["matrix", "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"], "gray": ["saturate", "0"], "sat": ["saturate", "2"], "hue": ["hueRotate", "90"], "sepia": ["matrix", ".393 .769 .189 0 0  .349 .686 .168 0 0  .272 .534 .131 0 0  0 0 0 1 0"], "invert": ["matrix", "-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"], "contrast": ["matrix", "1.5 0 0 0 -.25  0 1.5 0 0 -.25  0 0 1.5 0 -.25  0 0 0 1 0"], "swap": ["matrix", "0 0 1 0 0  0 1 0 0 0  1 0 0 0 0  0 0 0 1 0"], "l2a": ["luminanceToAlpha", ""]};
+    const $ = (id) => document.getElementById(id);
+    const grid = document.querySelector('.matrix');
+    // Rebuild the 4 × 5 grid with row labels
+    grid.innerHTML = '<span></span><b>R</b><b>G</b><b>B</b><b>A</b><b>+</b>' + ['R′', 'G′', 'B′', 'A′'].map((l, r) =>
+      '<b>' + l + '</b>' + [0, 1, 2, 3, 4].map((c) => '<input class="cell" type="number" step="0.05" aria-label="' + l + ' column ' + (c + 1) + '">').join('')).join('');
+    const cells = [...grid.querySelectorAll('.cell')];
+    const fmt = (v) => String(Math.round(v * 1000) / 1000);
+    // The full matrix a type= shorthand stands for (Filter Effects spec)
+    function expand(type, v) {
+      if (type === 'saturate') {
+        const s = +v;
+        return [.213 + .787 * s, .715 - .715 * s, .072 - .072 * s, 0, 0, .213 - .213 * s, .715 + .285 * s, .072 - .072 * s, 0, 0, .213 - .213 * s, .715 - .715 * s, .072 + .928 * s, 0, 0, 0, 0, 0, 1, 0];
+      }
+      if (type === 'hueRotate') {
+        const a = v * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+        return [.213 + c * .787 - s * .213, .715 - c * .715 - s * .715, .072 - c * .072 + s * .928, 0, 0,
+          .213 - c * .213 + s * .143, .715 + c * .285 + s * .140, .072 - c * .072 - s * .283, 0, 0,
+          .213 - c * .213 - s * .787, .715 - c * .715 + s * .715, .072 + c * .928 + s * .072, 0, 0, 0, 0, 0, 1, 0];
+      }
+      if (type === 'luminanceToAlpha') return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .2125, .7154, .0721, 0, 0];
+      return v.trim().split(/\s+/).map(Number);
+    }
+    function apply(type, values) {
+      const fe = $('fe');
+      fe.setAttribute('type', type);
+      if (type === 'luminanceToAlpha') fe.removeAttribute('values'); else fe.setAttribute('values', values);
+      const attrs = 'type="' + type + '"' + (type === 'luminanceToAlpha' ? '' : ' values="' + values + '"');
+      let code = '<feColorMatrix ' + attrs + '/>';
+      if (type !== 'matrix') {
+        const m = expand(type, values).map(fmt);
+        code += '\n\n<!-- same as -->\n<feColorMatrix type="matrix" values="\n' + [0, 1, 2, 3].map((r) => '  ' + m.slice(r * 5, r * 5 + 5).join(' ')).join('\n') + '"/>';
+      } else {
+        code = '<feColorMatrix type="matrix" values="\n' + [0, 1, 2, 3].map((r) => '  ' + values.trim().split(/\s+/).slice(r * 5, r * 5 + 5).join(' ')).join('\n') + '"/>';
+      }
+      $('out').textContent = code;
+    }
+    function fromPreset() {
+      const k = $('preset').value;
+      if (k === 'custom') return fromCells();
+      const [type, v] = PRESETS[k];
+      expand(type, v).forEach((n, i) => { cells[i].value = fmt(n); });
+      apply(type, v);
+    }
+    function fromCells() {
+      $('preset').value = 'custom';
+      apply('matrix', cells.map((c) => c.value || '0').join(' '));
+    }
+    $('preset').addEventListener('input', fromPreset);
+    cells.forEach((c) => c.addEventListener('input', fromCells));
+    $('lin').addEventListener('input', () => $('cm').setAttribute('color-interpolation-filters', $('lin').checked ? 'linearRGB' : 'sRGB'));
+    fromPreset();
+  </script>
+</body>
+</html>

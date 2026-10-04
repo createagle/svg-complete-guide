@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>23-2 Neon Glow Text</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    #sign.flicker { animation: flicker 4s infinite steps(1); }
+    @keyframes flicker { 0%, 100% { opacity: 1; } 41% { opacity: .55; } 42% { opacity: 1; } 44% { opacity: .4; } 45% { opacity: 1; } }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Text <input id="word" type="text" value="NEON" maxlength="10" size="10"></label>
+    <label class="control">Color <select id="color"><option value="#ff2bd6">Pink</option><option value="#22d3ee">Cyan</option><option value="#a3e635">Lime</option><option value="#fbbf24">Amber</option></select></label>
+    <label class="control">Glow <input id="glow" type="range" min="0" max="3" value="2"><output id="glowOut"></output></label>
+    <label class="control"><input id="flicker" type="checkbox" checked> Flicker</label>
+  </div>
+  <div class="stage">
+    <svg width="560" height="240" viewBox="0 0 560 240" role="img" aria-label="Glowing neon sign text">
+      <defs>
+        <filter id="neon" x="-20%" y="-80%" width="140%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="tight"/>
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="mid"/>
+          <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="wide"/>
+          <feMerge id="merge"></feMerge>
+        </filter>
+      </defs>
+      <rect width="560" height="240" rx="16" fill="#0b1020"/>
+      <g id="sign" filter="url(#neon)" font-family="system-ui, sans-serif" font-size="96" font-weight="700" text-anchor="middle" fill="none" stroke-linejoin="round">
+        <text id="tube" x="280" y="154" stroke="#ff2bd6" stroke-width="7">NEON</text>
+        <text id="core" x="280" y="154" stroke="#fff" stroke-opacity=".85" stroke-width="2">NEON</text>
+      </g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    // Glow level = how many copies of each blur are stacked under the sharp text
+    const LEVELS = [[], ['mid'], ['wide', 'mid', 'tight'], ['wide', 'wide', 'mid', 'mid', 'tight']];
+    function update() {
+      const word = $('word').value || ' ';
+      $('tube').textContent = word; $('core').textContent = word;
+      $('tube').setAttribute('stroke', $('color').value);
+      const nodes = [...LEVELS[$('glow').value], 'SourceGraphic'];
+      $('merge').innerHTML = nodes.map((n) => '<feMergeNode in="' + n + '"/>').join('');
+      $('glowOut').value = $('glow').value;
+      $('sign').classList.toggle('flicker', $('flicker').checked);
+      $('out').textContent = '<feMerge>\n' + nodes.map((n) => '  <feMergeNode in="' + n + '"/>').join('\n') + '\n</feMerge>';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

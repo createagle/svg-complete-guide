@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 34-1 · Starter</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="240" height="240" viewBox="0 0 100 100" role="img" aria-label="A square that snaps into a diamond and back">
+    <path d="M10 10 H90 V90 H10 Z" fill="var(--accent)">
+      <animate attributeName="d" dur="2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".45 0 .55 1;.45 0 .55 1"
+        values="M10 10 H90 V90 H10 Z;
+                M50 2 L98 50 L50 98 L2 50 Z;
+                M10 10 H90 V90 H10 Z"/>
+    </path>
+  </svg>
+  </div>
+  <script>
+    // SMIL ignores prefers-reduced-motion, so pause it from script
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelector('svg').pauseAnimations();
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 35-1 · Starter</title>
+  <script src="../../../assets/vendor/gsap.min.js"></script>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .stage svg { color: var(--fg); }
+  </style>
+</head>
+<body class="demo">
+  <button id="run" class="btn" type="button">Run</button>
+  <div class="stage">
+  <svg width="400" height="170" viewBox="0 0 400 170" role="img" aria-label="Three bars that grow from the left">
+    <g fill="none" stroke="currentColor" stroke-opacity=".15"><rect x="20" y="20" width="360" height="30" rx="6"/><rect x="20" y="70" width="360" height="30" rx="6"/><rect x="20" y="120" width="360" height="30" rx="6"/></g>
+    <rect id="b1" x="20" y="20" width="360" height="30" rx="6" fill="#2563eb"/>
+    <rect id="b2" x="20" y="70" width="360" height="30" rx="6" fill="#7c3aed"/>
+    <rect id="b3" x="20" y="120" width="360" height="30" rx="6" fill="#db2777"/>
+  </svg>
+  </div>
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById('run').addEventListener('click', () => {
+      // Each bar waits for the previous ones by adding up their durations by hand
+      const tweens = [
+        gsap.fromTo('#b1', { scaleX: 0 }, { scaleX: 1, duration: 0.5, transformOrigin: '0% 50%' }),
+        gsap.fromTo('#b2', { scaleX: 0 }, { scaleX: 1, duration: 0.5, delay: 0.5, transformOrigin: '0% 50%' }),
+        gsap.fromTo('#b3', { scaleX: 0 }, { scaleX: 1, duration: 0.5, delay: 1, transformOrigin: '0% 50%' }),
+      ];
+      if (reduce) tweens.forEach((t) => t.progress(1));
+    });
+  </script>
+</body>
+</html>

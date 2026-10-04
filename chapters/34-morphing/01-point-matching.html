@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>34-1 Point Matching for Morphs</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .stage svg { color: var(--fg); overflow: visible; }
+    #mid { fill: color-mix(in srgb, var(--accent) 25%, transparent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Progress <input id="t" type="range" min="0" max="100" value="50"><output></output></label>
+    <label class="control">Start point of B <input id="offset" type="range" min="0" max="7" value="7"><output></output></label>
+    <label class="control"><input id="rev" type="checkbox"> Reverse B</label>
+    <button id="play" class="btn" type="button">Play</button>
+  </div>
+  <div class="stage">
+    <svg width="380" height="380" viewBox="0 0 300 300" role="img" aria-label="A square morphing into a four-point star, with lines joining matching points">
+      <polygon id="shapeA" fill="none" stroke="#2563eb" stroke-opacity=".5" stroke-dasharray="4 4"/>
+      <polygon id="shapeB" fill="none" stroke="#f97316" stroke-opacity=".6" stroke-dasharray="4 4"/>
+      <g id="links" stroke="currentColor" stroke-opacity=".25"></g>
+      <polygon id="mid" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+      <g id="labels" font-family="ui-monospace, monospace" font-size="11" text-anchor="middle"></g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const A = [[60, 60], [150, 60], [240, 60], [240, 150], [240, 240], [150, 240], [60, 240], [60, 150]];
+    const B = [[150, 30], [190, 110], [270, 150], [190, 190], [150, 270], [110, 190], [30, 150], [110, 110]];
+    const NS = 'http://www.w3.org/2000/svg';
+    const pts = (list) => list.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    $('shapeA').setAttribute('points', pts(A));
+    $('shapeB').setAttribute('points', pts(B));
+    // Reorder B so that A[i] travels to B[order[i]]
+    function order() {
+      const k = +$('offset').value, rev = $('rev').checked;
+      return A.map((_, i) => (rev ? (k - i + 8) % 8 : (i + k) % 8));
+    }
+    function el(name, attrs, text) { const e = document.createElementNS(NS, name); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (text != null) e.textContent = text; return e; }
+    function update() {
+      const t = $('t').value / 100, o = order();
+      $('t').nextElementSibling.value = t.toFixed(2);
+      $('offset').nextElementSibling.value = $('offset').value;
+      const mid = A.map((a, i) => { const b = B[o[i]]; return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; });
+      $('mid').setAttribute('points', pts(mid));
+      $('links').replaceChildren(...A.map((a, i) => { const b = B[o[i]]; return el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }); }));
+      const labels = [];
+      A.forEach((a, i) => labels.push(el('circle', { cx: a[0], cy: a[1], r: 9, fill: '#2563eb' }), el('text', { x: a[0], y: a[1] + 4, fill: '#fff' }, i)));
+      B.forEach((b, j) => labels.push(el('circle', { cx: b[0], cy: b[1], r: 9, fill: '#f97316' }), el('text', { x: b[0], y: b[1] + 4, fill: '#fff' }, o.indexOf(j))));
+      $('labels').replaceChildren(...labels);
+      $('out').textContent = 'A point → B point\n' + o.map((j, i) => i + ' → ' + j).join('   ');
+    }
+    let raf = 0;
+    $('play').addEventListener('click', () => {
+      cancelAnimationFrame(raf);
+      const from = +$('t').value >= 50 ? 100 : 0, to = 100 - from;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { $('t').value = to; return update(); }
+      let start = null;
+      const step = (now) => {
+        if (start === null) start = now;
+        const k = Math.min((now - start) / 1200, 1), e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+        $('t').value = from + (to - from) * e; update();
+        if (k < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    });
+    ['t', 'offset', 'rev'].forEach((id) => $(id).addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

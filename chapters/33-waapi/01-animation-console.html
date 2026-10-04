@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>33-1 Web Animations Console</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    #orbit { transform-box: view-box; transform-origin: 240px 330px; }
+    #state { white-space: normal; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <button id="play" class="btn" type="button">Play</button>
+    <button id="pause" class="btn" type="button">Pause</button>
+    <button id="reverse" class="btn" type="button">Reverse</button>
+    <label class="control">Speed <select id="rate"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+    <label class="control">Easing <select id="easing"><option>ease-in-out</option><option>linear</option><option value="cubic-bezier(.3, 1.5, .6, 1)">overshoot</option></select></label>
+    <label class="control">Time <input id="scrub" type="range" min="0" max="4000" value="0"><output>0 ms</output></label>
+  </div>
+  <div class="stage">
+    <svg width="480" height="300" viewBox="0 0 480 300" role="img" aria-label="A sunrise: the sky brightens, the stars fade and the sun climbs over the hills">
+      <rect id="sky" width="480" height="300" rx="14" fill="#0f172a"/>
+      <g id="stars" fill="#f8fafc"><circle cx="60" cy="50" r="1.6"/><circle cx="140" cy="90" r="1.2"/><circle cx="220" cy="40" r="1.4"/><circle cx="330" cy="70" r="1.6"/><circle cx="410" cy="40" r="1.2"/><circle cx="440" cy="120" r="1.4"/><circle cx="90" cy="140" r="1.2"/></g>
+      <g id="orbit"><circle cx="240" cy="90" r="30" fill="#fbbf24"/></g>
+      <path id="hills" d="M0 230 C80 190 150 200 230 225 C310 250 380 200 480 215 V300 H0 Z" fill="#1e293b"/>
+    </svg>
+  </div>
+  <p id="state" class="out" role="status"></p>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const TIMING = { duration: 4000, easing: 'ease-in-out', fill: 'both' };
+    // One Animation object per element; they all share the same timing, so they stay in sync
+    const anims = [
+      $('sky').animate([{ fill: '#0f172a' }, { fill: '#7dd3fc' }], TIMING),
+      $('stars').animate([{ opacity: 1 }, { opacity: 0 }], TIMING),
+      $('orbit').animate([{ transform: 'rotate(-70deg)' }, { transform: 'rotate(0deg)' }], TIMING),
+      $('hills').animate([{ fill: '#1e293b' }, { fill: '#16a34a' }], TIMING),
+    ];
+    const all = (fn) => anims.forEach(fn);
+    let log = [];
+    function note(line) { log = [line, ...log].slice(0, 4); render(); }
+    function render() {
+      const a = anims[0];
+      $('state').textContent = 'playState: ' + a.playState + ' · currentTime: ' + Math.round(a.currentTime) + ' ms · playbackRate: ' + a.playbackRate;
+      $('out').textContent = "const sun = orbit.animate(\n  [{ transform: 'rotate(-70deg)' }, { transform: 'rotate(0deg)' }],\n  { duration: 4000, easing: '" + $('easing').value + "', fill: 'both' }\n);\n\n" + log.join('\n');
+    }
+    function watchFinish() { anims[0].finished.then(() => note('// finished resolved at ' + Math.round(anims[0].currentTime) + ' ms')).catch(() => {}); }
+    $('play').addEventListener('click', () => { all((a) => a.play()); watchFinish(); note('sun.play()'); });
+    $('pause').addEventListener('click', () => { all((a) => a.pause()); note('sun.pause()'); });
+    $('reverse').addEventListener('click', () => { all((a) => a.reverse()); watchFinish(); note('sun.reverse()'); });
+    $('rate').addEventListener('input', () => { all((a) => a.updatePlaybackRate(+$('rate').value)); note('sun.updatePlaybackRate(' + $('rate').value + ')'); });
+    $('easing').addEventListener('input', () => { all((a) => a.effect.updateTiming({ easing: $('easing').value })); note("sun.effect.updateTiming({ easing: '" + $('easing').value + "' })"); });
+    $('scrub').addEventListener('input', () => { all((a) => { a.pause(); a.currentTime = +$('scrub').value; }); note('sun.currentTime = ' + $('scrub').value); });
+    // Keep the slider and the status line in step with the animation
+    (function tick() { const t = anims[0].currentTime; $('scrub').value = t; $('scrub').nextElementSibling.value = Math.round(t) + ' ms'; render(); requestAnimationFrame(tick); })();
+    // Start paused at the beginning when the user prefers reduced motion
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) all((a) => a.pause()); else watchFinish();
+  </script>
+</body>
+</html>

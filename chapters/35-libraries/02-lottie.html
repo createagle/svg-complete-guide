@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>35-2 Lottie Rendered as SVG</title>
+  <script src="../../assets/vendor/lottie_svg.min.js"></script>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .lottie { width: 240px; height: 240px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <button id="play" class="btn" type="button">Play</button>
+    <label class="control">Frame <input id="frame" type="range" min="0" max="59" value="0"><output>0</output></label>
+    <label class="control">Speed <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+  </div>
+  <div class="stage">
+    <div id="anim" class="lottie" role="img" aria-label="A green circle pops up and a white check mark draws itself inside it"></div>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    // The animation data is inlined (same as success.json) so the page also works from file://
+    const DATA = {"v":"5.7.4","fr":30,"ip":0,"op":60,"w":120,"h":120,"nm":"success","ddd":0,"assets":[],"layers":[{"ddd":0,"ind":1,"ty":4,"nm":"check","sr":1,"ks":{"o":{"a":0,"k":100},"r":{"a":0,"k":0},"p":{"a":0,"k":[60,60,0]},"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]}},"ao":0,"shapes":[{"ty":"gr","nm":"check","it":[{"ty":"sh","ks":{"a":0,"k":{"i":[[0,0],[0,0],[0,0]],"o":[[0,0],[0,0],[0,0]],"v":[[-20,2],[-6,16],[22,-14]],"c":false}}},{"ty":"tm","s":{"a":0,"k":0},"e":{"a":1,"k":[{"t":18,"s":[0],"i":{"x":[0.4],"y":[1]},"o":{"x":[0.6],"y":[0]}},{"t":36,"s":[100]}]},"o":{"a":0,"k":0},"m":1},{"ty":"st","c":{"a":0,"k":[1,1,1,1]},"o":{"a":0,"k":100},"w":{"a":0,"k":9},"lc":2,"lj":2},{"ty":"tr","p":{"a":0,"k":[0,0]},"a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"r":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ip":0,"op":60,"st":0,"bm":0},{"ddd":0,"ind":2,"ty":4,"nm":"disc","sr":1,"ks":{"o":{"a":0,"k":100},"r":{"a":0,"k":0},"p":{"a":0,"k":[60,60,0]},"a":{"a":0,"k":[0,0,0]},"s":{"a":1,"k":[{"t":0,"s":[0,0,100],"i":{"x":[0.3,0.3,0.3],"y":[1.6,1.6,1]},"o":{"x":[0.6,0.6,0.6],"y":[0,0,0]}},{"t":16,"s":[100,100,100]}]}},"ao":0,"shapes":[{"ty":"gr","nm":"disc","it":[{"ty":"el","p":{"a":0,"k":[0,0]},"s":{"a":0,"k":[80,80]}},{"ty":"fl","c":{"a":0,"k":[0.086,0.639,0.29,1]},"o":{"a":0,"k":100},"r":1},{"ty":"tr","p":{"a":0,"k":[0,0]},"a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"r":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ip":0,"op":60,"st":0,"bm":0},{"ddd":0,"ind":3,"ty":4,"nm":"ring","sr":1,"ks":{"o":{"a":1,"k":[{"t":10,"s":[0],"h":1},{"t":11,"s":[100],"i":{"x":[0.4],"y":[1]},"o":{"x":[0.6],"y":[0]}},{"t":34,"s":[0]}]},"r":{"a":0,"k":0},"p":{"a":0,"k":[60,60,0]},"a":{"a":0,"k":[0,0,0]},"s":{"a":1,"k":[{"t":10,"s":[100,100,100],"i":{"x":[0.2,0.2,0.2],"y":[1,1,1]},"o":{"x":[0.4,0.4,0.4],"y":[0,0,0]}},{"t":34,"s":[145,145,100]}]}},"ao":0,"shapes":[{"ty":"gr","nm":"ring","it":[{"ty":"el","p":{"a":0,"k":[0,0]},"s":{"a":0,"k":[80,80]}},{"ty":"st","c":{"a":0,"k":[0.086,0.639,0.29,1]},"o":{"a":0,"k":100},"w":{"a":0,"k":3},"lc":2,"lj":2},{"ty":"tr","p":{"a":0,"k":[0,0]},"a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"r":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ip":0,"op":60,"st":0,"bm":0}]};
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const anim = lottie.loadAnimation({ container: $('anim'), renderer: 'svg', loop: false, autoplay: !reduce, animationData: DATA });
+    function report() {
+      const f = Math.round(anim.currentFrame);
+      $('frame').value = f; $('frame').nextElementSibling.value = f;
+      const svg = $('anim').querySelector('svg');
+      $('out').textContent = 'renderer: svg · frame ' + f + ' / ' + (anim.totalFrames - 1) + '\nelements inside the generated <svg>: ' + (svg ? svg.querySelectorAll('*').length : 0) + '\n\nlottie.loadAnimation({ container, renderer: \'svg\', loop: false, autoplay: true, animationData });';
+    }
+    anim.addEventListener('DOMLoaded', () => { if (reduce) anim.goToAndStop(anim.totalFrames - 1, true); report(); });
+    anim.addEventListener('enterFrame', report);
+    $('play').addEventListener('click', () => { if (reduce) return anim.goToAndStop(anim.totalFrames - 1, true), report(); anim.goToAndPlay(0, true); });
+    $('frame').addEventListener('input', () => { anim.goToAndStop(+$('frame').value, true); report(); });
+    $('speed').addEventListener('input', () => anim.setSpeed(+$('speed').value));
+  </script>
+</body>
+</html>

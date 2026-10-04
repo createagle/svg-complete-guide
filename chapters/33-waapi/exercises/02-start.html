@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 33-2 · Starter</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .stage svg { color: var(--fg); }
+  </style>
+</head>
+<body class="demo">
+  <button id="go" class="btn" type="button">Draw</button>
+  <div class="stage">
+  <svg width="400" height="200" viewBox="0 0 400 200" role="img" aria-label="A dashed curve with a pen tip resting at its start">
+    <path id="track" d="M30 150 C80 30 160 30 200 110 S300 190 370 60" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width="2" stroke-dasharray="4 6"/>
+    <path id="ink" d="M30 150 C80 30 160 30 200 110 S300 190 370 60" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 9999"/>
+    <circle id="pen" cx="30" cy="150" r="6" fill="#e11d48"/>
+  </svg>
+  </div>
+</body>
+</html>

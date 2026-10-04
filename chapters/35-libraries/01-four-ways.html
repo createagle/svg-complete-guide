@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>35-1 One Animation, Four Libraries</title>
+  <script src="../../assets/vendor/gsap.min.js"></script>
+  <script src="../../assets/vendor/anime.umd.min.js"></script>
+  <script src="../../assets/vendor/motion.min.js"></script>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .card { fill: var(--bg); stroke: var(--border); }
+    .line { fill: color-mix(in srgb, var(--fg) 15%, transparent); }
+    /* WAAPI, Anime.js and Motion write CSS transforms, so the pivots come from CSS */
+    .bell { transform-box: fill-box; transform-origin: 50% 0; }
+    .badge { transform-box: fill-box; transform-origin: center; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Library <select id="lib"><option value="waapi">Web Animations API</option><option value="gsap">GSAP 3.15</option><option value="anime">Anime.js 4.5</option><option value="motion">Motion 14</option></select></label>
+    <button id="replay" class="btn" type="button">Replay</button>
+    <span id="size" class="control"></span>
+  </div>
+  <div class="stage">
+    <svg id="scene" width="420" height="200" viewBox="0 0 420 200" role="img" aria-label="A notification card: a bell drops in and rings, a badge pops up and two lines of text slide in">
+      <rect x="10" y="10" width="400" height="180" rx="18" class="card"/>
+      <g transform="translate(80 100)">
+        <g class="drop">
+          <g class="bell">
+            <path d="M-22 18 V-4 A22 22 0 0 1 22 -4 V18 L28 26 H-28 Z" fill="#f59e0b"/>
+            <path d="M-7 30 A7 7 0 0 0 7 30 Z" fill="#b45309"/>
+            <rect x="-3" y="-34" width="6" height="8" rx="3" fill="#b45309"/>
+          </g>
+          <circle class="badge" cx="20" cy="-20" r="11" fill="#e11d48"/>
+        </g>
+      </g>
+      <rect class="line" x="140" y="72" width="220" height="18" rx="9"/>
+      <rect class="line" x="140" y="108" width="150" height="18" rx="9"/>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    function withWAAPI(scene) {
+      const drop = scene.querySelector('.drop'), bell = scene.querySelector('.bell'), badge = scene.querySelector('.badge'), lines = scene.querySelectorAll('.line');
+      const back = 'cubic-bezier(.34, 1.56, .64, 1)';
+      return [
+        drop.animate([{ transform: 'translateY(-40px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 500, easing: back, fill: 'backwards' }),
+        bell.animate([{ rotate: '0deg' }, { rotate: '14deg' }, { rotate: '-10deg' }, { rotate: '6deg' }, { rotate: '0deg' }], { duration: 600, delay: 500 }),
+        badge.animate([{ scale: 0 }, { scale: 1 }], { duration: 300, delay: 600, easing: back, fill: 'backwards' }),
+        ...[...lines].map((line, i) => line.animate([{ translate: '20px 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 400, delay: 500 + i * 100, fill: 'backwards' })),
+      ];
+    }
+    function withGSAP(scene) {
+      const q = gsap.utils.selector(scene);
+      return gsap.timeline()
+        .from(q('.drop'), { y: -40, opacity: 0, duration: 0.5, ease: 'back.out(1.7)' })
+        .to(q('.bell'), { keyframes: { rotation: [14, -10, 6, 0] }, duration: 0.6, transformOrigin: '50% 0%' })
+        .from(q('.badge'), { scale: 0, duration: 0.3, ease: 'back.out(1.7)', transformOrigin: '50% 50%' }, '<0.1')
+        .from(q('.line'), { x: 20, opacity: 0, duration: 0.4, stagger: 0.1 }, '<-0.1');
+    }
+    function withAnime(scene) {
+      const q = (sel) => scene.querySelectorAll(sel);
+      // Later items don't apply their start values until they begin, so set them up front
+      anime.utils.set(q('.badge'), { scale: 0 });
+      anime.utils.set(q('.line'), { opacity: 0 });
+      return anime.createTimeline()
+        .add(q('.drop'), { translateY: [-40, 0], opacity: [0, 1], duration: 500, ease: 'outBack' }, 0)
+        .add(q('.bell'), { rotate: [0, 14, -10, 6, 0], duration: 600 }, 500)
+        .add(q('.badge'), { scale: [0, 1], duration: 300, ease: 'outBack' }, 600)
+        .add(q('.line'), { translateX: [20, 0], opacity: [0, 1], duration: 400, delay: anime.stagger(100) }, 500);
+    }
+    function withMotion(scene) {
+      const q = (sel) => scene.querySelectorAll(sel);
+      return Motion.animate([
+        [q('.drop'), { y: [-40, 0], opacity: [0, 1] }, { duration: 0.5, ease: [0.34, 1.56, 0.64, 1], at: 0 }],
+        [q('.bell'), { rotate: [0, 14, -10, 6, 0] }, { duration: 0.6, at: 0.5 }],
+        [q('.badge'), { scale: [0, 1] }, { duration: 0.3, ease: [0.34, 1.56, 0.64, 1], at: 0.6 }],
+        [q('.line'), { x: [20, 0], opacity: [0, 1] }, { duration: 0.4, delay: Motion.stagger(0.1), at: 0.5 }],
+      ]);
+    }
+    const $ = (id) => document.getElementById(id);
+    const RUN = { waapi: withWAAPI, gsap: withGSAP, anime: withAnime, motion: withMotion };
+    const SIZE = {"waapi": "built in \u00b7 0 KB", "gsap": "28.3 KB gzip", "anime": "40.6 KB gzip", "motion": "47.6 KB gzip"};
+    // Reduced motion: jump each library to its end state
+    const FINISH = { waapi: (a) => a.forEach((x) => x.finish()), gsap: (t) => t.progress(1), anime: (t) => t.complete(), motion: (c) => c.complete() };
+    const blank = $('scene').cloneNode(true);
+    function run() {
+      const lib = $('lib').value, fresh = blank.cloneNode(true);
+      $('scene').replaceWith(fresh); // a fresh copy, so no library sees another one's leftovers
+      const handle = RUN[lib](fresh);
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) FINISH[lib](handle);
+      $('size').textContent = SIZE[lib];
+      $('out').textContent = RUN[lib].toString();
+    }
+    $('lib').addEventListener('input', run);
+    $('replay').addEventListener('click', run);
+    run();
+  </script>
+</body>
+</html>

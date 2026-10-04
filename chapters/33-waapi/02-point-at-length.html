@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>33-2 Custom Animation with getPointAtLength</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .stage svg { color: var(--fg); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Timing <select id="ease"><option value="linear">linear</option><option value="inOut" selected>ease-in-out</option><option value="bounce">bounce</option></select></label>
+    <label class="control">Duration <input id="dur" type="range" min="1" max="6" step="0.5" value="3"><output>3s</output></label>
+    <button id="go" class="btn" type="button">Play</button>
+  </div>
+  <div class="stage">
+    <svg width="560" height="300" viewBox="0 0 560 300" role="img" aria-label="A pen tip moving along a curve and drawing it as it goes">
+      <path id="track" d="M40 220 C90 60 170 60 210 150 S300 260 350 160 S430 40 520 90" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width="2" stroke-dasharray="4 6"/>
+      <path id="ink" d="M40 220 C90 60 170 60 210 150 S300 260 350 160 S430 40 520 90" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
+      <g id="pen"><path d="M12 0 L-8 -8 L-4 0 L-8 8 Z" fill="#e11d48"/></g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id), track = $('track'), ink = $('ink'), pen = $('pen');
+    const len = track.getTotalLength();
+    ink.style.strokeDasharray = len;
+    const EASE = {
+      linear: (t) => t,
+      inOut: (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2),
+      bounce: (t) => { const n = 7.5625, d = 2.75; if (t < 1 / d) return n * t * t; if (t < 2 / d) return n * (t -= 1.5 / d) * t + 0.75; if (t < 2.5 / d) return n * (t -= 2.25 / d) * t + 0.9375; return n * (t -= 2.625 / d) * t + 0.984375; },
+    };
+    // Place the pen and the ink for progress p (0..1)
+    function draw(p) {
+      const d = p * len, a = track.getPointAtLength(d), b = track.getPointAtLength(Math.min(d + 1, len)), c = track.getPointAtLength(Math.max(d - 1, 0));
+      const angle = Math.atan2(b.y - c.y, b.x - c.x) * 180 / Math.PI;
+      pen.setAttribute('transform', 'translate(' + a.x.toFixed(1) + ' ' + a.y.toFixed(1) + ') rotate(' + angle.toFixed(1) + ')');
+      ink.style.strokeDashoffset = len - d;
+      $('out').textContent = 'getTotalLength() = ' + len.toFixed(1) + '\nprogress = ' + p.toFixed(3) + '\ngetPointAtLength(' + d.toFixed(1) + ') = (' + a.x.toFixed(1) + ', ' + a.y.toFixed(1) + ')\nangle = ' + angle.toFixed(1) + '°';
+    }
+    let raf = 0;
+    function play() {
+      cancelAnimationFrame(raf);
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return draw(1);
+      const dur = $('dur').value * 1000, ease = EASE[$('ease').value];
+      let start = null;
+      // Time-based, not frame-based: the speed is the same at 60 Hz and 120 Hz
+      const step = (now) => {
+        if (start === null) start = now;
+        const t = Math.min((now - start) / dur, 1);
+        draw(ease(t));
+        if (t < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }
+    $('dur').addEventListener('input', () => { $('dur').nextElementSibling.value = $('dur').value + 's'; });
+    $('go').addEventListener('click', play);
+    draw(0); play();
+  </script>
+</body>
+</html>

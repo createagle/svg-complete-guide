@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 35-2 · Finished</title>
+  <script src="../../../assets/vendor/anime.umd.min.js"></script>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="300" height="160" viewBox="0 0 300 160" role="img" aria-label="Five dots bouncing in a wave">
+    <g fill="var(--accent)"><circle class="dot" cx="70" cy="100" r="12"/><circle class="dot" cx="110" cy="100" r="12"/><circle class="dot" cx="150" cy="100" r="12"/><circle class="dot" cx="190" cy="100" r="12"/><circle class="dot" cx="230" cy="100" r="12"/></g>
+  </svg>
+  </div>
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Never start on its own when the user asks for less motion
+    const wave = anime.animate('.dot', { translateY: [0, -40], duration: 500, ease: 'inOutSine', loop: true, alternate: true, delay: anime.stagger(120), autoplay: !reduce });
+    // Pause while the drawing is off screen
+    new IntersectionObserver(([entry]) => {
+      if (reduce) return;
+      if (entry.isIntersecting) wave.play(); else wave.pause();
+    }).observe(document.querySelector('svg'));
+  </script>
+</body>
+</html>

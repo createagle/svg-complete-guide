@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 33-1 · Starter</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    #blades { transform-box: fill-box; transform-origin: center; }
+    #blades { animation: spin 1.2s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="demo">
+  <button id="toggle" class="btn" type="button">Pause</button>
+  <div class="stage">
+  <svg width="240" height="240" viewBox="-80 -80 160 160" role="img" aria-label="A three-blade fan">
+    <g id="blades" fill="var(--accent)">
+      <path d="M0 -8 C10 -40 30 -60 44 -52 C52 -46 40 -24 0 -8 Z"/>
+      <path d="M0 -8 C10 -40 30 -60 44 -52 C52 -46 40 -24 0 -8 Z" transform="rotate(120)"/>
+      <path d="M0 -8 C10 -40 30 -60 44 -52 C52 -46 40 -24 0 -8 Z" transform="rotate(240)"/>
+    </g>
+    <circle r="10" fill="var(--fg)"/>
+  </svg>
+  </div>
+</body>
+</html>

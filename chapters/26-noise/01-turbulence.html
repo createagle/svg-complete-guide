@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>26-1 feTurbulence Explorer</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 3em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .checker { background: repeating-conic-gradient(#e7e5e4 0 25%, #fafaf9 0 50%) 0 0 / 16px 16px; border-radius: 8px; }
+    .stage svg { border-radius: 8px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">type <select id="type"><option>turbulence</option><option selected>fractalNoise</option></select></label>
+    <label class="control">baseFrequency x <input id="fx" type="range" min="1" max="200" value="20"><output id="fxOut"></output></label>
+    <label class="control">y <input id="fy" type="range" min="1" max="200" value="20"><output id="fyOut"></output></label>
+    <label class="control"><input id="lock" type="checkbox" checked> Same x and y</label>
+    <label class="control">numOctaves <input id="oct" type="range" min="1" max="8" value="3"><output id="octOut"></output></label>
+    <label class="control">seed <input id="seed" type="range" min="0" max="50" value="0"><output id="seedOut"></output></label>
+    <label class="control">View
+      <select id="view"><option value="raw">RGBA as generated</option><option value="red">Red channel as gray</option><option value="alpha">Alpha channel as gray</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <svg class="checker" width="480" height="300" viewBox="0 0 480 300" role="img" aria-label="Generated noise">
+      <defs>
+        <filter id="noise" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feTurbulence id="t" type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="0"/>
+          <feColorMatrix id="cm" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+        </filter>
+      </defs>
+      <rect width="480" height="300" filter="url(#noise)"/>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const VIEWS = {"raw": "", "red": "1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 1", "alpha": "0 0 0 1 0  0 0 0 1 0  0 0 0 1 0  0 0 0 0 1"};
+    const $ = (id) => document.getElementById(id);
+    const IDENTITY = '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0';
+    function update(e) {
+      if ($('lock').checked) { if (e && e.target === $('fy')) $('fx').value = $('fy').value; else $('fy').value = $('fx').value; }
+      const fx = $('fx').value / 1000, fy = $('fy').value / 1000;
+      const freq = fx === fy ? String(fx) : fx + ' ' + fy;
+      const t = $('t');
+      t.setAttribute('type', $('type').value);
+      t.setAttribute('baseFrequency', freq);
+      t.setAttribute('numOctaves', $('oct').value);
+      t.setAttribute('seed', $('seed').value);
+      const v = VIEWS[$('view').value];
+      $('cm').setAttribute('values', v || IDENTITY);
+      $('fxOut').value = fx; $('fyOut').value = fy; $('octOut').value = $('oct').value; $('seedOut').value = $('seed').value;
+      $('out').textContent = '<feTurbulence type="' + $('type').value + '" baseFrequency="' + freq + '" numOctaves="' + $('oct').value + '" seed="' + $('seed').value + '"/>' +
+        (v ? '\n<feColorMatrix type="matrix" values="' + v + '"/>' : '');
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>26-2 Grainy Gradient Background</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 3em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .card { width: 480px; max-width: 100%; aspect-ratio: 8 / 5; border-radius: 16px; display: grid; place-items: center; }
+    .card span { font: 800 64px system-ui, sans-serif; color: #fff; letter-spacing: -0.02em; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Colors <input id="c1" type="color" value="#7c3aed"> <input id="c2" type="color" value="#f97316"></label>
+    <label class="control">Grain size <input id="freq" type="range" min="30" max="150" value="80"><output id="freqOut"></output></label>
+    <label class="control">Amount <input id="amount" type="range" min="0" max="100" value="45"><output id="amountOut"></output></label>
+    <label class="control">background-blend-mode
+      <select id="mode"><option>overlay</option><option>soft-light</option><option>multiply</option><option>screen</option><option>normal</option></select>
+    </label>
+  </div>
+  <div class="stage">
+    <div id="card" class="card" role="img" aria-label="A purple to orange gradient with film grain">
+      <span>Grain</span>
+    </div>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    // A 200 × 200 noise tile; stitchTiles keeps the repeat seamless
+    function tile(freq, amount) {
+      return "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>" +
+        "<filter id='g'><feTurbulence type='fractalNoise' baseFrequency='" + freq + "' numOctaves='3' stitchTiles='stitch'/>" +
+        "<feColorMatrix type='saturate' values='0'/></filter>" +
+        "<rect width='100%' height='100%' filter='url(%23g)' opacity='" + amount + "'/></svg>";
+    }
+    function update() {
+      const freq = $('freq').value / 100, amount = $('amount').value / 100;
+      $('freqOut').value = freq; $('amountOut').value = amount;
+      const url = 'url("data:image/svg+xml,' + tile(freq, amount) + '")';
+      const grad = 'linear-gradient(135deg, ' + $('c1').value + ', ' + $('c2').value + ')';
+      const card = $('card');
+      card.style.backgroundImage = url + ', ' + grad;
+      card.style.backgroundBlendMode = $('mode').value;
+      $('out').textContent = '.card {\n  background-image:\n    ' + url + ',\n    ' + grad + ';\n  background-blend-mode: ' + $('mode').value + ';\n}';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

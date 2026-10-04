@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>27-1 Displacement Explorer</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select, button { accent-color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Source <select id="src"><option value="grid">Grid</option><option value="photo">Photo</option></select></label>
+    <label class="control">Map <select id="map"><option value="noise">Noise (feTurbulence)</option><option value="waves">Waves (map-waves.png)</option><option value="lens">Lens (map-lens.png)</option></select></label>
+    <label class="control">scale <input id="scale" type="range" min="-120" max="120" value="40"><output id="scaleOut"></output></label>
+    <label class="control">xChannelSelector <select id="xc"><option selected>R</option><option>G</option><option>B</option><option>A</option></select></label>
+    <label class="control">yChannelSelector <select id="yc"><option>R</option><option selected>G</option><option>B</option><option>A</option></select></label>
+  </div>
+  <div class="stage">
+    <figure>
+      <svg width="360" height="240" viewBox="0 0 360 240" role="img" aria-label="The displacement map">
+        <defs>
+          <filter id="mapOnly" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feTurbulence id="noise2" type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="noise"/>
+            <feImage href="map-waves.png" x="0" y="0" width="360" height="240" preserveAspectRatio="none" result="waves"/>
+            <feImage href="map-lens.png" x="0" y="0" width="360" height="240" preserveAspectRatio="none" result="lens"/>
+            <feMerge><feMergeNode id="show" in="noise"/></feMerge>
+          </filter>
+        </defs>
+        <rect width="360" height="240" fill="#808080" filter="url(#mapOnly)"/>
+      </svg>
+      <figcaption>Map (in2)</figcaption>
+    </figure>
+    <figure>
+      <svg width="360" height="240" viewBox="0 0 360 240" role="img" aria-label="The source displaced by the map">
+        <defs>
+          <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+            <rect width="24" height="24" fill="#f8fafc"/>
+            <path d="M24 0 V24 H0" fill="none" stroke="#2563eb" stroke-width="2"/>
+          </pattern>
+          <filter id="disp" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="noise"/>
+            <feImage href="map-waves.png" x="0" y="0" width="360" height="240" preserveAspectRatio="none" result="waves"/>
+            <feImage href="map-lens.png" x="0" y="0" width="360" height="240" preserveAspectRatio="none" result="lens"/>
+            <feDisplacementMap id="dm" in="SourceGraphic" in2="noise" scale="40" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+        </defs>
+        <g filter="url(#disp)">
+          <rect id="gridRect" width="360" height="240" fill="url(#grid)"/>
+          <image id="photo" href="photo.jpg" width="360" height="240" preserveAspectRatio="xMidYMid slice" display="none"/>
+        </g>
+      </svg>
+      <figcaption>Result</figcaption>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const SOURCES = {
+      noise: '<feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="noise"/>',
+      waves: '<feImage href="map-waves.png" x="0" y="0" width="360" height="240" preserveAspectRatio="none" result="waves"/>',
+      lens: '<feImage href="map-lens.png" x="0" y="0" width="360" height="240" preserveAspectRatio="none" result="lens"/>',
+    };
+    function update() {
+      const map = $('map').value, dm = $('dm');
+      dm.setAttribute('in2', map);
+      dm.setAttribute('scale', $('scale').value);
+      dm.setAttribute('xChannelSelector', $('xc').value);
+      dm.setAttribute('yChannelSelector', $('yc').value);
+      $('show').setAttribute('in', map);
+      $('scaleOut').value = $('scale').value;
+      const photo = $('src').value === 'photo';
+      $('photo').setAttribute('display', photo ? 'inline' : 'none');
+      $('gridRect').setAttribute('display', photo ? 'none' : 'inline');
+      $('out').textContent = SOURCES[map] + '\n<feDisplacementMap in="SourceGraphic" in2="' + map + '" scale="' + $('scale').value + '"\n                   xChannelSelector="' + $('xc').value + '" yChannelSelector="' + $('yc').value + '"/>';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

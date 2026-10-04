@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>27-2 Rippling Water Reflection</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select, button { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .stage svg { border-radius: 12px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Ripple <input id="scale" type="range" min="0" max="40" value="16"><output id="scaleOut"></output></label>
+    <button id="play" class="btn" type="button">Pause</button>
+  </div>
+  <div class="stage">
+    <svg id="scene" width="480" height="440" viewBox="0 0 480 440" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river, reflected in rippling water">
+      <defs>
+        <filter id="ripple" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006 0.06" numOctaves="2" seed="5" result="waves">
+            <animate attributeName="baseFrequency" dur="6s" values="0.006 0.06; 0.008 0.075; 0.006 0.06" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap id="dm" in="SourceGraphic" in2="waves" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <clipPath id="water"><rect y="320" width="480" height="120"/></clipPath>
+      </defs>
+      <image href="photo.jpg" width="480" height="320"/>
+      <g clip-path="url(#water)">
+        <g filter="url(#ripple)">
+          <image href="photo.jpg" width="480" height="320" transform="translate(0 640) scale(1 -1)"/>
+        </g>
+        <rect y="320" width="480" height="120" fill="#0c4a6e" opacity=".35"/>
+      </g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const scene = $('scene');
+    // SMIL ignores prefers-reduced-motion, so pause it ourselves
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    function setPlaying(on) { if (on) scene.unpauseAnimations(); else scene.pauseAnimations(); $('play').textContent = on ? 'Pause' : 'Play'; }
+    $('play').addEventListener('click', () => setPlaying(scene.animationsPaused()));
+    setPlaying(!reduce.matches);
+    function update() {
+      $('dm').setAttribute('scale', $('scale').value);
+      $('scaleOut').value = $('scale').value;
+      $('out').textContent = '<feTurbulence type="fractalNoise" baseFrequency="0.006 0.06" numOctaves="2" seed="5" result="waves">\n  <animate attributeName="baseFrequency" dur="6s" values="0.006 0.06; 0.008 0.075; 0.006 0.06" repeatCount="indefinite"/>\n</feTurbulence>\n<feDisplacementMap in="SourceGraphic" in2="waves" scale="' + $('scale').value + '" xChannelSelector="R" yChannelSelector="G"/>';
+    }
+    $('scale').addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

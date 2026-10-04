@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>27-3 Glass Refraction Card</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select, button { accent-color: var(--accent); }
+    .stage svg { border-radius: 14px; touch-action: none; }
+    .card { cursor: grab; outline: none; }
+    .card:focus-visible #rim { stroke: var(--accent); stroke-opacity: 1; stroke-width: 3; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Refraction <input id="scale" type="range" min="0" max="120" value="60"><output id="scaleOut"></output></label>
+    <label class="control">Frost <input id="frost" type="range" min="0" max="6" step="0.5" value="1"><output id="frostOut"></output></label>
+  </div>
+  <div class="stage">
+    <svg id="scene" width="520" height="360" viewBox="0 0 520 360" role="img" aria-label="A glass card over a colorful scene; drag the card to see the background bend at its edges">
+      <defs>
+        <g id="bg">
+          <image href="photo.jpg" width="520" height="360" preserveAspectRatio="xMidYMid slice"/>
+          <g font-family="system-ui, sans-serif" font-weight="900" font-size="64" fill="#fff" stroke="#1e293b" stroke-width="3" paint-order="stroke">
+            <text x="30" y="110">REFRACT</text>
+            <text x="150" y="300">GLASS</text>
+          </g>
+          <path d="M0 200 H520" stroke="#ef4444" stroke-width="6"/>
+          <path d="M260 0 V360" stroke="#facc15" stroke-width="6"/>
+        </g>
+        <filter id="glass" filterUnits="userSpaceOnUse" x="140" y="100" width="240" height="160" color-interpolation-filters="sRGB">
+          <feImage id="map" href="map-glass.png" x="140" y="100" width="240" height="160" result="map"/>
+          <feDisplacementMap id="dm" in="SourceGraphic" in2="map" scale="60" xChannelSelector="R" yChannelSelector="G" result="bent"/>
+          <feGaussianBlur id="frost" in="bent" stdDeviation="1"/>
+          <feColorMatrix type="saturate" values="1.3"/>
+        </filter>
+        <clipPath id="cardClip"><rect id="clipRect" x="140" y="100" width="240" height="160" rx="32"/></clipPath>
+      </defs>
+      <use href="#bg"/>
+      <g id="card" class="card" tabindex="0" role="slider" aria-label="Glass card position" aria-valuetext="centered">
+        <g clip-path="url(#cardClip)">
+          <use href="#bg" filter="url(#glass)"/>
+          <rect id="tintRect" x="140" y="100" width="240" height="160" fill="#fff" opacity=".12"/>
+        </g>
+        <rect id="rim" x="140.75" y="100.75" width="238.5" height="158.5" rx="31.25" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>
+      </g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const scene = $('scene');
+    const W = 240, H = 160;
+    let pos = { x: 140, y: 100 };
+    // Everything that depends on the card position: clip, filter region, map, tint and rim
+    function place() {
+      const { x, y } = pos;
+      [['clipRect', 0], ['tintRect', 0], ['rim', 0.75]].forEach(([id, d]) => { $(id).setAttribute('x', x + d); $(id).setAttribute('y', y + d); });
+      ['glass', 'map'].forEach((id) => { $(id).setAttribute('x', x); $(id).setAttribute('y', y); });
+      $('card').setAttribute('aria-valuetext', 'x ' + Math.round(x) + ', y ' + Math.round(y));
+    }
+    function update() {
+      $('dm').setAttribute('scale', $('scale').value);
+      $('frost').setAttribute('stdDeviation', $('frost').value);
+      $('scaleOut').value = $('scale').value; $('frostOut').value = $('frost').value;
+      $('out').textContent = '<filter id="glass" filterUnits="userSpaceOnUse" x="' + pos.x + '" y="' + pos.y + '" width="240" height="160" color-interpolation-filters="sRGB">\n  <feImage href="map-glass.png" x="' + pos.x + '" y="' + pos.y + '" width="240" height="160" result="map"/>\n  <feDisplacementMap in="SourceGraphic" in2="map" scale="' + $('scale').value + '" xChannelSelector="R" yChannelSelector="G" result="bent"/>\n  <feGaussianBlur in="bent" stdDeviation="' + $('frost').value + '"/>\n  <feColorMatrix type="saturate" values="1.3"/>\n</filter>';
+    }
+    const toSvg = (e) => new DOMPoint(e.clientX, e.clientY).matrixTransform(scene.getScreenCTM().inverse());
+    let grab = null;
+    $('card').addEventListener('pointerdown', (e) => { const p = toSvg(e); grab = { dx: p.x - pos.x, dy: p.y - pos.y }; $('card').setPointerCapture(e.pointerId); });
+    $('card').addEventListener('pointermove', (e) => {
+      if (!grab) return;
+      const p = toSvg(e);
+      pos = { x: Math.max(-60, Math.min(520 - W + 60, p.x - grab.dx)), y: Math.max(-40, Math.min(360 - H + 40, p.y - grab.dy)) };
+      place(); update();
+    });
+    $('card').addEventListener('pointerup', () => { grab = null; });
+    $('card').addEventListener('keydown', (e) => {
+      const step = e.shiftKey ? 20 : 5, k = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+      if (!k) return; e.preventDefault(); pos = { x: pos.x + k[0], y: pos.y + k[1] }; place(); update();
+    });
+    document.querySelectorAll('input').forEach((el) => el.addEventListener('input', update));
+    place(); update();
+  </script>
+</body>
+</html>

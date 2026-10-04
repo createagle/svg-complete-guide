@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 43-2 · Starter</title>
+  <style>
+    .badges { display: flex; gap: 14px; }
+    .badges circle { fill: var(--badge); }
+    .badges text { font: 700 20px system-ui, sans-serif; }
+    /* Pick black or white text automatically */
+    .badges text { fill: contrast-color(var(--badge)); }
+  </style>
+</head>
+<body class="demo">
+  <div class="badges">
+    <svg width="56" height="56" viewBox="0 0 56 56" role="img" aria-label="3 new messages" style="--badge: #fde047"><circle cx="28" cy="28" r="26"/><text x="28" y="35" text-anchor="middle">3</text></svg>
+    <svg width="56" height="56" viewBox="0 0 56 56" role="img" aria-label="12 new messages" style="--badge: #1d4ed8"><circle cx="28" cy="28" r="26"/><text x="28" y="35" text-anchor="middle">12</text></svg>
+    <svg width="56" height="56" viewBox="0 0 56 56" role="img" aria-label="7 new messages" style="--badge: #16a34a"><circle cx="28" cy="28" r="26"/><text x="28" y="35" text-anchor="middle">7</text></svg>
+    <svg width="56" height="56" viewBox="0 0 56 56" role="img" aria-label="99 new messages" style="--badge: #111827"><circle cx="28" cy="28" r="26"/><text x="28" y="35" text-anchor="middle">99</text></svg>
+  </div>
+</body>
+</html>

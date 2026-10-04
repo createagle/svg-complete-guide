@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 42-1 · Starter</title>
+  <style>
+    .card { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 1px solid var(--border); border-radius: 14px; }
+    .avatar { width: 64px; height: 64px; display: block; }
+    .avatar svg { width: 100%; height: 100%; display: block; }
+    .card h2 { margin: 0; font-size: 18px; }
+    #status { margin: 0; font-size: 14px; color: #16a34a; }
+    #status.ran { color: #dc2626; font-weight: 600; }
+  </style>
+</head>
+<body class="demo">
+  <div class="card">
+    <div class="avatar"></div>
+    <div><h2>Ada Lovelace</h2><p id="status">No script ran</p></div>
+  </div>
+  <script>
+    // The file a user uploaded as their avatar. It carries a harmless test payload.
+    const uploaded = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\"><circle cx=\"32\" cy=\"32\" r=\"30\" fill=\"#c7d2fe\"/><circle cx=\"32\" cy=\"26\" r=\"11\" fill=\"#4f46e5\"/><path d=\"M12 54c4-11 12-15 20-15s16 4 20 15\" fill=\"#4f46e5\"/><image href=\"data:image/png;base64,AAAA\" width=\"1\" height=\"1\" onerror=\"document.getElementById('status').textContent='Payload ran: it could have read this page\u2019s cookies and data'\"/><\/svg>";
+    // Turn the status red if the payload rewrote it
+    new MutationObserver(() => document.getElementById('status').classList.toggle('ran', /Payload/.test(document.getElementById('status').textContent))).observe(document.getElementById('status'), { childList: true });
+    document.querySelector('.avatar').innerHTML = uploaded;
+  </script>
+</body>
+</html>

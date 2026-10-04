@@ -1,0 +1,3 @@
+/* Size and stroke for inline icons (sprite and <svg-icon>) */
+.icon { width: var(--icon-size, 1.5em); height: var(--icon-size, 1.5em); stroke-width: var(--icon-stroke, 2); vertical-align: middle; flex: none; }
+svg-icon { display: inline-flex; }

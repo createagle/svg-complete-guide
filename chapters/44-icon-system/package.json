@@ -1,0 +1,15 @@
+{
+  "name": "@svg-complete-guide/icons",
+  "version": "1.0.0",
+  "description": "A 14-icon demo library: sprite, custom element and CSS masks",
+  "license": "MIT",
+  "type": "module",
+  "files": ["dist", "icons"],
+  "exports": {
+    ".": "./dist/icons.js",
+    "./sprite.svg": "./dist/sprite.svg",
+    "./icons.css": "./dist/icons.css",
+    "./base.css": "./dist/base.css"
+  },
+  "scripts": { "build": "node build.mjs" }
+}

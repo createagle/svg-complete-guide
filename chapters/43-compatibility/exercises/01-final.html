@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 43-1 · Finished</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    .chev-btn { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .chev path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .css-d .chev path { d: path("M5 9 L12 16 L19 9"); transition: d .3s; }
+    .css-d .chev-btn[aria-expanded="true"] path { d: path("M5 15 L12 8 L19 15"); }
+  </style>
+</head>
+<body class="demo">
+  <button id="toggle" class="chev-btn" type="button" aria-expanded="false" aria-label="Show details">
+    <svg class="chev" width="48" height="48" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 9 L12 16 L19 9">
+        <animate id="to-up" attributeName="d" begin="indefinite" dur="0.3s" fill="freeze" to="M5 15 L12 8 L19 15"/>
+        <animate id="to-down" attributeName="d" begin="indefinite" dur="0.3s" fill="freeze" to="M5 9 L12 16 L19 9"/>
+      </path>
+    </svg>
+  </button>
+  <script>
+    const toggle = document.getElementById('toggle'), path = toggle.querySelector('path');
+    // Add #fallback to the URL to try the fallback in a browser that supports the CSS d property
+    const cssD = CSS.supports('d', 'path("M0 0")') && location.hash !== '#fallback';
+    document.documentElement.classList.toggle('css-d', cssD);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', open);
+      if (cssD) return;
+      if (reduce) { path.setAttribute('d', open ? 'M5 15 L12 8 L19 15' : 'M5 9 L12 16 L19 9'); return; }
+      document.getElementById(open ? 'to-up' : 'to-down').beginElement();
+    });
+  </script>
+</body>
+</html>

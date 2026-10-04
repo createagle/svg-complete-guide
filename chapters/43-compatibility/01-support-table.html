@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>43-1 Support in This Browser</title>
+  <style>
+    .support { border-collapse: collapse; font-size: 14px; max-width: 100%; }
+    .support th, .support td { padding: 7px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    .support thead th { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .support tbody th { font: 500 13px ui-monospace, Menlo, Consolas, monospace; }
+    .live.yes { color: #16a34a; font-weight: 600; }
+    .live.no { color: #dc2626; font-weight: 600; }
+    .live.unknown { color: #d97706; }
+    .bl { color: var(--muted); }
+  </style>
+</head>
+<body class="demo">
+  <table class="support">
+    <thead><tr><th scope="col">Feature</th><th scope="col">This browser</th><th scope="col">Chrome</th><th scope="col">Firefox</th><th scope="col">Safari</th><th scope="col">Baseline</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">clip-path: shape()</th><td class="live" data-test="CSS.supports(&#x27;clip-path&#x27;, &#x27;shape(from 0 0, line to 10px 10px)&#x27;)"></td><td>135</td><td>148</td><td>18.4</td><td class="bl">Newly available (2026-02-24)</td></tr>
+      <tr><th scope="row">d as a CSS property</th><td class="live" data-test="CSS.supports(&#x27;d&#x27;, &#x27;path(&quot;M0 0&quot;)&#x27;)"></td><td>52</td><td>97</td><td>No</td><td class="bl">Limited</td></tr>
+      <tr><th scope="row">CSS filter functions on SVG elements</th><td class="live" data-test=""></td><td>89</td><td>35</td><td>No</td><td class="bl">Limited</td></tr>
+      <tr><th scope="row">animation-timeline</th><td class="live" data-test="CSS.supports(&#x27;animation-timeline&#x27;, &#x27;scroll()&#x27;)"></td><td>115</td><td>Preview</td><td>26</td><td class="bl">Limited</td></tr>
+      <tr><th scope="row">document.startViewTransition()</th><td class="live" data-test="&#x27;startViewTransition&#x27; in document"></td><td>111</td><td>144</td><td>18</td><td class="bl">Newly available (2025-10-14)</td></tr>
+      <tr><th scope="row">contrast-color()</th><td class="live" data-test="CSS.supports(&#x27;color&#x27;, &#x27;contrast-color(red)&#x27;)"></td><td>147</td><td>146</td><td>26</td><td class="bl">Newly available (2026-04-10)</td></tr>
+      <tr><th scope="row">light-dark()</th><td class="live" data-test="CSS.supports(&#x27;color&#x27;, &#x27;light-dark(#000, #fff)&#x27;)"></td><td>123</td><td>120</td><td>17.5</td><td class="bl">Newly available (2024-05-13)</td></tr>
+      <tr><th scope="row">transform-box</th><td class="live" data-test="CSS.supports(&#x27;transform-box&#x27;, &#x27;fill-box&#x27;)"></td><td>64</td><td>55</td><td>11</td><td class="bl">Newly available (2024-04-16)</td></tr>
+      <tr><th scope="row">mask-image (unprefixed)</th><td class="live" data-test="CSS.supports(&#x27;mask-image&#x27;, &#x27;none&#x27;)"></td><td>120</td><td>53</td><td>15.4</td><td class="bl">Widely available</td></tr>
+      <tr><th scope="row">paint-order</th><td class="live" data-test="CSS.supports(&#x27;paint-order&#x27;, &#x27;stroke&#x27;)"></td><td>123</td><td>60</td><td>11</td><td class="bl">Widely available</td></tr>
+    </tbody>
+  </table>
+  <script>
+    // Run every check in the viewer's own browser
+    document.querySelectorAll('.live').forEach((td) => {
+      const test = td.dataset.test;
+      if (!test) { td.className = 'live unknown'; td.textContent = 'Cannot detect'; return; }
+      let ok = false;
+      try { ok = Function('return ' + test)(); } catch (e) { ok = false; }
+      td.className = 'live ' + (ok ? 'yes' : 'no');
+      td.textContent = ok ? 'Yes' : 'No';
+    });
+  </script>
+</body>
+</html>

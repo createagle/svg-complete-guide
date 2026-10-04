@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>42-1 Untrusted SVG: Four Ways to Embed</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; width: min(860px, 100%); }
+    .grid figure { margin: 0; display: grid; justify-items: center; gap: 6px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; }
+    .grid iframe { width: 172px; height: 102px; border: 0; border-radius: 8px; background: #fff; }
+    .grid figcaption { font: 600 13px ui-monospace, Menlo, Consolas, monospace; }
+    .status { margin: 0; font-size: 13px; text-align: center; }
+    .status.ran { color: #dc2626; font-weight: 600; }
+    .status.safe { color: #16a34a; }
+    .status.warn { color: #d97706; }
+    #out { width: min(860px, 100%); white-space: pre-wrap; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Test file <select id="sample"><option value="script">&lt;script&gt; element</option><option value="handler">onerror handler</option><option value="foreign">HTML in foreignObject</option><option value="link">javascript: link (click it)</option><option value="animate">SMIL sets href (click it)</option></select></label>
+    <button id="rerun" class="btn" type="button">Run again</button>
+  </div>
+  <div class="grid">
+    <figure><iframe name="inner" sandbox="allow-scripts" title="Inserted with innerHTML"></iframe><figcaption>innerHTML</figcaption><p class="status" data-for="inner"></p></figure>
+    <figure><iframe name="img" sandbox="allow-scripts" title="Shown with an img element"></iframe><figcaption>&lt;img src&gt;</figcaption><p class="status" data-for="img"></p></figure>
+    <figure><iframe name="doc" sandbox="allow-scripts" title="Opened as a document"></iframe><figcaption>Opened as a document</figcaption><p class="status" data-for="doc"></p></figure>
+    <figure><iframe name="purified" sandbox="allow-scripts" title="DOMPurify, then innerHTML"></iframe><figcaption>DOMPurify → innerHTML</figcaption><p class="status" data-for="purified"></p></figure>
+  </div>
+  <pre id="out" class="out" aria-label="What DOMPurify removed"></pre>
+  <script src="../../assets/vendor/purify.min.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const SAMPLES = {"script": {"label": "<script> element", "click": false, "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"90\"><rect width=\"160\" height=\"90\" rx=\"8\" fill=\"#fde68a\"/><text x=\"80\" y=\"52\" text-anchor=\"middle\" font-family=\"sans-serif\">script<\/text><script>parent.postMessage(['ran','script',name],'*')<\/script><\/svg>"}, "handler": {"label": "onerror handler", "click": false, "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"90\"><rect width=\"160\" height=\"90\" rx=\"8\" fill=\"#fde68a\"/><text x=\"80\" y=\"52\" text-anchor=\"middle\" font-family=\"sans-serif\">onerror<\/text><image href=\"data:image/png;base64,AAAA\" width=\"1\" height=\"1\" onerror=\"parent.postMessage(['ran','handler',name],'*')\"/><\/svg>"}, "foreign": {"label": "HTML in foreignObject", "click": false, "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"90\"><rect width=\"160\" height=\"90\" rx=\"8\" fill=\"#fde68a\"/><foreignObject width=\"160\" height=\"90\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"font:14px sans-serif;padding:34px 0;text-align:center\">foreignObject<img src=\"data:image/png;base64,AAAA\" onerror=\"parent.postMessage(['ran','foreign',name],'*')\" alt=\"\"/><\/div><\/foreignObject><\/svg>"}, "link": {"label": "javascript: link (click it)", "click": true, "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"90\"><rect width=\"160\" height=\"90\" rx=\"8\" fill=\"#fde68a\"/><a href=\"javascript:parent.postMessage(['ran','link',name],'*')\"><text x=\"80\" y=\"52\" text-anchor=\"middle\" font-family=\"sans-serif\" fill=\"#1d4ed8\" text-decoration=\"underline\">Click me<\/text><\/a><\/svg>"}, "animate": {"label": "SMIL sets href (click it)", "click": true, "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"90\"><rect width=\"160\" height=\"90\" rx=\"8\" fill=\"#fde68a\"/><a><animate attributeName=\"href\" values=\"javascript:parent.postMessage(['ran','animate',name],'*')\"/><text x=\"80\" y=\"52\" text-anchor=\"middle\" font-family=\"sans-serif\" fill=\"#1d4ed8\" text-decoration=\"underline\">Click me<\/text><\/a><\/svg>"}};
+    const frames = Object.fromEntries([...document.querySelectorAll('.grid iframe')].map((f) => [f.name, f]));
+    const status = (name) => document.querySelector('.status[data-for="' + name + '"]');
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    // Each frame is sandboxed without allow-same-origin: even a payload that runs cannot touch this page
+    const insertWithInnerHTML = (svg) => '<body style="margin:0"><div id="host"></div><script>document.getElementById("host").innerHTML = ' + JSON.stringify(svg).replace(/</g, '\\u003c') + ';<\/script></body>';
+    function run() {
+      const s = SAMPLES[$('sample').value];
+      for (const name in frames) {
+        const st = status(name); st.className = 'status safe'; st.textContent = 'Nothing ran';
+        // javascript: URLs need a click, and this page's sandbox blocks them; in a normal page they run
+        if (s.click && (name === 'inner' || name === 'doc')) { st.className = 'status warn'; st.textContent = 'Runs on click in a normal page (this sandbox blocks it)'; }
+      }
+      const clean = DOMPurify.sanitize(s.svg, { USE_PROFILES: { svg: true, svgFilters: true } });
+      const removed = DOMPurify.removed.filter((r) => !r.element || r.element.nodeName !== 'BODY').map((r) => r.attribute ? 'attribute ' + r.attribute.name + ' on <' + r.from.nodeName.toLowerCase() + '>' : 'element <' + r.element.nodeName.toLowerCase() + '>');
+      frames.inner.srcdoc = insertWithInnerHTML(s.svg);
+      frames.img.srcdoc = '<body style="margin:0"><img alt="" src="data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s.svg).replace(/'/g, '%27') + '"></body>';
+      frames.doc.removeAttribute('srcdoc');
+      frames.doc.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s.svg);
+      frames.purified.srcdoc = insertWithInnerHTML(clean);
+      $('out').textContent = 'DOMPurify removed: ' + (removed.length ? removed.join(', ') : 'nothing') + '\n\nSanitized markup:\n' + clean;
+    }
+    // A payload that runs reports back here; only messages from our own frames count
+    window.addEventListener('message', (e) => {
+      const name = Object.keys(frames).find((n) => frames[n].contentWindow === e.source);
+      if (!name || !Array.isArray(e.data) || e.data[0] !== 'ran') return;
+      const st = status(name); st.className = 'status ran'; st.textContent = 'Payload ran';
+    });
+    $('sample').addEventListener('input', run);
+    $('rerun').addEventListener('click', run);
+    run();
+  </script>
+</body>
+</html>

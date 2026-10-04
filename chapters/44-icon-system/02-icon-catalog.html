@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <link rel="stylesheet" href="dist/base.css">
+  <title>44-2 Icon Library Catalog</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    input, select { accent-color: var(--accent); }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    #q { font: inherit; padding: 4px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; width: min(760px, 100%); }
+    .tile { display: grid; justify-items: center; gap: 8px; padding: 14px 6px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--fg); font: 12px ui-monospace, Menlo, Consolas, monospace; cursor: pointer; }
+    .tile:hover, .tile[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+    .tile:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .note { margin: 0; color: var(--muted); }
+    #out { width: min(760px, 100%); }
+  </style>
+</head>
+<body class="demo">
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol><symbol id="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol><symbol id="calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol><symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol><symbol id="close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></symbol><symbol id="heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8Z"/></symbol><symbol id="home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3Z"/></symbol><symbol id="mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol><symbol id="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol><symbol id="search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol><symbol id="star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9Z"/></symbol><symbol id="user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></symbol></svg>
+  <div class="controls">
+    <label class="control">Search <input id="q" type="search" placeholder="e.g. arrow"></label>
+    <label class="control">Size <select id="size"><option value="20">20</option><option value="24" selected>24</option><option value="32">32</option></select></label>
+    <label class="control">Stroke <select id="stroke"><option value="1.5">1.5</option><option value="2" selected>2</option></select></label>
+  </div>
+  <div id="grid" class="grid">
+      <button class="tile" type="button" data-name="arrow-right"><svg class="icon" aria-hidden="true"><use href="#arrow-right"/></svg><span>arrow-right</span></button>
+      <button class="tile" type="button" data-name="bell"><svg class="icon" aria-hidden="true"><use href="#bell"/></svg><span>bell</span></button>
+      <button class="tile" type="button" data-name="calendar"><svg class="icon" aria-hidden="true"><use href="#calendar"/></svg><span>calendar</span></button>
+      <button class="tile" type="button" data-name="check"><svg class="icon" aria-hidden="true"><use href="#check"/></svg><span>check</span></button>
+      <button class="tile" type="button" data-name="close"><svg class="icon" aria-hidden="true"><use href="#close"/></svg><span>close</span></button>
+      <button class="tile" type="button" data-name="download"><svg class="icon" aria-hidden="true"><use href="#download"/></svg><span>download</span></button>
+      <button class="tile" type="button" data-name="heart"><svg class="icon" aria-hidden="true"><use href="#heart"/></svg><span>heart</span></button>
+      <button class="tile" type="button" data-name="home"><svg class="icon" aria-hidden="true"><use href="#home"/></svg><span>home</span></button>
+      <button class="tile" type="button" data-name="mail"><svg class="icon" aria-hidden="true"><use href="#mail"/></svg><span>mail</span></button>
+      <button class="tile" type="button" data-name="plus"><svg class="icon" aria-hidden="true"><use href="#plus"/></svg><span>plus</span></button>
+      <button class="tile" type="button" data-name="search"><svg class="icon" aria-hidden="true"><use href="#search"/></svg><span>search</span></button>
+      <button class="tile" type="button" data-name="sliders"><svg class="icon" aria-hidden="true"><use href="#sliders"/></svg><span>sliders</span></button>
+      <button class="tile" type="button" data-name="star"><svg class="icon" aria-hidden="true"><use href="#star"/></svg><span>star</span></button>
+      <button class="tile" type="button" data-name="user"><svg class="icon" aria-hidden="true"><use href="#user"/></svg><span>user</span></button>
+  </div>
+  <p id="empty" class="note" hidden>No icon matches.</p>
+  <pre id="out" class="out" aria-live="polite">Pick an icon to see how to use it.</pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const tiles = [...document.querySelectorAll('.tile')];
+    function theme() {
+      $('grid').style.setProperty('--icon-size', $('size').value + 'px');
+      $('grid').style.setProperty('--icon-stroke', $('stroke').value);
+    }
+    $('q').addEventListener('input', () => {
+      const q = $('q').value.trim().toLowerCase();
+      let shown = 0;
+      tiles.forEach((t) => { const hit = t.dataset.name.includes(q); t.hidden = !hit; shown += hit; });
+      $('empty').hidden = shown > 0;
+    });
+    // Show the three ways to use the chosen icon
+    $('grid').addEventListener('click', (e) => {
+      const tile = e.target.closest('.tile'); if (!tile) return;
+      tiles.forEach((t) => t.setAttribute('aria-pressed', t === tile));
+      const n = tile.dataset.name;
+      $('out').textContent = 'Sprite:     <svg class="icon" aria-hidden="true"><use href="sprite.svg#' + n + '"/></svg>\n' +
+        'Component:  <svg-icon name="' + n + '"></svg-icon>\n' +
+        'Mask:       <span class="i i-' + n + '"></span>';
+    });
+    $('size').addEventListener('input', theme); $('stroke').addEventListener('input', theme);
+    theme();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>43-2 Two Features, Two Fallbacks</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    .card { display: grid; justify-items: center; gap: 10px; padding: 18px 22px; border: 1px solid var(--border); border-radius: 14px; }
+    .chev-btn { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .chev path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    /* Native: the CSS d property, transitioned */
+    .native .chev path { d: path("M5 9 L12 16 L19 9"); transition: d .3s; }
+    .native .chev-btn[aria-expanded="true"] path { d: path("M5 15 L12 8 L19 15"); }
+    .banner { width: 240px; height: 120px; display: grid; place-items: center; background: var(--accent); color: #fff; font-weight: 700; border-radius: 6px;
+      /* Fallback first: browsers that cannot read shape() keep the polygon */
+      clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 96%, 0 78%);
+      clip-path: shape(from 0% 0%, line to 100% 0%, line to 100% 78%, curve to 0% 78% with 50% 112%, close); }
+    .force .banner { clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 96%, 0 78%); }
+    figcaption span { font-family: ui-monospace, Menlo, Consolas, monospace; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control"><input id="force" type="checkbox"> Force fallbacks</label>
+  </div>
+  <div class="stage">
+    <figure class="card">
+      <button id="toggle" class="chev-btn" type="button" aria-expanded="false" aria-label="Show details">
+        <svg class="chev" width="48" height="48" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 9 L12 16 L19 9">
+            <animate id="to-up" attributeName="d" begin="indefinite" dur="0.3s" fill="freeze" to="M5 15 L12 8 L19 15"/>
+            <animate id="to-down" attributeName="d" begin="indefinite" dur="0.3s" fill="freeze" to="M5 9 L12 16 L19 9"/>
+          </path>
+        </svg>
+      </button>
+      <figcaption>Morph: <span id="morph-mode"></span></figcaption>
+    </figure>
+    <figure class="card">
+      <div id="banner" class="banner">Wavy edge</div>
+      <figcaption>Clip: <span id="clip-mode"></span></figcaption>
+    </figure>
+  </div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const path = document.querySelector('.chev path');
+    function setup() {
+      const force = $('force').checked;
+      // Feature detection decides which version runs
+      const cssD = !force && CSS.supports('d', 'path("M0 0")');
+      const shape = !force && CSS.supports('clip-path', 'shape(from 0 0, line to 10px 10px)');
+      document.body.classList.toggle('native', cssD);
+      document.body.classList.toggle('force', force);
+      $('morph-mode').textContent = cssD ? 'CSS d transition' : 'SMIL fallback';
+      $('clip-mode').textContent = shape ? 'shape()' : 'polygon() fallback';
+    }
+    $('toggle').addEventListener('click', () => {
+      const open = $('toggle').getAttribute('aria-expanded') !== 'true';
+      $('toggle').setAttribute('aria-expanded', open);
+      if (document.body.classList.contains('native')) return;      // CSS handles it
+      // Fallback: SMIL can morph d in every browser that lacks the CSS property
+      const to = open ? 'M5 15 L12 8 L19 15' : 'M5 9 L12 16 L19 9';
+      if (reduce) { path.setAttribute('d', to); return; }
+      $(open ? 'to-up' : 'to-down').beginElement();
+    });
+    $('force').addEventListener('input', setup);
+    setup();
+  </script>
+</body>
+</html>

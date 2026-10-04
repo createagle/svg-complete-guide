@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 29-2 · Finished</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg id="sign" width="360" height="180" viewBox="0 0 360 180" role="img" aria-label="Pink GLITCH text that jitters only while hovered or focused" tabindex="0">
+    <defs>
+      <filter id="glitch" x="-10%" y="-20%" width="120%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence id="noise" type="fractalNoise" baseFrequency="0 0.12" numOctaves="1" seed="2" result="bands"/>
+        <feDisplacementMap in="SourceGraphic" in2="bands" scale="14" xChannelSelector="R" yChannelSelector="A"/>
+      </filter>
+    </defs>
+    <rect width="360" height="180" rx="16" fill="#0f172a"/>
+    <text x="180" y="108" text-anchor="middle" font-family="system-ui, sans-serif" font-size="56" font-weight="900" fill="#f472b6" filter="url(#glitch)">GLITCH</text>
+  </svg>
+  </div>
+  <script>
+    // Re-roll the noise only while hovered or focused, and never with reduced motion
+    const noise = document.getElementById('noise'), sign = document.getElementById('sign');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    let timer = null;
+    const start = () => { if (reduce.matches || timer) return; timer = setInterval(() => noise.setAttribute('seed', Math.floor(Math.random() * 100)), 90); };
+    const stop = () => { clearInterval(timer); timer = null; noise.setAttribute('seed', 2); };
+    sign.addEventListener('pointerenter', start); sign.addEventListener('focus', start);
+    sign.addEventListener('pointerleave', stop); sign.addEventListener('blur', stop);
+  </script>
+</body>
+</html>

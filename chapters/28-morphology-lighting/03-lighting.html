@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>28-3 Embossed Text with Lighting</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    #scene { cursor: crosshair; touch-action: none; border-radius: 16px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Lighting <select id="kind"><option value="diffuse">feDiffuseLighting</option><option value="specular">feSpecularLighting</option></select></label>
+    <label class="control">Light <select id="light"><option value="distant">feDistantLight</option><option value="point" selected>fePointLight</option><option value="spot">feSpotLight</option></select></label>
+    <label class="control">surfaceScale <input id="surface" type="range" min="0" max="12" step="0.5" value="5"><output id="surfaceOut"></output></label>
+    <label class="control">Light color <input id="color" type="color" value="#ffffff"></label>
+  </div>
+  <div class="stage">
+    <svg id="scene" width="560" height="260" viewBox="0 0 560 260" role="img" aria-label="Embossed text lit by a light you can move with the pointer">
+      <defs>
+        <filter id="emboss" filterUnits="userSpaceOnUse" x="0" y="0" width="560" height="260">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="height"/>
+          <feDiffuseLighting id="diffuse" in="height" surfaceScale="5" diffuseConstant="1" lighting-color="#ffffff" result="lit">
+            <fePointLight id="dl" x="200" y="60" z="120"/>
+          </feDiffuseLighting>
+          <feSpecularLighting id="specular" in="height" surfaceScale="5" specularConstant="1" specularExponent="18" lighting-color="#ffffff" result="shine">
+            <fePointLight id="sl" x="200" y="60" z="120"/>
+          </feSpecularLighting>
+          <feComposite id="mix" in="lit" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="shaded"/>
+          <feComposite in="shaded" in2="SourceAlpha" operator="in"/>
+        </filter>
+      </defs>
+      <rect width="560" height="260" rx="16" fill="#e7e5e4"/>
+      <text x="280" y="170" text-anchor="middle" font-family="system-ui, sans-serif" font-size="130" font-weight="900" fill="#d97706" filter="url(#emboss)">SVG</text>
+      <circle id="bulb" cx="200" cy="60" r="7" fill="#facc15" stroke="#78350f" stroke-width="2"/>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const NS = 'http://www.w3.org/2000/svg';
+    let pos = { x: 200, y: 60 };
+    // Build the light element for the chosen type at the current position
+    function lightEl(type) {
+      const el = document.createElementNS(NS, { distant: 'feDistantLight', point: 'fePointLight', spot: 'feSpotLight' }[type]);
+      const az = Math.atan2(pos.y - 130, pos.x - 280) * 180 / Math.PI;
+      const attrs = type === 'distant' ? { azimuth: Math.round(az), elevation: 35 }
+        : type === 'point' ? { x: Math.round(pos.x), y: Math.round(pos.y), z: 120 }
+        : { x: Math.round(pos.x), y: Math.round(pos.y), z: 220, pointsAtX: 280, pointsAtY: 130, pointsAtZ: 0, specularExponent: 6, limitingConeAngle: 30 };
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      return el;
+    }
+    function update() {
+      const kind = $('kind').value, type = $('light').value, surf = $('surface').value, color = $('color').value;
+      ['diffuse', 'specular'].forEach((id) => {
+        const fe = $(id);
+        fe.replaceChildren(lightEl(type));
+        fe.setAttribute('surfaceScale', surf);
+        fe.setAttribute('lighting-color', color);
+      });
+      // Diffuse light multiplies the text color; specular highlights are added on top of it
+      const mix = $('mix');
+      if (kind === 'diffuse') Object.entries({ in: 'lit', k1: 1, k2: 0, k3: 0, k4: 0 }).forEach(([k, v]) => mix.setAttribute(k, v));
+      else Object.entries({ in: 'shine', k1: 0, k2: 1, k3: 1, k4: 0 }).forEach(([k, v]) => mix.setAttribute(k, v));
+      $('surfaceOut').value = surf;
+      $('bulb').setAttribute('display', type === 'distant' ? 'none' : 'inline');
+      $('bulb').setAttribute('cx', pos.x); $('bulb').setAttribute('cy', pos.y);
+      const light = lightEl(type), la = [...light.attributes].map((a) => a.name + '="' + a.value + '"').join(' ');
+      const prim = kind === 'diffuse'
+        ? '<feDiffuseLighting in="height" surfaceScale="' + surf + '" diffuseConstant="1" lighting-color="' + color + '" result="lit">'
+        : '<feSpecularLighting in="height" surfaceScale="' + surf + '" specularConstant="1" specularExponent="18" lighting-color="' + color + '" result="shine">';
+      const comp = kind === 'diffuse'
+        ? '<feComposite in="lit" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="shaded"/>'
+        : '<feComposite in="shine" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="shaded"/>';
+      $('out').textContent = '<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="height"/>\n' + prim + '\n  <' + light.localName + ' ' + la + '/>\n</' + prim.slice(1, prim.indexOf(' ')) + '>\n' + comp + '\n<feComposite in="shaded" in2="SourceAlpha" operator="in"/>';
+    }
+    const scene = $('scene');
+    function move(e) { const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(scene.getScreenCTM().inverse()); pos = { x: p.x, y: p.y }; update(); }
+    scene.addEventListener('pointerdown', (e) => { scene.setPointerCapture(e.pointerId); move(e); });
+    scene.addEventListener('pointermove', (e) => { if (e.buttons || e.pointerType === 'mouse') move(e); });
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

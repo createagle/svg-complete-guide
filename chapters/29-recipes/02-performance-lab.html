@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>29-2 Filter Performance Lab</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select, button { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .meter { margin: 0; font: 15px system-ui, sans-serif; color: var(--muted); }
+    .meter b { color: var(--fg); font-variant-numeric: tabular-nums; }
+    #note { font-size: 13px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Effect <select id="effect"><option value="none">No filter</option><option value="blur4" selected>Blur, stdDeviation 4</option><option value="blur24">Blur, stdDeviation 24</option><option value="noise1">Noise, 1 octave</option><option value="noise6">Noise, 6 octaves</option><option value="displace">Noise + displacement</option><option value="morph">Morphology, radius 8</option><option value="light">Diffuse lighting</option></select></label>
+    <label class="control">Filtered area <select id="area"><option value="0.25">25%</option><option value="0.5">50%</option><option value="1" selected>100%</option></select></label>
+    <button id="run" class="btn" type="button">Pause</button>
+  </div>
+  <div class="stage">
+    <svg id="scene" width="640" height="400" viewBox="0 0 640 400" role="img" aria-label="Moving shapes inside a filtered area">
+      <defs><filter id="fx" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse"></filter></defs>
+      <rect width="640" height="400" fill="#f1f5f9"/>
+      <g id="layer" filter="url(#fx)">
+        <rect id="bounds" width="640" height="400" fill="#e2e8f0"/>
+        <circle id="ball" cx="100" cy="200" r="50" fill="#2563eb"/>
+        <rect id="box" x="300" y="120" width="120" height="120" rx="16" fill="#f97316"/>
+      </g>
+    </svg>
+  </div>
+  <p class="meter" role="status"><b id="ms">–</b> ms per frame · <b id="fps">–</b> fps <span id="note"></span></p>
+  <pre id="out" class="out"></pre>
+  <script>
+    const EFFECTS = {"none": "", "blur4": "<feGaussianBlur stdDeviation=\"4\"/>", "blur24": "<feGaussianBlur stdDeviation=\"24\"/>", "noise1": "<feTurbulence type=\"fractalNoise\" baseFrequency=\"0.02\" numOctaves=\"1\" result=\"n\"/><feComposite in=\"n\" in2=\"SourceGraphic\" operator=\"in\"/>", "noise6": "<feTurbulence type=\"fractalNoise\" baseFrequency=\"0.02\" numOctaves=\"6\" result=\"n\"/><feComposite in=\"n\" in2=\"SourceGraphic\" operator=\"in\"/>", "displace": "<feTurbulence type=\"fractalNoise\" baseFrequency=\"0.02\" numOctaves=\"2\" result=\"n\"/><feDisplacementMap in=\"SourceGraphic\" in2=\"n\" scale=\"30\" xChannelSelector=\"R\" yChannelSelector=\"G\"/>", "morph": "<feMorphology operator=\"dilate\" radius=\"8\"/>", "light": "<feGaussianBlur in=\"SourceAlpha\" stdDeviation=\"4\" result=\"h\"/><feDiffuseLighting in=\"h\" surfaceScale=\"4\"><feDistantLight azimuth=\"45\" elevation=\"45\"/></feDiffuseLighting>"};
+    const $ = (id) => document.getElementById(id);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    let running = !reduce.matches, t0 = performance.now(), times = [];
+    function setup() {
+      const k = $('effect').value, a = +$('area').value, w = 640 * Math.sqrt(a), h = 400 * Math.sqrt(a);
+      const fx = $('fx');
+      fx.innerHTML = EFFECTS[k];
+      Object.entries({ x: (640 - w) / 2, y: (400 - h) / 2, width: w, height: h }).forEach(([n, v]) => fx.setAttribute(n, v));
+      $('layer').setAttribute('filter', k === 'none' ? 'none' : 'url(#fx)');
+      times = [];
+      $('out').textContent = k === 'none' ? '<!-- no filter -->' : '<filter id="fx" filterUnits="userSpaceOnUse" x="' + Math.round((640 - w) / 2) + '" y="' + Math.round((400 - h) / 2) + '" width="' + Math.round(w) + '" height="' + Math.round(h) + '">\n  ' + EFFECTS[k].replace(/></g, '>\n  <') + '\n</filter>';
+    }
+    // Move the shapes every frame so the filter has to be recomputed, and time each frame
+    let last = performance.now();
+    function frame(now) {
+      if (running) {
+        const t = (now - t0) / 1000;
+        $('ball').setAttribute('cx', 320 + Math.sin(t * 1.3) * 240);
+        $('box').setAttribute('transform', 'rotate(' + (t * 40 % 360) + ' 360 180)');
+        times.push(now - last);
+        if (times.length > 60) times.shift();
+        const avg = times.reduce((s, v) => s + v, 0) / times.length;
+        $('ms').textContent = avg.toFixed(1); $('fps').textContent = Math.round(1000 / avg);
+      }
+      last = now;
+      requestAnimationFrame(frame);
+    }
+    function setRunning(on) { running = on; times = []; $('run').textContent = on ? 'Pause' : 'Run'; $('note').textContent = on ? '' : '(paused)'; }
+    $('run').addEventListener('click', () => setRunning(!running));
+    ['effect', 'area'].forEach((id) => $(id).addEventListener('input', setup));
+    setup(); setRunning(running); requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

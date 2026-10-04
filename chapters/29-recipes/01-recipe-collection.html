@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>29-1 Filter Recipe Collection</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .stage { max-width: 760px; }
+    .recipe { padding: 0; border: 0; background: none; border-radius: 10px; cursor: pointer; line-height: 0; }
+    .recipe svg { border-radius: 10px; }
+    .recipe[aria-pressed="true"] { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .blob { animation: drift 3.2s ease-in-out infinite alternate; }
+    .blob.b { animation-duration: 2.6s; animation-direction: alternate-reverse; }
+    .blob.c { animation-duration: 4s; }
+    @keyframes drift { from { transform: translateX(-34px); } to { transform: translateX(34px); } }
+  </style>
+</head>
+<body class="demo">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="goo" color-interpolation-filters="sRGB">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+        <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo"/>
+        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+      </filter>
+      <filter id="glitch" x="-10%" y="-20%" width="120%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence id="glitchNoise" type="fractalNoise" baseFrequency="0 0.12" numOctaves="1" seed="2" result="bands"/>
+        <feDisplacementMap in="SourceGraphic" in2="bands" scale="14" xChannelSelector="R" yChannelSelector="A" result="sliced"/>
+        <feColorMatrix in="sliced" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
+        <feOffset in="red" dx="-3" result="redShift"/>
+        <feColorMatrix in="sliced" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="cyan"/>
+        <feOffset in="cyan" dx="3" result="cyanShift"/>
+        <feBlend in="redShift" in2="cyanShift" mode="screen"/>
+      </filter>
+      <filter id="pixelate" x="0" y="0" width="100%" height="100%">
+        <feFlood x="4" y="4" width="2" height="2"/>
+        <feComposite width="10" height="10"/>
+        <feTile result="dots"/>
+        <feComposite in="SourceGraphic" in2="dots" operator="in"/>
+        <feMorphology operator="dilate" radius="5"/>
+      </filter>
+      <filter id="sticker" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+        <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="thick"/>
+        <feFlood flood-color="#fff" result="white"/>
+        <feComposite in="white" in2="thick" operator="in" result="border"/>
+        <feDropShadow in="border" dx="0" dy="4" stdDeviation="4" flood-opacity=".35" result="lifted"/>
+        <feMerge><feMergeNode in="lifted"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="ink" x="-10%" y="-20%" width="120%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="8" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+        <feGaussianBlur in="rough" stdDeviation="1.2" result="soft"/>
+        <feComponentTransfer in="soft">
+          <feFuncA type="table" tableValues="0 0 1 1"/>
+        </feComponentTransfer>
+      </filter>
+      <filter id="spotlight" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feFlood flood-color="#fff" result="white"/>
+        <feDiffuseLighting in="white" surfaceScale="0" diffuseConstant="1.3" lighting-color="#fff7d6" result="light">
+          <feSpotLight x="150" y="20" z="220" pointsAtX="110" pointsAtY="90" pointsAtZ="0" specularExponent="12" limitingConeAngle="26"/>
+        </feDiffuseLighting>
+        <feComposite in="SourceGraphic" in2="light" operator="arithmetic" k1="1.1" k2="0" k3="0" k4="0"/>
+      </filter>
+    </defs>
+  </svg>
+  <div class="stage">
+    <figure>
+      <button class="recipe" type="button" data-key="goo" aria-pressed="true">
+        <svg width="220" height="160" viewBox="0 0 220 160" role="img" aria-label="Goo effect"><rect width="220" height="160" fill="#fdf2f8"/>
+        <g filter="url(#goo)" fill="#ec4899">
+          <circle class="blob a" cx="80" cy="80" r="26"/>
+          <circle class="blob b" cx="140" cy="80" r="22"/>
+          <circle class="blob c" cx="110" cy="80" r="18"/>
+        </g></svg>
+      </button>
+      <figcaption>Goo</figcaption>
+    </figure>
+    <figure>
+      <button class="recipe" type="button" data-key="glitch" aria-pressed="false">
+        <svg width="220" height="160" viewBox="0 0 220 160" role="img" aria-label="Glitch effect"><rect width="220" height="160" fill="#0f172a"/>
+        <text x="110" y="96" text-anchor="middle" font-family="system-ui, sans-serif" font-size="46" font-weight="900" fill="#fff" filter="url(#glitch)">ERROR</text></svg>
+      </button>
+      <figcaption>Glitch</figcaption>
+    </figure>
+    <figure>
+      <button class="recipe" type="button" data-key="pixelate" aria-pressed="false">
+        <svg width="220" height="160" viewBox="0 0 220 160" role="img" aria-label="Pixelate effect"><rect width="220" height="160" fill="#e2e8f0"/>
+        <image href="photo.jpg" width="220" height="160" preserveAspectRatio="xMidYMid slice" filter="url(#pixelate)"/></svg>
+      </button>
+      <figcaption>Pixelate</figcaption>
+    </figure>
+    <figure>
+      <button class="recipe" type="button" data-key="sticker" aria-pressed="false">
+        <svg width="220" height="160" viewBox="0 0 220 160" role="img" aria-label="Sticker effect"><rect width="220" height="160" fill="#c7d2fe"/>
+        <g filter="url(#sticker)">
+          <path d="M110 38 L124 68 L157 71 L132 93 L139 126 L110 109 L81 126 L88 93 L63 71 L96 68 Z" fill="#facc15" stroke="#ca8a04" stroke-width="3" stroke-linejoin="round"/>
+        </g></svg>
+      </button>
+      <figcaption>Sticker</figcaption>
+    </figure>
+    <figure>
+      <button class="recipe" type="button" data-key="ink" aria-pressed="false">
+        <svg width="220" height="160" viewBox="0 0 220 160" role="img" aria-label="Ink bleed effect"><rect width="220" height="160" fill="#fef9ec"/>
+        <text x="110" y="100" text-anchor="middle" font-family="Georgia, serif" font-size="56" font-style="italic" fill="#1e3a8a" filter="url(#ink)">Ink</text></svg>
+      </button>
+      <figcaption>Ink bleed</figcaption>
+    </figure>
+    <figure>
+      <button class="recipe" type="button" data-key="spotlight" aria-pressed="false">
+        <svg width="220" height="160" viewBox="0 0 220 160" role="img" aria-label="Spotlight effect"><rect width="220" height="160" fill="#000"/>
+        <image href="photo.jpg" width="220" height="160" preserveAspectRatio="xMidYMid slice" filter="url(#spotlight)"/></svg>
+      </button>
+      <figcaption>Spotlight</figcaption>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const CODE = {"goo": "<filter id=\"goo\" color-interpolation-filters=\"sRGB\">\n  <feGaussianBlur in=\"SourceGraphic\" stdDeviation=\"10\" result=\"blur\"/>\n  <feColorMatrix in=\"blur\" type=\"matrix\" values=\"1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8\" result=\"goo\"/>\n  <feComposite in=\"SourceGraphic\" in2=\"goo\" operator=\"atop\"/>\n</filter>", "glitch": "<filter id=\"glitch\" x=\"-10%\" y=\"-20%\" width=\"120%\" height=\"140%\" color-interpolation-filters=\"sRGB\">\n  <feTurbulence id=\"glitchNoise\" type=\"fractalNoise\" baseFrequency=\"0 0.12\" numOctaves=\"1\" seed=\"2\" result=\"bands\"/>\n  <feDisplacementMap in=\"SourceGraphic\" in2=\"bands\" scale=\"14\" xChannelSelector=\"R\" yChannelSelector=\"A\" result=\"sliced\"/>\n  <feColorMatrix in=\"sliced\" type=\"matrix\" values=\"1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0\" result=\"red\"/>\n  <feOffset in=\"red\" dx=\"-3\" result=\"redShift\"/>\n  <feColorMatrix in=\"sliced\" type=\"matrix\" values=\"0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0\" result=\"cyan\"/>\n  <feOffset in=\"cyan\" dx=\"3\" result=\"cyanShift\"/>\n  <feBlend in=\"redShift\" in2=\"cyanShift\" mode=\"screen\"/>\n</filter>", "pixelate": "<filter id=\"pixelate\" x=\"0\" y=\"0\" width=\"100%\" height=\"100%\">\n  <feFlood x=\"4\" y=\"4\" width=\"2\" height=\"2\"/>\n  <feComposite width=\"10\" height=\"10\"/>\n  <feTile result=\"dots\"/>\n  <feComposite in=\"SourceGraphic\" in2=\"dots\" operator=\"in\"/>\n  <feMorphology operator=\"dilate\" radius=\"5\"/>\n</filter>", "sticker": "<filter id=\"sticker\" x=\"-20%\" y=\"-20%\" width=\"140%\" height=\"150%\" color-interpolation-filters=\"sRGB\">\n  <feMorphology in=\"SourceAlpha\" operator=\"dilate\" radius=\"5\" result=\"thick\"/>\n  <feFlood flood-color=\"#fff\" result=\"white\"/>\n  <feComposite in=\"white\" in2=\"thick\" operator=\"in\" result=\"border\"/>\n  <feDropShadow in=\"border\" dx=\"0\" dy=\"4\" stdDeviation=\"4\" flood-opacity=\".35\" result=\"lifted\"/>\n  <feMerge><feMergeNode in=\"lifted\"/><feMergeNode in=\"SourceGraphic\"/></feMerge>\n</filter>", "ink": "<filter id=\"ink\" x=\"-10%\" y=\"-20%\" width=\"120%\" height=\"140%\" color-interpolation-filters=\"sRGB\">\n  <feTurbulence type=\"fractalNoise\" baseFrequency=\"0.035\" numOctaves=\"3\" seed=\"8\" result=\"noise\"/>\n  <feDisplacementMap in=\"SourceGraphic\" in2=\"noise\" scale=\"7\" xChannelSelector=\"R\" yChannelSelector=\"G\" result=\"rough\"/>\n  <feGaussianBlur in=\"rough\" stdDeviation=\"1.2\" result=\"soft\"/>\n  <feComponentTransfer in=\"soft\">\n    <feFuncA type=\"table\" tableValues=\"0 0 1 1\"/>\n  </feComponentTransfer>\n</filter>", "spotlight": "<filter id=\"spotlight\" x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" color-interpolation-filters=\"sRGB\">\n  <feFlood flood-color=\"#fff\" result=\"white\"/>\n  <feDiffuseLighting in=\"white\" surfaceScale=\"0\" diffuseConstant=\"1.3\" lighting-color=\"#fff7d6\" result=\"light\">\n    <feSpotLight x=\"150\" y=\"20\" z=\"220\" pointsAtX=\"110\" pointsAtY=\"90\" pointsAtZ=\"0\" specularExponent=\"12\" limitingConeAngle=\"26\"/>\n  </feDiffuseLighting>\n  <feComposite in=\"SourceGraphic\" in2=\"light\" operator=\"arithmetic\" k1=\"1.1\" k2=\"0\" k3=\"0\" k4=\"0\"/>\n</filter>"};
+    const out = document.getElementById('out');
+    function show(key) {
+      out.textContent = CODE[key];
+      document.querySelectorAll('.recipe').forEach((b) => b.setAttribute('aria-pressed', b.dataset.key === key));
+    }
+    document.querySelectorAll('.recipe').forEach((b) => b.addEventListener('click', () => show(b.dataset.key)));
+    // The glitch jumps only while hovered or focused, and never when reduced motion is requested
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const glitchBtn = document.querySelector('[data-key="glitch"]'), noise = document.getElementById('glitchNoise');
+    let timer = null;
+    const start = () => { if (reduce.matches || timer) return; timer = setInterval(() => noise.setAttribute('seed', Math.floor(Math.random() * 100)), 90); };
+    const stop = () => { clearInterval(timer); timer = null; noise.setAttribute('seed', 2); };
+    ['pointerenter', 'focus'].forEach((t) => glitchBtn.addEventListener(t, start));
+    ['pointerleave', 'blur'].forEach((t) => glitchBtn.addEventListener(t, stop));
+    show('goo');
+  </script>
+</body>
+</html>

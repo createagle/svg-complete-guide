@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>28-2 feConvolveMatrix Kernels</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .stage { align-items: center; }
+    .kernel { display: grid; grid-template-columns: repeat(3, 3.4em); gap: 4px; }
+    .k { width: 3.4em; padding: 4px; font: 13px ui-monospace, Menlo, Consolas, monospace; text-align: right; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Kernel <select id="preset"><option value="identity">Identity</option><option value="blur">Box blur</option><option value="sharpen">Sharpen</option><option value="edges">Edge detect</option><option value="emboss">Emboss</option><option value="custom">Custom</option></select></label>
+    <label class="control">divisor <input id="div" type="text" size="4" placeholder="auto"></label>
+    <label class="control">bias <input id="bias" type="range" min="-0.5" max="1" step="0.05" value="0"><output id="biasOut"></output></label>
+    <label class="control"><input id="pa" type="checkbox" checked> preserveAlpha</label>
+    <label class="control">edgeMode <select id="edge"><option>duplicate</option><option>wrap</option><option>none</option></select></label>
+  </div>
+  <div class="stage">
+    <div class="kernel" role="group" aria-label="3 by 3 kernel">
+      <input class="k" type="number" step="1" aria-label="Kernel cell 1"><input class="k" type="number" step="1" aria-label="Kernel cell 2"><input class="k" type="number" step="1" aria-label="Kernel cell 3"><input class="k" type="number" step="1" aria-label="Kernel cell 4"><input class="k" type="number" step="1" aria-label="Kernel cell 5"><input class="k" type="number" step="1" aria-label="Kernel cell 6"><input class="k" type="number" step="1" aria-label="Kernel cell 7"><input class="k" type="number" step="1" aria-label="Kernel cell 8"><input class="k" type="number" step="1" aria-label="Kernel cell 9">
+    </div>
+    <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="Flat illustration of mountains, a sun, a tree and a river, convolved">
+      <defs>
+        <filter id="conv" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+          <feConvolveMatrix id="cm" order="3" kernelMatrix="0 0 0 0 1 0 0 0 0" preserveAlpha="true" edgeMode="duplicate"/>
+        </filter>
+      </defs>
+      <image href="photo.jpg" width="480" height="320" filter="url(#conv)"/>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const KERNELS = {"identity": "0 0 0 0 1 0 0 0 0", "blur": "1 1 1 1 1 1 1 1 1", "sharpen": "0 -1 0 -1 5 -1 0 -1 0", "edges": "-1 -1 -1 -1 8 -1 -1 -1 -1", "emboss": "-2 -1 0 -1 1 1 0 1 2"};
+    const $ = (id) => document.getElementById(id);
+    const cells = [...document.querySelectorAll('.k')];
+    function apply() {
+      const m = cells.map((c) => c.value || '0').join(' ');
+      const cm = $('cm');
+      cm.setAttribute('kernelMatrix', m);
+      if ($('div').value.trim()) cm.setAttribute('divisor', $('div').value.trim()); else cm.removeAttribute('divisor');
+      cm.setAttribute('bias', $('bias').value);
+      cm.setAttribute('preserveAlpha', $('pa').checked);
+      cm.setAttribute('edgeMode', $('edge').value);
+      $('biasOut').value = $('bias').value;
+      const rows = [0, 3, 6].map((i) => '  ' + cells.slice(i, i + 3).map((c) => (c.value || '0').padStart(2)).join(' ')).join('\n');
+      $('out').textContent = '<feConvolveMatrix order="3" kernelMatrix="\n' + rows + '"' + ($('div').value.trim() ? ' divisor="' + $('div').value.trim() + '"' : '') +
+        ($('bias').value !== '0' ? ' bias="' + $('bias').value + '"' : '') + ' preserveAlpha="' + $('pa').checked + '" edgeMode="' + $('edge').value + '"/>';
+    }
+    function fromPreset() {
+      const k = $('preset').value;
+      if (k !== 'custom') KERNELS[k].split(' ').forEach((v, i) => { cells[i].value = v; });
+      $('bias').value = k === 'emboss' ? 0.5 : 0;
+      apply();
+    }
+    $('preset').addEventListener('input', fromPreset);
+    cells.forEach((c) => c.addEventListener('input', () => { $('preset').value = 'custom'; apply(); }));
+    ['div', 'bias', 'pa', 'edge'].forEach((id) => $(id).addEventListener('input', apply));
+    fromPreset();
+  </script>
+</body>
+</html>

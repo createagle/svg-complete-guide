@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 28-2 · Starter</title>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="480" height="320" viewBox="0 0 480 320" role="img" aria-label="An empty light gray area where the edge-detected picture should be">
+    <defs>
+      <filter id="edges" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1  -1 8 -1  -1 -1 -1"/>
+      </filter>
+    </defs>
+    <rect width="480" height="320" fill="#f1f5f9"/>
+    <image href="../photo.jpg" width="480" height="320" filter="url(#edges)"/>
+  </svg>
+  </div>
+</body>
+</html>

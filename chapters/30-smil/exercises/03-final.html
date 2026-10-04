@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 30-3 · Finished</title>
+  <style>
+    .like { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px 8px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--fg); font: inherit; font-size: 16px; cursor: pointer; }
+    .like svg { overflow: visible; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <button id="like" class="like" type="button">
+    <svg id="icon" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="10" fill="none" stroke="#e11d48" stroke-width="2" opacity="0">
+        <animate attributeName="r" from="10" to="24" begin="pop.begin+0.1s" dur="0.4s"/>
+        <animate attributeName="opacity" values="1;0" begin="pop.begin+0.1s" dur="0.4s"/>
+      </circle>
+      <g transform="translate(24 24)">
+        <g>
+          <animateTransform id="pop" attributeName="transform" type="scale" values="1;1.35;1" begin="like.click" dur="0.35s"/>
+          <path transform="translate(-24 -24)" d="M24 40 C10 30 6 22 6 16 C6 10 11 6 16 6 C20 6 23 9 24 12 C25 9 28 6 32 6 C37 6 42 10 42 16 C42 22 38 30 24 40 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round">
+            <set attributeName="fill" to="#e11d48" begin="pop.begin" fill="freeze"/>
+            <set attributeName="stroke" to="#e11d48" begin="pop.begin" fill="freeze"/>
+          </path>
+        </g>
+      </g>
+    </svg>
+    Like
+  </button>
+  </div>
+  <script>
+    // SMIL ignores prefers-reduced-motion: jump to the end state instead of playing
+    const icon = document.getElementById('icon');
+    document.getElementById('like').addEventListener('click', () => {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) setTimeout(() => icon.setCurrentTime(icon.getCurrentTime() + 5));
+    });
+  </script>
+</body>
+</html>

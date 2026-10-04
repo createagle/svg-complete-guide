@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>30-1 SMIL Loaders</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .stage { max-width: 720px; }
+    .tile { padding: 12px; border: 1px solid var(--border); background: none; border-radius: 12px; cursor: pointer; line-height: 0; color: var(--accent); }
+    .tile[aria-pressed="true"] { outline: 3px solid var(--accent); outline-offset: 2px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+    <figure>
+      <button class="tile" type="button" data-key="spin" aria-pressed="true">
+        <svg width="96" height="96" viewBox="0 0 48 48" role="img" aria-label="Spin loader">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width="5"/>
+          <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-dasharray="30 200">
+            <animateTransform attributeName="transform" type="rotate" from="0 24 24" to="360 24 24" dur="0.9s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </button>
+      <figcaption>Spin · animateTransform</figcaption>
+    </figure>
+    <figure>
+      <button class="tile" type="button" data-key="pulse" aria-pressed="false">
+        <svg width="96" height="96" viewBox="0 0 48 48" role="img" aria-label="Pulse loader">
+          <circle cx="10" cy="24" r="5" fill="currentColor">
+            <animate attributeName="opacity" values="1;.2;1" dur="1.2s" begin="0s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="24" cy="24" r="5" fill="currentColor">
+            <animate attributeName="opacity" values="1;.2;1" dur="1.2s" begin="0.2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="38" cy="24" r="5" fill="currentColor">
+            <animate attributeName="opacity" values="1;.2;1" dur="1.2s" begin="0.4s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </button>
+      <figcaption>Pulse · begin offsets</figcaption>
+    </figure>
+    <figure>
+      <button class="tile" type="button" data-key="bars" aria-pressed="false">
+        <svg width="96" height="96" viewBox="0 0 48 48" role="img" aria-label="Bars loader">
+          <rect x="6" y="12" width="6" height="24" rx="2" fill="currentColor">
+            <animate attributeName="height" values="24;8;24" dur="1s" begin="0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+            <animate attributeName="y" values="12;20;12" dur="1s" begin="0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+          </rect>
+          <rect x="16" y="12" width="6" height="24" rx="2" fill="currentColor">
+            <animate attributeName="height" values="24;8;24" dur="1s" begin="0.15s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+            <animate attributeName="y" values="12;20;12" dur="1s" begin="0.15s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+          </rect>
+          <rect x="26" y="12" width="6" height="24" rx="2" fill="currentColor">
+            <animate attributeName="height" values="24;8;24" dur="1s" begin="0.3s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+            <animate attributeName="y" values="12;20;12" dur="1s" begin="0.3s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+          </rect>
+          <rect x="36" y="12" width="6" height="24" rx="2" fill="currentColor">
+            <animate attributeName="height" values="24;8;24" dur="1s" begin="0.45s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+            <animate attributeName="y" values="12;20;12" dur="1s" begin="0.45s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+          </rect>
+        </svg>
+      </button>
+      <figcaption>Bars · calcMode spline</figcaption>
+    </figure>
+    <figure>
+      <button class="tile" type="button" data-key="draw" aria-pressed="false">
+        <svg width="96" height="96" viewBox="0 0 48 48" role="img" aria-label="Draw loader">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" transform="rotate(-90 24 24)">
+            <animate attributeName="stroke-dashoffset" values="100;0;-100" dur="1.6s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </button>
+      <figcaption>Draw · stroke-dashoffset</figcaption>
+    </figure>
+    <figure>
+      <button class="tile" type="button" data-key="orbit" aria-pressed="false">
+        <svg width="96" height="96" viewBox="0 0 48 48" role="img" aria-label="Orbit loader">
+          <path id="orbit" d="M24 6 a18 18 0 1 1 0 36 a18 18 0 1 1 0 -36" fill="none" stroke="currentColor" stroke-opacity=".2" stroke-width="2"/>
+          <g fill="currentColor">
+            <circle r="4"/>
+            <path d="M-3 -2.5 L-13 0 L-3 2.5 Z" opacity=".45"/>
+            <animateMotion dur="1.5s" repeatCount="indefinite" rotate="auto">
+              <mpath href="#orbit"/>
+            </animateMotion>
+          </g>
+        </svg>
+      </button>
+      <figcaption>Orbit · animateMotion</figcaption>
+    </figure>
+    <figure>
+      <button class="tile" type="button" data-key="morph" aria-pressed="false">
+        <svg width="96" height="96" viewBox="0 0 48 48" role="img" aria-label="Morph loader">
+          <path d="M24 6 C34 6 42 14 42 24 C42 34 34 42 24 42 C14 42 6 34 6 24 C6 14 14 6 24 6 Z">
+            <animate attributeName="d" dur="3s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.33;.66;1" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1"
+              values="M24 6 C34 6 42 14 42 24 C42 34 34 42 24 42 C14 42 6 34 6 24 C6 14 14 6 24 6 Z;
+                      M24 4 C36 8 40 12 42 24 C44 36 32 40 24 44 C12 42 8 36 4 24 C6 12 12 2 24 4 Z;
+                      M24 8 C30 4 44 12 40 24 C38 34 36 44 24 40 C14 44 4 34 8 24 C10 16 16 10 24 8 Z;
+                      M24 6 C34 6 42 14 42 24 C42 34 34 42 24 42 C14 42 6 34 6 24 C6 14 14 6 24 6 Z"/>
+            <animate attributeName="fill" values="#3b82f6;#8b5cf6;#ec4899;#3b82f6" dur="3s" repeatCount="indefinite"/>
+          </path>
+        </svg>
+      </button>
+      <figcaption>Morph · animate d</figcaption>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const CODE = {"spin": "<svg viewBox=\"0 0 48 48\" width=\"96\" height=\"96\">\n  <circle cx=\"24\" cy=\"24\" r=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\".2\" stroke-width=\"5\"/>\n  <circle cx=\"24\" cy=\"24\" r=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-dasharray=\"30 200\">\n    <animateTransform attributeName=\"transform\" type=\"rotate\" from=\"0 24 24\" to=\"360 24 24\" dur=\"0.9s\" repeatCount=\"indefinite\"/>\n  </circle>\n</svg>", "pulse": "<svg viewBox=\"0 0 48 48\" width=\"96\" height=\"96\">\n  <circle cx=\"10\" cy=\"24\" r=\"5\" fill=\"currentColor\">\n    <animate attributeName=\"opacity\" values=\"1;.2;1\" dur=\"1.2s\" begin=\"0s\" repeatCount=\"indefinite\"/>\n  </circle>\n  <circle cx=\"24\" cy=\"24\" r=\"5\" fill=\"currentColor\">\n    <animate attributeName=\"opacity\" values=\"1;.2;1\" dur=\"1.2s\" begin=\"0.2s\" repeatCount=\"indefinite\"/>\n  </circle>\n  <circle cx=\"38\" cy=\"24\" r=\"5\" fill=\"currentColor\">\n    <animate attributeName=\"opacity\" values=\"1;.2;1\" dur=\"1.2s\" begin=\"0.4s\" repeatCount=\"indefinite\"/>\n  </circle>\n</svg>", "bars": "<svg viewBox=\"0 0 48 48\" width=\"96\" height=\"96\">\n  <rect x=\"6\" y=\"12\" width=\"6\" height=\"24\" rx=\"2\" fill=\"currentColor\">\n    <animate attributeName=\"height\" values=\"24;8;24\" dur=\"1s\" begin=\"0s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n    <animate attributeName=\"y\" values=\"12;20;12\" dur=\"1s\" begin=\"0s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n  </rect>\n  <rect x=\"16\" y=\"12\" width=\"6\" height=\"24\" rx=\"2\" fill=\"currentColor\">\n    <animate attributeName=\"height\" values=\"24;8;24\" dur=\"1s\" begin=\"0.15s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n    <animate attributeName=\"y\" values=\"12;20;12\" dur=\"1s\" begin=\"0.15s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n  </rect>\n  <rect x=\"26\" y=\"12\" width=\"6\" height=\"24\" rx=\"2\" fill=\"currentColor\">\n    <animate attributeName=\"height\" values=\"24;8;24\" dur=\"1s\" begin=\"0.3s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n    <animate attributeName=\"y\" values=\"12;20;12\" dur=\"1s\" begin=\"0.3s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n  </rect>\n  <rect x=\"36\" y=\"12\" width=\"6\" height=\"24\" rx=\"2\" fill=\"currentColor\">\n    <animate attributeName=\"height\" values=\"24;8;24\" dur=\"1s\" begin=\"0.45s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n    <animate attributeName=\"y\" values=\"12;20;12\" dur=\"1s\" begin=\"0.45s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.5;1\" keySplines=\".4 0 .6 1;.4 0 .6 1\"/>\n  </rect>\n</svg>", "draw": "<svg viewBox=\"0 0 48 48\" width=\"96\" height=\"96\">\n  <circle cx=\"24\" cy=\"24\" r=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"5\" stroke-linecap=\"round\" pathLength=\"100\" stroke-dasharray=\"100\" stroke-dashoffset=\"100\" transform=\"rotate(-90 24 24)\">\n    <animate attributeName=\"stroke-dashoffset\" values=\"100;0;-100\" dur=\"1.6s\" repeatCount=\"indefinite\"/>\n  </circle>\n</svg>", "orbit": "<svg viewBox=\"0 0 48 48\" width=\"96\" height=\"96\">\n  <path id=\"orbit\" d=\"M24 6 a18 18 0 1 1 0 36 a18 18 0 1 1 0 -36\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\".2\" stroke-width=\"2\"/>\n  <g fill=\"currentColor\">\n    <circle r=\"4\"/>\n    <path d=\"M-3 -2.5 L-13 0 L-3 2.5 Z\" opacity=\".45\"/>\n    <animateMotion dur=\"1.5s\" repeatCount=\"indefinite\" rotate=\"auto\">\n      <mpath href=\"#orbit\"/>\n    </animateMotion>\n  </g>\n</svg>", "morph": "<svg viewBox=\"0 0 48 48\" width=\"96\" height=\"96\">\n  <path d=\"M24 6 C34 6 42 14 42 24 C42 34 34 42 24 42 C14 42 6 34 6 24 C6 14 14 6 24 6 Z\">\n    <animate attributeName=\"d\" dur=\"3s\" repeatCount=\"indefinite\" calcMode=\"spline\" keyTimes=\"0;.33;.66;1\" keySplines=\".45 0 .55 1;.45 0 .55 1;.45 0 .55 1\"\n      values=\"M24 6 C34 6 42 14 42 24 C42 34 34 42 24 42 C14 42 6 34 6 24 C6 14 14 6 24 6 Z;\n              M24 4 C36 8 40 12 42 24 C44 36 32 40 24 44 C12 42 8 36 4 24 C6 12 12 2 24 4 Z;\n              M24 8 C30 4 44 12 40 24 C38 34 36 44 24 40 C14 44 4 34 8 24 C10 16 16 10 24 8 Z;\n              M24 6 C34 6 42 14 42 24 C42 34 34 42 24 42 C14 42 6 34 6 24 C6 14 14 6 24 6 Z\"/>\n    <animate attributeName=\"fill\" values=\"#3b82f6;#8b5cf6;#ec4899;#3b82f6\" dur=\"3s\" repeatCount=\"indefinite\"/>\n  </path>\n</svg>"};
+    const out = document.getElementById('out');
+    function show(key) {
+      out.textContent = CODE[key];
+      document.querySelectorAll('.tile').forEach((b) => b.setAttribute('aria-pressed', b.dataset.key === key));
+    }
+    document.querySelectorAll('.tile').forEach((b) => b.addEventListener('click', () => show(b.dataset.key)));
+    show('spin');
+    // SMIL ignores prefers-reduced-motion, so pause it from script
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelectorAll('svg').forEach((s) => s.pauseAnimations && s.pauseAnimations());
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>32-2 offset-path Functions</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .box { position: relative; width: 200px; height: 140px; border: 1px solid var(--border); border-radius: 10px; }
+    .track { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; stroke: currentColor; stroke-opacity: .3; stroke-dasharray: 5 5; }
+    .dot { position: absolute; left: 0; top: 0; width: 18px; height: 18px; border-radius: 4px; background: var(--accent); animation: go 3s ease-in-out infinite; }
+    [data-kind="ray"] .dot { animation-direction: alternate; }
+    @keyframes go { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Box width <input id="w" type="range" min="160" max="360" value="200"><output>200px</output></label>
+  </div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><path id="track" d="M20 110 C20 20 180 20 180 110"/></svg>
+  <div class="stage">
+    <figure>
+      <div class="box" data-kind="path"><svg class="track" aria-hidden="true"><path/></svg><div class="dot" style='offset-path: path("M20 70 C60 10 140 10 180 70")'></div></div>
+      <figcaption>path() · px, fixed</figcaption>
+    </figure>
+    <figure>
+      <div class="box" data-kind="url"><svg class="track" aria-hidden="true"><path/></svg><div class="dot" style='offset-path: url(#track)'></div></div>
+      <figcaption>url(#track) · px, fixed</figcaption>
+    </figure>
+    <figure>
+      <div class="box" data-kind="ray"><svg class="track" aria-hidden="true"><path/></svg><div class="dot" style='offset-path: ray(60deg closest-side at 50% 50%)'></div></div>
+      <figcaption>ray() · from a point</figcaption>
+    </figure>
+    <figure>
+      <div class="box" data-kind="shape"><svg class="track" aria-hidden="true"><path/></svg><div class="dot" style='offset-path: shape(from 10% 50%, curve to 90% 50% with 30% 0% / 70% 0%, curve to 10% 50% with 70% 100% / 30% 100%, close)'></div></div>
+      <figcaption>shape() · % of the box</figcaption>
+    </figure>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const CODE = {"path": "path(\"M20 70 C60 10 140 10 180 70\")", "url": "url(#track)", "ray": "ray(60deg closest-side at 50% 50%)", "shape": "shape(from 10% 50%, curve to 90% 50% with 30% 0% / 70% 0%, curve to 10% 50% with 70% 100% / 30% 100%, close)"};
+    // Draw each track in px so you can see where the dot is allowed to go
+    function tracks(w, h) {
+      const d = {
+        path: 'M20 70 C60 10 140 10 180 70',
+        url: 'M20 110 C20 20 180 20 180 110',
+        ray: (() => { const r = Math.min(w, h) / 2, a = (60 - 90) * Math.PI / 180; return 'M' + w / 2 + ' ' + h / 2 + ' l' + (r * Math.cos(a)).toFixed(1) + ' ' + (r * Math.sin(a)).toFixed(1); })(),
+        shape: 'M' + .1 * w + ' ' + .5 * h + ' C' + .3 * w + ' 0 ' + .7 * w + ' 0 ' + .9 * w + ' ' + .5 * h + ' C' + .7 * w + ' ' + h + ' ' + .3 * w + ' ' + h + ' ' + .1 * w + ' ' + .5 * h + ' Z',
+      };
+      document.querySelectorAll('.box').forEach((b) => b.querySelector('.track path').setAttribute('d', d[b.dataset.kind]));
+    }
+    function update() {
+      const w = +$('w').value;
+      $('w').nextElementSibling.value = w + 'px';
+      document.querySelectorAll('.box').forEach((b) => { b.style.width = w + 'px'; });
+      tracks(w, 140);
+      $('out').textContent = Object.entries(CODE).map(([k, v]) => '/* ' + k + ' */ offset-path: ' + v + ';').join('\n');
+    }
+    $('w').addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>

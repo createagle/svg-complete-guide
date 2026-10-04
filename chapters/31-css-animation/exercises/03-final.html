@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 31-3 · Finished</title>
+  <style>
+    .menu { padding: 12px; border: 1px solid var(--border); border-radius: 16px; background: var(--bg); color: var(--fg); cursor: pointer; line-height: 0; }
+    .menu svg { stroke: currentColor; stroke-width: 2; stroke-linecap: round; overflow: visible; }
+    .menu line { transition: transform .3s, opacity .2s; transform-box: fill-box; transform-origin: center; }
+    .menu[aria-expanded="true"] .top { transform: translateY(6px) rotate(45deg); }
+    .menu[aria-expanded="true"] .mid { opacity: 0; }
+    .menu[aria-expanded="true"] .bot { transform: translateY(-6px) rotate(-45deg); }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <button class="menu" type="button" aria-label="Menu" aria-expanded="false">
+    <svg width="64" height="64" viewBox="0 0 24 24" aria-hidden="true">
+      <line class="top" x1="4" y1="6" x2="20" y2="6"/>
+      <line class="mid" x1="4" y1="12" x2="20" y2="12"/>
+      <line class="bot" x1="4" y1="18" x2="20" y2="18"/>
+    </svg>
+  </button>
+  </div>
+  <script>
+    // Toggle the menu state; the look comes from CSS
+    const menu = document.querySelector('.menu');
+    menu.addEventListener('click', () => menu.setAttribute('aria-expanded', menu.getAttribute('aria-expanded') !== 'true'));
+  </script>
+</body>
+</html>

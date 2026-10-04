@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>31-3 transform-box & transform-origin</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .stage svg { color: var(--fg); overflow: visible; }
+    #shape { fill: color-mix(in srgb, var(--accent) 35%, transparent); stroke: color-mix(in srgb, var(--accent) 60%, transparent); }
+    #shape.spin { animation: spin 4s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">transform-box <select id="box"><option>view-box</option><option selected>fill-box</option><option>stroke-box</option></select></label>
+    <label class="control">transform-origin <select id="origin"><option>0 0</option><option selected>center</option><option>100% 100%</option><option>30px 20px</option></select></label>
+    <label class="control">rotate <input id="angle" type="range" min="0" max="360" value="30"><output></output></label>
+    <label class="control"><input id="spin" type="checkbox"> Animate</label>
+  </div>
+  <div class="stage">
+    <svg width="540" height="360" viewBox="0 0 360 240" role="img" aria-label="A rectangle rotated around the chosen transform origin, with its reference box outlined">
+      <rect x="0.5" y="0.5" width="359" height="239" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="4 4"/>
+      <rect id="refbox" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <rect x="200" y="90" width="100" height="60" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="4 3"/>
+      <rect id="shape" x="200" y="90" width="100" height="60" rx="6" stroke-width="12"/>
+      <g id="cross" stroke="#e11d48" stroke-width="2"><line x1="-7" x2="7"/><line y1="-7" y2="7"/><circle r="3" fill="#e11d48" stroke="none"/></g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    // Reference boxes in user units: the viewBox, the geometry, the geometry plus half the stroke
+    const BOXES = { 'view-box': [0, 0, 360, 240], 'fill-box': [200, 90, 100, 60], 'stroke-box': [194, 84, 112, 72] };
+    function point([x, y, w, h], origin) {
+      if (origin === 'center') return [x + w / 2, y + h / 2];
+      if (origin === '100% 100%') return [x + w, y + h];
+      if (origin === '30px 20px') return [x + 30, y + 20];
+      return [x, y];
+    }
+    function update() {
+      const box = $('box').value, origin = $('origin').value, angle = $('angle').value, s = $('shape');
+      $('angle').nextElementSibling.value = angle + '°';
+      s.style.transformBox = box;
+      s.style.transformOrigin = origin;
+      s.style.transform = 'rotate(' + angle + 'deg)';
+      s.classList.toggle('spin', $('spin').checked);
+      const b = BOXES[box], [ox, oy] = point(b, origin);
+      ['x', 'y', 'width', 'height'].forEach((k, i) => $('refbox').setAttribute(k, b[i]));
+      $('cross').setAttribute('transform', 'translate(' + ox + ' ' + oy + ')');
+      $('out').textContent = '#shape {\n  transform-box: ' + box + ';\n  transform-origin: ' + origin + ';\n  transform: rotate(' + angle + 'deg);\n}';
+    }
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

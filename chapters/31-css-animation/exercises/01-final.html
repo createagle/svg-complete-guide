@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 31-1 · Finished</title>
+  <style>
+    .art { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .art > * { stroke-dasharray: 1 2; stroke-dashoffset: 1.01; animation: draw 1.2s ease-in-out forwards; }
+    .art > :nth-child(2) { animation-delay: .6s; }
+    .art > :nth-child(3) { animation-delay: .9s; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg class="art" width="360" height="300" viewBox="0 0 120 100" role="img" aria-label="A line drawing of mountains and the sun that draws itself in">
+    <path d="M10 82 L42 40 L62 64 L76 50 L110 82" pathLength="1"/>
+    <circle cx="86" cy="28" r="10" pathLength="1"/>
+    <path d="M6 90 H114" pathLength="1"/>
+  </svg>
+  </div>
+</body>
+</html>

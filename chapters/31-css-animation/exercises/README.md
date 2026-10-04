@@ -1,0 +1,11 @@
+# Chapter 31 · Exercise Code
+
+**English** | [简体中文](README.zh-CN.md)
+
+Starter and finished versions of each exercise, deployed to GitHub Pages so both can be previewed live. The tasks and reference answers are in the tutorial. Exercises without code are answered in the tutorial only.
+
+| Exercise | Starter | Finished |
+| --- | --- | --- |
+| 1 · Draw-on line art | [Preview](https://createagle.github.io/svg-complete-guide/chapters/31-css-animation/exercises/01-start.html) · [01-start.html](01-start.html) | [Preview](https://createagle.github.io/svg-complete-guide/chapters/31-css-animation/exercises/01-final.html) · [01-final.html](01-final.html) |
+| 2 · Gear spinning off center | [Preview](https://createagle.github.io/svg-complete-guide/chapters/31-css-animation/exercises/02-start.html) · [02-start.html](02-start.html) | [Preview](https://createagle.github.io/svg-complete-guide/chapters/31-css-animation/exercises/02-final.html) · [02-final.html](02-final.html) |
+| 3 · Menu icon to X | [Preview](https://createagle.github.io/svg-complete-guide/chapters/31-css-animation/exercises/03-start.html) · [03-start.html](03-start.html) | [Preview](https://createagle.github.io/svg-complete-guide/chapters/31-css-animation/exercises/03-final.html) · [03-final.html](03-final.html) |

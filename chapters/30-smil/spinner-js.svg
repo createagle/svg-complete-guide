@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <circle cx="24" cy="24" r="18" fill="none" stroke="#3b82f6" stroke-opacity=".25" stroke-width="5"/>
+  <circle id="arc" cx="24" cy="24" r="18" fill="none" stroke="#3b82f6" stroke-width="5" stroke-linecap="round" stroke-dasharray="30 200"/>
+  <script><![CDATA[
+    // Never runs when this file is shown through <img> or a CSS background
+    const arc = document.getElementById('arc');
+    let angle = 0;
+    setInterval(() => { angle = (angle + 8) % 360; arc.setAttribute('transform', 'rotate(' + angle + ' 24 24)'); }, 20);
+  ]]></script>
+</svg>

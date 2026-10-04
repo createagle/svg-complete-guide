@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>32-1 Paper Plane on a Motion Path</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .stage svg { color: var(--fg); }
+    .plane { fill: var(--accent); }
+    #cssPlane { offset-path: path("M30 240 C130 240 200 200 260 150 C320 100 380 60 380 110 C380 160 300 160 300 110 C300 60 420 40 570 60"); offset-rotate: var(--rot, auto); animation: fly 4s ease-in-out infinite; }
+    @keyframes fly { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Engine <select id="engine"><option value="css">CSS offset-path</option><option value="smil">SMIL animateMotion</option></select></label>
+    <label class="control">Rotation <select id="rot"><option value="auto">auto</option><option value="reverse">reverse</option><option value="0deg">fixed (0deg)</option></select></label>
+    <button id="play" class="btn" type="button">Pause</button>
+    <label class="control">Progress <input id="scrub" type="range" min="0" max="100" value="0"><output>0%</output></label>
+  </div>
+  <div class="stage">
+    <svg id="sky" width="600" height="300" viewBox="0 0 600 300" role="img" aria-label="A paper plane flying a loop along a dashed path">
+      <path id="flight" d="M30 240 C130 240 200 200 260 150 C320 100 380 60 380 110 C380 160 300 160 300 110 C300 60 420 40 570 60" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 6"/>
+      <g id="cssPlane" class="plane">
+        <path d="M18 0 L-14 -12 L-6 0 L-14 12 Z"/>
+        <path d="M18 0 L-6 0" fill="none" stroke="var(--bg)" stroke-width="1.5"/>
+      </g>
+      <g id="smilPlane" class="plane" display="none">
+        <path d="M18 0 L-14 -12 L-6 0 L-14 12 Z"/>
+        <path d="M18 0 L-6 0" fill="none" stroke="var(--bg)" stroke-width="1.5"/>
+        <animateMotion id="motion" dur="4s" repeatCount="indefinite" rotate="auto" calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".42 0 .58 1">
+          <mpath href="#flight"/>
+        </animateMotion>
+      </g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id), sky = $('sky'), cssPlane = $('cssPlane'), anim = cssPlane.getAnimations()[0];
+    const SMIL_ROT = { auto: 'auto', reverse: 'auto-reverse', '0deg': '0' };
+    let playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function update() {
+      const engine = $('engine').value, rot = $('rot').value;
+      cssPlane.style.display = engine === 'css' ? '' : 'none';
+      $('smilPlane').setAttribute('display', engine === 'smil' ? 'inline' : 'none');
+      cssPlane.style.setProperty('--rot', rot);
+      $('motion').setAttribute('rotate', SMIL_ROT[rot]);
+      if (!playing) sky.setCurrentTime(sky.getCurrentTime()); // a paused timeline only redraws on a seek
+      $('out').textContent = engine === 'css'
+        ? '.plane {\n  offset-path: path("M30 240 C130 240 …");\n  offset-rotate: ' + rot + ';\n  animation: fly 4s ease-in-out infinite;\n}\n@keyframes fly { to { offset-distance: 100%; } }'
+        : '<g class="plane">\n  …\n  <animateMotion dur="4s" repeatCount="indefinite" rotate="' + SMIL_ROT[rot] + '"\n    calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".42 0 .58 1">\n    <mpath href="#flight"/>\n  </animateMotion>\n</g>';
+    }
+    // Both engines share one clock: the CSS animation's currentTime and the SVG document time
+    function setPlaying(on) {
+      playing = on;
+      $('play').textContent = on ? 'Pause' : 'Play';
+      if (on) { anim.play(); sky.unpauseAnimations(); } else { anim.pause(); sky.pauseAnimations(); }
+    }
+    function seek(p) {
+      anim.currentTime = 4000 * p;
+      sky.setCurrentTime(4 * p);
+    }
+    $('scrub').addEventListener('input', () => { setPlaying(false); seek($('scrub').value / 100); $('scrub').nextElementSibling.value = $('scrub').value + '%'; });
+    $('play').addEventListener('click', () => setPlaying(!playing));
+    ['engine', 'rot'].forEach((id) => $(id).addEventListener('input', update));
+    // Keep the slider in step while playing
+    (function tick() { if (playing) { const p = (anim.currentTime % 4000) / 40; $('scrub').value = p; $('scrub').nextElementSibling.value = Math.round(p) + '%'; } requestAnimationFrame(tick); })();
+    seek(playing ? 0 : 0.35); setPlaying(playing); update();
+  </script>
+</body>
+</html>

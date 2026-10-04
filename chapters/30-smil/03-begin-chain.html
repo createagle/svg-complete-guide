@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>30-3 SMIL begin Event Chain</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .log { margin: 0; padding: 10px 12px 10px 34px; min-width: 220px; min-height: 120px; font: 12.5px/1.6 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; align-self: stretch; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <button id="launch" class="btn" type="button">Launch</button>
+    <button id="reset" class="btn" type="button">Reset</button>
+  </div>
+  <div class="stage">
+    <svg id="scene" width="360" height="300" viewBox="0 0 360 300" role="img" aria-label="A rocket on a launch pad with three signal lights">
+      <rect width="360" height="300" rx="14" fill="#0f172a"/>
+      <g fill="#f8fafc" opacity=".7"><circle cx="40" cy="120" r="1.2"/><circle cx="300" cy="60" r="1.5"/><circle cx="250" cy="140" r="1"/><circle cx="90" cy="200" r="1.3"/><circle cx="330" cy="200" r="1"/></g>
+      <rect x="0" y="262" width="360" height="38" fill="#334155"/>
+      <rect x="150" y="252" width="80" height="10" fill="#64748b"/>
+      <g stroke="#475569" stroke-width="2">
+        <circle id="light1" cx="40" cy="36" r="11" fill="#1e293b">
+          <set id="l1" attributeName="fill" to="#ef4444" begin="launch.click" restart="never" fill="freeze"/>
+        </circle>
+        <circle id="light2" cx="72" cy="36" r="11" fill="#1e293b">
+          <set id="l2" attributeName="fill" to="#f59e0b" begin="l1.begin+0.6s" fill="freeze"/>
+        </circle>
+        <circle id="light3" cx="104" cy="36" r="11" fill="#1e293b">
+          <set id="l3" attributeName="fill" to="#22c55e" begin="l2.begin+0.6s" fill="freeze"/>
+        </circle>
+      </g>
+      <g transform="translate(190 250)">
+        <animateTransform id="lift" attributeName="transform" type="translate" from="0 0" to="0 -330" additive="sum"
+          begin="l3.begin+0.6s" dur="1.6s" calcMode="spline" keyTimes="0;1" keySplines=".55 0 1 .45" fill="freeze"/>
+        <path d="M-9 -8 L0 18 L9 -8 Z" fill="#f97316" opacity="0">
+          <animate id="ignite" attributeName="opacity" to="1" begin="lift.begin" dur="0.15s" fill="freeze"/>
+          <animateTransform attributeName="transform" type="scale" values="1 1;1 1.4;1 1" dur="0.2s" begin="lift.begin" end="lift.end" repeatCount="indefinite"/>
+        </path>
+        <path d="M0 -70 C14 -54 16 -30 14 -8 L-14 -8 C-16 -30 -14 -54 0 -70 Z" fill="#e2e8f0"/>
+        <circle cy="-38" r="6" fill="#38bdf8" stroke="#0f172a" stroke-width="2"/>
+        <path d="M-14 -24 L-24 -4 L-14 -8 Z M14 -24 L24 -4 L14 -8 Z" fill="#ef4444"/>
+      </g>
+      <text x="180" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="#f8fafc" opacity="0">Liftoff!
+        <set id="done" attributeName="opacity" to="1" begin="lift.end" fill="freeze"/>
+      </text>
+    </svg>
+    <ol id="log" class="log" aria-live="polite"></ol>
+  </div>
+  <script>
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const blank = document.getElementById('scene').cloneNode(true);
+    const log = document.getElementById('log');
+    let svg;
+    // Log every beginEvent / endEvent fired by an animation element that has an id
+    function wire() {
+      svg = document.getElementById('scene');
+      svg.querySelectorAll('set[id], animate[id], animateTransform[id]').forEach((a) => {
+        ['beginEvent', 'endEvent'].forEach((type) => a.addEventListener(type, () => {
+          if (!a.isConnected) return; // ignore the copy that Reset just removed
+          const li = document.createElement('li');
+          li.textContent = svg.getCurrentTime().toFixed(2) + 's  #' + a.id + ' ' + type.replace('Event', '');
+          log.append(li);
+        }));
+      });
+    }
+    wire();
+    // SMIL ignores prefers-reduced-motion: skip straight to the end state instead of playing
+    document.getElementById('launch').addEventListener('click', () => {
+      if (reduce.matches) setTimeout(() => svg.setCurrentTime(svg.getCurrentTime() + 10));
+    });
+    // A fresh <svg> gets a fresh timeline, so Reset swaps in an untouched copy
+    document.getElementById('reset').addEventListener('click', () => {
+      svg.replaceWith(blank.cloneNode(true));
+      log.textContent = '';
+      wire();
+    });
+  </script>
+</body>
+</html>

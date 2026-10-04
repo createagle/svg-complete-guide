@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 30-2 · Finished</title>
+  <style>
+    .stage svg { color: var(--accent); }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="240" height="240" viewBox="0 0 48 48" role="img" aria-label="Three dots that fade in and out one after another">
+    <circle cx="10" cy="24" r="5" fill="currentColor">
+      <animate attributeName="opacity" values="1;.2;1" dur="1.2s" begin="0s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="24" cy="24" r="5" fill="currentColor">
+      <animate attributeName="opacity" values="1;.2;1" dur="1.2s" begin="0.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="38" cy="24" r="5" fill="currentColor">
+      <animate attributeName="opacity" values="1;.2;1" dur="1.2s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+  </svg>
+  </div>
+  <script>
+    // SMIL ignores prefers-reduced-motion, so pause it from script
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelectorAll('svg').forEach((s) => s.pauseAnimations && s.pauseAnimations());
+  </script>
+</body>
+</html>

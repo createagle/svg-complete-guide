@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>31-1 Signature Drawing</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    .sig { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .sig path { stroke-dasharray: 1 2; stroke-dashoffset: 1.01; }
+    .sig.play path { animation: draw var(--dur, 0.8s) var(--ease, ease-in-out) calc(var(--i) * var(--dur, 0.8s)) both; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @media (prefers-reduced-motion: reduce) { .sig.play path { animation-delay: 0s; } }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Duration per stroke <input id="dur" type="range" min="0.2" max="2" step="0.1" value="0.8"><output>0.8s</output></label>
+    <label class="control">Easing <select id="ease"><option>ease-in-out</option><option>linear</option><option>ease-out</option></select></label>
+    <button id="replay" class="btn" type="button">Replay</button>
+  </div>
+  <div class="stage">
+    <svg width="520" height="320" viewBox="0 0 260 160" role="img" aria-label="The letters svg handwritten with a single pen line, then underlined">
+      <g id="sig" class="sig play">
+      <path d="M68 66 C64 54 40 54 40 66 C40 78 70 76 70 89 C70 103 42 104 37 93" pathLength="1" style="--i: 0"/>
+      <path d="M90 62 L106 100 L122 62" pathLength="1" style="--i: 1"/>
+      <path d="M170 68 C162 58 140 60 140 76 C140 92 162 94 170 80 L170 106 C170 124 146 128 136 116" pathLength="1" style="--i: 2"/>
+      <path d="M30 136 C90 124 170 126 232 116" pathLength="1" style="--i: 3"/>
+      </g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id), sig = $('sig');
+    function update() {
+      const dur = $('dur').value + 's', ease = $('ease').value;
+      $('dur').nextElementSibling.value = dur;
+      sig.style.setProperty('--dur', dur);
+      sig.style.setProperty('--ease', ease);
+      $('out').textContent = '<path d="…" pathLength="1" style="--i: 0"/>\n\n.sig path {\n  stroke-dasharray: 1 2;\n  stroke-dashoffset: 1.01;\n  animation: draw ' + dur + ' ' + ease + ' calc(var(--i) * ' + dur + ') both;\n}\n@keyframes draw { to { stroke-dashoffset: 0; } }';
+    }
+    // Restart: drop the class, force a style flush, add it back
+    function replay() { sig.classList.remove('play'); sig.getBoundingClientRect(); sig.classList.add('play'); }
+    ['dur', 'ease'].forEach((id) => $(id).addEventListener('input', () => { update(); replay(); }));
+    $('replay').addEventListener('click', replay);
+    update();
+  </script>
+</body>
+</html>

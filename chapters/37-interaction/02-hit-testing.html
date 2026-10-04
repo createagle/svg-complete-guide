@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>37-2 pointer-events & Hit Testing</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    .stage svg { color: var(--fg); }
+    #ring:hover { stroke: #e11d48; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">pointer-events <select id="pe"><option selected>visiblePainted</option><option>visibleFill</option><option>visibleStroke</option><option>visible</option><option>painted</option><option>fill</option><option>stroke</option><option>all</option><option>none</option><option>bounding-box</option></select></label>
+    <label class="control">fill <select id="fill"><option value="none" selected>none</option><option value="#93c5fd">color</option><option value="transparent">transparent</option></select></label>
+    <label class="control"><input id="hide" type="checkbox"> visibility: hidden</label>
+  </div>
+  <div class="stage">
+    <svg id="lab" width="420" height="300" viewBox="0 0 420 300" role="img" aria-label="A thick ring; green dots mark where it receives pointer events">
+      <rect width="420" height="300" fill="none" stroke="currentColor" stroke-opacity=".2"/>
+      <circle id="ring" cx="210" cy="150" r="90" fill="none" stroke="#2563eb" stroke-width="28"/>
+      <g id="dots" fill="#16a34a" pointer-events="none"></g>
+    </svg>
+  </div>
+  <pre id="out" class="out" role="status"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id), lab = $('lab'), ring = $('ring');
+    const NS = 'http://www.w3.org/2000/svg';
+    if (!CSS.supports('pointer-events', 'bounding-box')) $('pe').querySelector('option:last-child').disabled = true;
+    // Paint the hit area: probe a grid of points with elementFromPoint
+    function hitMap() {
+      const box = lab.getBoundingClientRect(), dots = [];
+      for (let y = 6; y < 300; y += 12) for (let x = 6; x < 420; x += 12) {
+        const el = document.elementFromPoint(box.left + x * box.width / 420, box.top + y * box.height / 300);
+        if (el === ring) { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 2.5); dots.push(c); }
+      }
+      $('dots').replaceChildren(...dots);
+    }
+    function update() {
+      ring.style.pointerEvents = $('pe').value;
+      ring.setAttribute('fill', $('fill').value);
+      ring.style.visibility = $('hide').checked ? 'hidden' : '';
+      hitMap(); report();
+    }
+    function report(e) {
+      let line = '#ring { pointer-events: ' + $('pe').value + '; fill: ' + $('fill').value + (($('hide').checked) ? '; visibility: hidden' : '') + ' }';
+      if (e) {
+        const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ring.getScreenCTM().inverse());
+        const hit = document.elementFromPoint(e.clientX, e.clientY) === ring;
+        line += '\npointer at ' + p.x.toFixed(0) + ', ' + p.y.toFixed(0) + ' · hit: ' + hit + ' · isPointInFill: ' + ring.isPointInFill(p) + ' · isPointInStroke: ' + ring.isPointInStroke(p);
+      }
+      $('out').textContent = line;
+    }
+    lab.addEventListener('pointermove', report);
+    document.querySelectorAll('select, input').forEach((el) => el.addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>

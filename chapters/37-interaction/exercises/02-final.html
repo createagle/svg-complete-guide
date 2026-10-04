@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 37-2 · Finished</title>
+  <style>
+    .chip { cursor: pointer; }
+    .chip rect { fill: var(--bg); stroke: var(--border); stroke-width: 1.5; }
+    .chip text { font: 600 15px system-ui, sans-serif; fill: var(--fg); }
+    .chip.on rect, .chip[aria-pressed="true"] rect { fill: var(--accent); stroke: var(--accent); }
+    .chip.on text, .chip[aria-pressed="true"] text { fill: var(--bg); }
+    .chip:focus { outline: none; }
+    .chip:focus-visible rect { stroke: var(--fg); stroke-width: 3; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg width="730" height="200" viewBox="0 0 365 100" role="toolbar" aria-label="Text style">
+    <g class="chip" tabindex="0" role="button" aria-pressed="false" aria-label="Bold" transform="translate(15 30)">
+      <rect width="105" height="40" rx="20"/>
+      <text x="52.5" y="26" text-anchor="middle">Bold</text>
+    </g>
+    <g class="chip" tabindex="0" role="button" aria-pressed="false" aria-label="Italic" transform="translate(130 30)">
+      <rect width="105" height="40" rx="20"/>
+      <text x="52.5" y="26" text-anchor="middle">Italic</text>
+    </g>
+    <g class="chip" tabindex="0" role="button" aria-pressed="false" aria-label="Underline" transform="translate(245 30)">
+      <rect width="105" height="40" rx="20"/>
+      <text x="52.5" y="26" text-anchor="middle">Underline</text>
+    </g>
+  </svg>
+  </div>
+  <script>
+    function toggle(chip) { chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed') !== 'true'); }
+    document.querySelectorAll('.chip').forEach((chip) => {
+      chip.addEventListener('click', () => toggle(chip));
+      // A real button reacts to Enter and Space; an SVG group has to do it by hand
+      chip.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(chip); }
+      });
+    });
+  </script>
+</body>
+</html>

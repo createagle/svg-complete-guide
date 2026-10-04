@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>38-2 Faux 3D Cube</title>
+  <style>
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--fg) 6%, transparent); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-x: auto; white-space: pre; }
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    #view { touch-action: none; cursor: grab; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Turn <input id="ry" type="range" min="0" max="360" value="35"><output></output></label>
+    <label class="control">Tilt <input id="rx" type="range" min="-60" max="60" value="25"><output></output></label>
+    <label class="control">Light <input id="light" type="range" min="0" max="360" value="320"><output></output></label>
+    <label class="control">Projection <select id="proj"><option value="persp">perspective</option><option value="ortho">orthographic</option></select></label>
+    <label class="control"><input id="spin" type="checkbox"> Auto-rotate</label>
+  </div>
+  <div class="stage">
+    <svg id="view" width="420" height="360" viewBox="-210 -180 420 360" role="img" aria-label="A cube drawn from three visible faces, shaded by a movable light">
+      <ellipse id="shadow" cx="0" cy="125" rx="90" ry="16" fill="#000" opacity=".18"/>
+      <g id="faces" stroke="#1e3a8a" stroke-width="1.5" stroke-linejoin="round"></g>
+    </svg>
+  </div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const $ = (id) => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+    const S = 70;
+    const V = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]].map((p) => p.map((c) => c * S));
+    // Each face lists its corners in order, plus its outward normal before rotation
+    const FACES = [
+      { v: [0, 1, 2, 3], n: [0, 0, -1] }, { v: [5, 4, 7, 6], n: [0, 0, 1] },
+      { v: [4, 0, 3, 7], n: [-1, 0, 0] }, { v: [1, 5, 6, 2], n: [1, 0, 0] },
+      { v: [4, 5, 1, 0], n: [0, -1, 0] }, { v: [3, 2, 6, 7], n: [0, 1, 0] },
+    ];
+    function rotate([x, y, z], ry, rx) {
+      const cy = Math.cos(ry), sy = Math.sin(ry), cx = Math.cos(rx), sx = Math.sin(rx);
+      const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;          // turn around the vertical axis
+      return [x1, y * cx - z1 * sx, y * sx + z1 * cx];            // then tilt around the horizontal axis
+    }
+    function project([x, y, z], persp) {
+      const k = persp ? 600 / (600 + z) : 1;                      // farther (bigger z) → smaller
+      return [x * k, y * k];
+    }
+    function draw() {
+      const ry = $('ry').value * Math.PI / 180, rx = $('rx').value * Math.PI / 180, la = $('light').value * Math.PI / 180, persp = $('proj').value === 'persp';
+      ['ry', 'rx', 'light'].forEach((id) => { $(id).nextElementSibling.value = $(id).value + '°'; });
+      const L = [Math.sin(la) * 0.8, -0.7, -Math.cos(la) * 0.8];     // toward the light: 0° = in front of the cube, 90° = to its right
+      const len = Math.hypot(...L), light = L.map((c) => c / len);
+      const rv = V.map((p) => rotate(p, ry, rx));
+      const shown = FACES.map((f) => {
+        const n = rotate(f.n, ry, rx);
+        const z = f.v.reduce((s, i) => s + rv[i][2], 0) / 4;
+        const lit = Math.max(0, n[0] * light[0] + n[1] * light[1] + n[2] * light[2]);
+        return { f, n, z, lit };
+      }).filter((s) => s.n[2] < 0)                                   // back faces point away from the viewer
+        .sort((a, b) => b.z - a.z);                                  // painter's algorithm: far faces first
+      $('faces').replaceChildren(...shown.map((s) => {
+        const p = document.createElementNS(NS, 'polygon');
+        p.setAttribute('points', s.f.v.map((i) => project(rv[i], persp).map((c) => c.toFixed(1)).join(',')).join(' '));
+        p.setAttribute('fill', 'hsl(220 75% ' + (28 + 50 * s.lit).toFixed(0) + '%)');
+        return p;
+      }));
+      $('shadow').setAttribute('rx', (80 + 20 * Math.abs(Math.sin(2 * ry))).toFixed(1));
+      $('out').textContent = 'visible faces: ' + shown.length + ' · brightness: ' + shown.map((s) => s.lit.toFixed(2)).join(', ') + '\nscreen = ' + (persp ? '(x, y) × 600 / (600 + z)' : '(x, y), z dropped');
+    }
+    // Drag to turn and tilt
+    let drag = null;
+    $('view').addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, ry: +$('ry').value, rx: +$('rx').value }; $('view').setPointerCapture(e.pointerId); });
+    $('view').addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      $('ry').value = ((drag.ry + (e.clientX - drag.x) * 0.6) % 360 + 360) % 360;
+      $('rx').value = Math.max(-60, Math.min(60, drag.rx - (e.clientY - drag.y) * 0.4));
+      draw();
+    });
+    ['pointerup', 'pointercancel'].forEach((t) => $('view').addEventListener(t, () => { drag = null; }));
+    // Auto-rotate is opt-in, and unavailable when the user prefers reduced motion
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) $('spin').disabled = true;
+    let last = null;
+    (function tick(now) {
+      if ($('spin').checked && last !== null) { $('ry').value = (+$('ry').value + (now - last) * 0.03) % 360; draw(); }
+      last = now; requestAnimationFrame(tick);
+    })(performance.now());
+    document.querySelectorAll('input, select').forEach((el) => el.addEventListener('input', draw));
+    draw();
+  </script>
+</body>
+</html>

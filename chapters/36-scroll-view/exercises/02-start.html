@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 36-2 · Starter</title>
+  <style>
+    .viewer { width: 420px; max-width: 100%; height: 300px; display: grid; place-items: start; }
+    .thumb { padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 10px; overflow: hidden; line-height: 0; }
+    #pic { display: block; width: 120px; height: 80px; }
+    .viewer.big { place-items: center; }
+    .viewer.big .thumb { cursor: zoom-out; }
+    .viewer.big #pic { width: 390px; height: 260px; }
+  </style>
+</head>
+<body class="demo">
+  <div class="viewer">
+    <button id="toggle" class="thumb" type="button" aria-expanded="false" aria-label="Enlarge picture">
+      <svg id="pic" viewBox="0 0 120 80" role="img" aria-label="Mountains under the sun"><rect width="120" height="80" fill="#bae6fd"/><circle cx="92" cy="22" r="10" fill="#fbbf24"/><path d="M0 80 L30 38 L50 58 L72 30 L120 80 Z" fill="#16a34a"/><path d="M0 80 L20 60 L40 80 Z" fill="#15803d"/></svg>
+    </button>
+  </div>
+  <script>
+    const viewer = document.querySelector('.viewer'), toggle = document.getElementById('toggle');
+    toggle.addEventListener('click', () => {
+      const big = viewer.classList.toggle('big');
+      toggle.setAttribute('aria-expanded', big);
+    });
+  </script>
+</body>
+</html>

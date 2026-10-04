@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <style>
+    @media (max-width: 520px) { .birds, .tree2 { display: none; } }
+    @media (max-width: 340px) { .title, .hills-back { display: none; } }
+  </style>
+  <rect width="800" height="400" fill="#bae6fd"/>
+  <circle class="sun" cx="680" cy="90" r="42" fill="#fbbf24"/>
+  <g class="birds" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round"><path d="M140 120 q10 -10 20 0 q10 -10 20 0"/><path d="M200 90 q8 -8 16 0 q8 -8 16 0"/></g>
+  <path class="hills-back" d="M0 300 C120 210 260 220 380 280 C500 220 660 200 800 270 V400 H0 Z" fill="#86efac"/>
+  <path d="M0 340 C160 300 300 320 400 340 C520 310 680 300 800 330 V400 H0 Z" fill="#22c55e"/>
+  <g class="tree2"><rect x="566" y="250" width="12" height="60" fill="#92400e"/><circle cx="572" cy="240" r="34" fill="#15803d"/></g>
+  <g class="tree"><rect x="234" y="250" width="12" height="70" fill="#92400e"/><circle cx="240" cy="236" r="40" fill="#16a34a"/></g>
+  <g class="house"><rect x="340" y="230" width="120" height="100" fill="#f8fafc" stroke="#475569" stroke-width="3"/><path d="M326 236 L400 176 L474 236 Z" fill="#dc2626"/><rect x="386" y="276" width="28" height="54" fill="#92400e"/><rect x="352" y="252" width="24" height="22" fill="#7dd3fc" stroke="#475569" stroke-width="2"/><rect x="424" y="252" width="24" height="22" fill="#7dd3fc" stroke="#475569" stroke-width="2"/></g>
+  <text class="title" x="40" y="70" font-family="system-ui, sans-serif" font-size="40" font-weight="800" fill="#0f172a">Welcome home</text>
+</svg>

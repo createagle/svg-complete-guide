@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>38-1 Art-Directed Illustration</title>
+  <style>
+    .control output { min-width: 2.6em; font: 12px ui-monospace, Menlo, Consolas, monospace; }
+    input, select { accent-color: var(--accent); }
+    .fig { margin: 0; text-align: center; }
+    .fig figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .frame { width: 760px; max-width: 100%; container-type: inline-size; }
+    .art { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; border-radius: 12px; }
+    #img { display: block; max-width: 100%; height: auto; border-radius: 12px; }
+    /* Medium: a 4:3 crop around the house, fewer details */
+    @container (max-width: 520px) {
+      .art { aspect-ratio: 4 / 3; }
+      .birds, .tree2 { display: none; }
+      .title { transform: translateX(120px); }
+      .sun { transform: translateX(-70px); }
+    }
+    /* Narrow: a square crop, no title, the sun moved into view */
+    @container (max-width: 340px) {
+      .art { aspect-ratio: 1 / 1; }
+      .title, .hills-back { display: none; }
+      .sun { transform: translate(-140px, 20px); }
+    }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Width <input id="w" type="range" min="240" max="760" value="760"><output>760px</output></label>
+  </div>
+  <figure class="fig">
+    <div id="frame" class="frame">
+      <svg class="art" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A house with a tree under the sun, cropped to fit the frame">
+  <rect width="800" height="400" fill="#bae6fd"/>
+  <circle class="sun" cx="680" cy="90" r="42" fill="#fbbf24"/>
+  <g class="birds" fill="none" stroke="#334155" stroke-width="3" stroke-linecap="round"><path d="M140 120 q10 -10 20 0 q10 -10 20 0"/><path d="M200 90 q8 -8 16 0 q8 -8 16 0"/></g>
+  <path class="hills-back" d="M0 300 C120 210 260 220 380 280 C500 220 660 200 800 270 V400 H0 Z" fill="#86efac"/>
+  <path d="M0 340 C160 300 300 320 400 340 C520 310 680 300 800 330 V400 H0 Z" fill="#22c55e"/>
+  <g class="tree2"><rect x="566" y="250" width="12" height="60" fill="#92400e"/><circle cx="572" cy="240" r="34" fill="#15803d"/></g>
+  <g class="tree"><rect x="234" y="250" width="12" height="70" fill="#92400e"/><circle cx="240" cy="236" r="40" fill="#16a34a"/></g>
+  <g class="house"><rect x="340" y="230" width="120" height="100" fill="#f8fafc" stroke="#475569" stroke-width="3"/><path d="M326 236 L400 176 L474 236 Z" fill="#dc2626"/><rect x="386" y="276" width="28" height="54" fill="#92400e"/><rect x="352" y="252" width="24" height="22" fill="#7dd3fc" stroke="#475569" stroke-width="2"/><rect x="424" y="252" width="24" height="22" fill="#7dd3fc" stroke="#475569" stroke-width="2"/></g>
+  <text class="title" x="40" y="70" font-family="system-ui, sans-serif" font-size="40" font-weight="800" fill="#0f172a">Welcome home</text>
+      </svg>
+    </div>
+    <figcaption>Inline SVG · container queries + preserveAspectRatio slice</figcaption>
+  </figure>
+  <figure class="fig">
+    <img id="img" src="scene.svg" alt="A house with a tree under the sun" width="760">
+    <figcaption>scene.svg in &lt;img&gt; · media queries inside the file</figcaption>
+  </figure>
+  <script>
+    const w = document.getElementById('w');
+    w.addEventListener('input', () => {
+      document.getElementById('frame').style.width = w.value + 'px';
+      document.getElementById('img').width = +w.value;
+      w.nextElementSibling.value = w.value + 'px';
+    });
+  </script>
+</body>
+</html>

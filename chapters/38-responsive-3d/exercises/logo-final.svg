@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <style>
+    /* Inside an img element, this width is the image's own width */
+    @media (max-width: 160px) {
+      .word { display: none; }
+      .mark { transform: translateX(120px); }
+    }
+  </style>
+  <g class="mark"><circle cx="40" cy="40" r="32" fill="#f97316"/><path d="M24 46 C34 30 48 30 58 40 C50 38 42 42 36 52 Z" fill="#fff"/></g>
+  <text class="word" x="90" y="54" font-family="system-ui, sans-serif" font-size="40" font-weight="800" fill="#334155">Sparrow</text>
+</svg>

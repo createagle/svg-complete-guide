@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 37-1 · Finished</title>
+  <style>
+    .stage svg { color: var(--fg); }
+    #token { fill: var(--accent); }
+    #board { touch-action: none; }
+    #token { cursor: grab; }
+    #token.dragging { cursor: grabbing; }
+  </style>
+</head>
+<body class="demo">
+  <div class="stage">
+  <svg id="board" width="480" height="300" viewBox="0 0 240 150" role="img" aria-label="A board with one round token">
+    <rect width="240" height="150" rx="8" fill="none" stroke="currentColor" stroke-opacity=".25"/>
+    <circle id="token" cx="60" cy="75" r="18"/>
+  </svg>
+  </div>
+  <script>
+    const board = document.getElementById('board'), token = document.getElementById('token');
+    const toSVG = (e) => new DOMPoint(e.clientX, e.clientY).matrixTransform(board.getScreenCTM().inverse());
+    let grab = null;
+    token.addEventListener('pointerdown', (e) => {
+      const p = toSVG(e);
+      grab = { dx: p.x - token.cx.baseVal.value, dy: p.y - token.cy.baseVal.value };
+      token.setPointerCapture(e.pointerId);
+      token.classList.add('dragging');
+    });
+    token.addEventListener('pointermove', (e) => {
+      if (!grab) return;
+      const p = toSVG(e);
+      token.setAttribute('cx', Math.min(Math.max(p.x - grab.dx, 18), 222));
+      token.setAttribute('cy', Math.min(Math.max(p.y - grab.dy, 18), 132));
+    });
+    const drop = () => { grab = null; token.classList.remove('dragging'); };
+    token.addEventListener('pointerup', drop);
+    token.addEventListener('pointercancel', drop);
+  </script>
+</body>
+</html>

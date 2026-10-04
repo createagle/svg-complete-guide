@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 48-2 · Finished</title>
+  <style>
+    .chart { width: 360px; height: 200px; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; color: var(--fg); }
+  </style>
+</head>
+<body class="demo">
+  <canvas id="c" class="chart" role="img" aria-label="Bar chart with the value labels 42, 58 and 89"></canvas>
+  <script>
+    const canvas = document.getElementById('c');
+    // Give the bitmap one pixel per device pixel, then draw in CSS pixels as before
+    const dpr = devicePixelRatio || 1;
+    canvas.width = 360 * dpr; canvas.height = 200 * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    const W = 360, H = 200;
+    const ink = getComputedStyle(canvas).color;
+    ctx.font = '600 15px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    [[42, '#2563eb'], [58, '#7c3aed'], [89, '#ea580c']].forEach(([v, c], i) => {
+      const x = 60 + i * 110, h = v * 1.6;
+      ctx.fillStyle = c; ctx.fillRect(x - 30, H - 20 - h, 60, h);
+      ctx.fillStyle = ink; ctx.fillText(String(v), x, H - 28 - h);
+    });
+    ctx.strokeStyle = ink; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(10, H - 19.5); ctx.lineTo(W - 10, H - 19.5); ctx.stroke();
+  </script>
+</body>
+</html>

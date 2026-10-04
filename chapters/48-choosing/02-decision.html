@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>48-2 Which Renderer?</title>
+  <style>
+    input { accent-color: var(--accent); }
+    .needs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px 18px; width: min(760px, 100%); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; margin: 0; }
+    .needs legend { font-size: 13px; color: var(--muted); padding: 0 6px; }
+    .need { font-size: 14px; display: flex; gap: 8px; align-items: center; }
+    .grid { border-collapse: collapse; font-size: 13.5px; width: min(760px, 100%); }
+    .grid th, .grid td { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: center; }
+    .grid th:first-child, .grid td:first-child { text-align: left; }
+    .grid thead th { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .grid td.yes { color: #16a34a; font-weight: 600; }
+    .grid td.some { color: #d97706; font-weight: 600; }
+    .grid td.no { color: #dc2626; font-weight: 600; }
+    .grid td.why { text-align: left; color: var(--muted); font-size: 12.5px; }
+    .grid tr.total td { font-weight: 700; border-bottom: none; }
+    .grid .best { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+    .pick { margin: 0; font-size: 15px; }
+    @media (max-width: 640px) { .grid td.why { display: none; } }
+  </style>
+</head>
+<body class="demo">
+  <fieldset class="needs">
+    <legend>The project needs</legend>
+      <label class="need"><input type="checkbox" value="many"> Thousands of moving objects</label>
+      <label class="need"><input type="checkbox" value="events" checked> Each object needs its own click or focus</label>
+      <label class="need"><input type="checkbox" value="a11y" checked> Screen readers must read it</label>
+      <label class="need"><input type="checkbox" value="css"> Styled and themed with CSS</label>
+      <label class="need"><input type="checkbox" value="crisp"> Sharp at any zoom and in print</label>
+      <label class="need"><input type="checkbox" value="pixels"> Per-pixel effects or shaders</label>
+      <label class="need"><input type="checkbox" value="three"> Real 3D scenes</label>
+      <label class="need"><input type="checkbox" value="everywhere"> Must work in every current browser</label>
+  </fieldset>
+  <table class="grid">
+    <thead><tr><th scope="col">Need</th><th scope="col">SVG</th><th scope="col">HTML + CSS</th><th scope="col">Canvas 2D</th><th scope="col">WebGL</th><th scope="col">WebGPU</th></tr></thead>
+    <tbody id="body"></tbody>
+  </table>
+  <p id="pick" class="pick" aria-live="polite"></p>
+  <script>
+    const NEEDS = [{"key": "many", "label": "Thousands of moving objects", "marks": ["no", "no", "yes", "yes", "yes"], "why": "Every SVG or HTML element costs layout and paint work; 47-4 and 48-1 show where it breaks down."}, {"key": "events", "label": "Each object needs its own click or focus", "marks": ["yes", "yes", "some", "some", "some"], "why": "Elements get events and focus for free; on a canvas you find the object under the pointer yourself."}, {"key": "a11y", "label": "Screen readers must read it", "marks": ["yes", "yes", "no", "no", "no"], "why": "Pixels have no accessibility tree; a canvas needs a separate text or table alternative."}, {"key": "css", "label": "Styled and themed with CSS", "marks": ["yes", "yes", "no", "no", "no"], "why": "Canvas, WebGL and WebGPU read colors from script and must redraw when the theme changes."}, {"key": "crisp", "label": "Sharp at any zoom and in print", "marks": ["yes", "yes", "some", "some", "some"], "why": "Vectors re-render at every size; bitmaps must be drawn again for the device pixel ratio."}, {"key": "pixels", "label": "Per-pixel effects or shaders", "marks": ["some", "some", "some", "yes", "yes"], "why": "Filters exist in SVG and CSS but are slow on large areas; shaders run on the GPU."}, {"key": "three", "label": "Real 3D scenes", "marks": ["no", "some", "no", "yes", "yes"], "why": "CSS 3D transforms flatten SVG children (chapter 38); WebGL and WebGPU have depth buffers."}, {"key": "everywhere", "label": "Must work in every current browser", "marks": ["yes", "yes", "yes", "yes", "no"], "why": "WebGPU is still limited availability: not in Firefox on Linux or macOS on Intel, and Chrome on Linux only since 144."}];
+    const TECH = ["SVG", "HTML + CSS", "Canvas 2D", "WebGL", "WebGPU"];
+    const SIGN = { yes: '✓', some: '~', no: '✗' };
+    const $ = (id) => document.getElementById(id);
+    function render() {
+      const chosen = new Set([...document.querySelectorAll('.need input:checked')].map((i) => i.value));
+      const rows = NEEDS.filter((n) => chosen.has(n.key));
+      // A renderer is out if it fails any need; among the rest, more ✓ wins, and the simpler one wins a tie
+      const score = TECH.map((_, t) => rows.some((r) => r.marks[t] === 'no') ? -1 : rows.filter((r) => r.marks[t] === 'yes').length);
+      const best = score.indexOf(Math.max(...score));
+      $('body').innerHTML = rows.map((r) => `<tr><td>${r.label}<div class="why">${r.why}</div></td>` +
+        r.marks.map((m, t) => `<td class="${m}${t === best && score[best] >= 0 ? ' best' : ''}" aria-label="${TECH[t]}: ${m}">${SIGN[m]}</td>`).join('') + '</tr>').join('') +
+        `<tr class="total"><td>Fits</td>${score.map((s, t) => `<td class="${t === best && s >= 0 ? 'best' : ''}">${s < 0 ? '✗' : s}</td>`).join('')}</tr>`;
+      $('pick').textContent = !rows.length ? 'Pick at least one need.' : score[best] < 0 ? 'No single renderer fits: combine them, for example a canvas for the data and SVG for axes and labels.' : `Start with ${TECH[best]}.`;
+    }
+    document.querySelectorAll('.need input').forEach((i) => i.addEventListener('input', render));
+    render();
+  </script>
+</body>
+</html>

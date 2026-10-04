@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24">
+  <!-- Generated: a "check" badge. Several problems are hidden in this file. -->
+  <defs>
+    <linearGradient id="grad1"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#feca57"/></linearGradient>
+  </defs>
+  <rect x="0" y="0" width="24" height="24" fill="#ffffff" opacity="0"/>
+  <g transform="translate(6 6)">
+    <circle cx="12.000000" cy="12.000000" r="9.500000" fill="#4f46e5"/>
+    <path d="M7.9999999 12.0000001 L10.9999998 14.9999997 L16.0000002 9.0000003" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M7.9999999 12.0000001 L10.9999998 14.9999997 L16.0000002 9.0000003" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <circle cx="30" cy="4" r="3" fill="#22c55e"/>
+  <g></g>
+</svg>

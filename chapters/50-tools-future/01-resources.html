@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>50-1 Resource Directory</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    #q { font: inherit; padding: 4px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--fg); }
+    .cats { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 760px; }
+    .cats button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; width: min(960px, 100%); }
+    .list li { border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; display: grid; gap: 4px; }
+    .list a { font-weight: 600; text-decoration: none; }
+    .list a:hover { text-decoration: underline; }
+    .list p { margin: 0; font-size: 13px; color: var(--muted); }
+    .tag { font-size: 11.5px; color: var(--muted); }
+    .count { margin: 0; font-size: 13px; color: var(--muted); }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Search <input id="q" type="search" placeholder="e.g. icons"></label>
+  </div>
+  <div id="cats" class="cats" role="group" aria-label="Categories"></div>
+  <ul id="list" class="list"></ul>
+  <p id="count" class="count" aria-live="polite"></p>
+  <script>
+    const RES = [{"name": "MDN: SVG", "url": "https://developer.mozilla.org/en-US/docs/Web/SVG", "cat": "Reference", "ch": "1\u201350", "desc": "Elements, attributes and guides, with compatibility tables"}, {"name": "SVG 2 specification", "url": "https://www.w3.org/TR/SVG2/", "cat": "Reference", "ch": "1\u201321", "desc": "The W3C standard for SVG itself"}, {"name": "Filter Effects Module", "url": "https://www.w3.org/TR/filter-effects-1/", "cat": "Reference", "ch": "22\u201329", "desc": "Every filter primitive, and CSS filter functions"}, {"name": "CSS Masking Module", "url": "https://www.w3.org/TR/css-masking-1/", "cat": "Reference", "ch": "17\u201318", "desc": "clip-path, mask and their SVG counterparts"}, {"name": "Can I use", "url": "https://caniuse.com/", "cat": "Compatibility", "ch": "43", "desc": "Browser support tables, searchable by feature"}, {"name": "Baseline (web.dev)", "url": "https://web.dev/baseline", "cat": "Compatibility", "ch": "43", "desc": "What \"widely\" and \"newly available\" mean"}, {"name": "browser-compat-data", "url": "https://github.com/mdn/browser-compat-data", "cat": "Compatibility", "ch": "43", "desc": "The data behind MDN compatibility tables"}, {"name": "web-features", "url": "https://github.com/web-platform-dx/web-features", "cat": "Compatibility", "ch": "43", "desc": "Feature groups and their Baseline status"}, {"name": "Interop dashboard", "url": "https://wpt.fyi/interop", "cat": "Compatibility", "ch": "43", "desc": "Yearly cross-browser focus areas and scores"}, {"name": "Inkscape", "url": "https://inkscape.org/", "cat": "Editor", "ch": "50", "desc": "Free desktop vector editor that saves SVG natively"}, {"name": "Figma", "url": "https://www.figma.com/", "cat": "Editor", "ch": "41, 44", "desc": "Design tool; export SVG and check it before use"}, {"name": "Boxy SVG", "url": "https://boxy-svg.com/", "cat": "Editor", "ch": "50", "desc": "Editor built around SVG and its source"}, {"name": "SVG Path Editor", "url": "https://yqnn.github.io/svg-path-editor/", "cat": "Editor", "ch": "6, 20", "desc": "Edit path commands and see the result"}, {"name": "SVGO", "url": "https://github.com/svg/svgo", "cat": "Build", "ch": "40, 41", "desc": "Optimizer used by most build tools"}, {"name": "SVGOMG", "url": "https://jakearchibald.github.io/svgomg/", "cat": "Build", "ch": "40", "desc": "SVGO in the browser, with a preview"}, {"name": "SVGR", "url": "https://react-svgr.com/", "cat": "Build", "ch": "41, 45", "desc": "Turns SVG files into React components"}, {"name": "Iconify", "url": "https://iconify.design/", "cat": "Icons", "ch": "41, 44", "desc": "One API for many open icon sets"}, {"name": "Lucide", "url": "https://lucide.dev/", "cat": "Icons", "ch": "44", "desc": "24 \u00d7 24 stroke icons with framework packages"}, {"name": "Heroicons", "url": "https://heroicons.com/", "cat": "Icons", "ch": "44", "desc": "Outline and solid icons from the Tailwind CSS team"}, {"name": "Tabler Icons", "url": "https://tabler.io/icons", "cat": "Icons", "ch": "44", "desc": "A large stroke icon set"}, {"name": "D3", "url": "https://d3js.org/", "cat": "Library", "ch": "47", "desc": "Scales, axes, shapes and interaction for data visualization"}, {"name": "GSAP", "url": "https://gsap.com/", "cat": "Library", "ch": "35", "desc": "Animation library with SVG plugins"}, {"name": "Motion", "url": "https://motion.dev/", "cat": "Library", "ch": "35", "desc": "Animation library for JavaScript and React"}, {"name": "Anime.js", "url": "https://animejs.com/", "cat": "Library", "ch": "35", "desc": "Small animation library with SVG helpers"}, {"name": "Lottie (lottie-web)", "url": "https://github.com/airbnb/lottie-web", "cat": "Library", "ch": "35", "desc": "Plays After Effects animations as SVG"}, {"name": "Flubber", "url": "https://github.com/veltman/flubber", "cat": "Library", "ch": "34", "desc": "Interpolates between unrelated shapes"}, {"name": "DOMPurify", "url": "https://github.com/cure53/DOMPurify", "cat": "Security", "ch": "42", "desc": "Sanitizer for HTML and SVG markup"}, {"name": "Nu Html Checker", "url": "https://validator.w3.org/nu/", "cat": "Security", "ch": "2", "desc": "Validates HTML documents with inline SVG"}];
+    const $ = (id) => document.getElementById(id);
+    const cats = ['All', ...new Set(RES.map((r) => r.cat))];
+    let cat = 'All';
+    $('cats').innerHTML = cats.map((c) => `<button class="btn" type="button" aria-pressed="${c === cat}">${c}</button>`).join('');
+    $('cats').addEventListener('click', (e) => {
+      if (!e.target.matches('button')) return;
+      cat = e.target.textContent;
+      $('cats').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b === e.target));
+      render();
+    });
+    function render() {
+      const q = $('q').value.trim().toLowerCase();
+      const hits = RES.filter((r) => (cat === 'All' || r.cat === cat) && (r.name + ' ' + r.desc + ' ' + r.cat).toLowerCase().includes(q));
+      $('list').innerHTML = hits.map((r) => `<li><a href="${r.url}" target="_blank" rel="noopener">${r.name}</a><p>${r.desc}</p><span class="tag">${r.cat} · chapter ${r.ch}</span></li>`).join('');
+      $('count').textContent = `${hits.length} of ${RES.length} resources`;
+    }
+    $('q').addEventListener('input', render);
+    render();
+  </script>
+</body>
+</html>

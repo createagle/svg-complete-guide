@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 48-1 · Starter</title>
+  <style>
+    .view { width: 480px; height: 300px; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; color: var(--accent); }
+    .view svg, .view canvas { display: block; width: 100%; height: 100%; }
+    .view circle { fill: currentColor; fill-opacity: .6; }
+    .out { margin: 0; font: 12.5px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+  </style>
+</head>
+<body class="demo">
+  <div id="view" class="view" role="img" aria-label="Particles swirling around the center"></div>
+  <p id="out" class="out"></p>
+  <script>
+    const W = 480, H = 300, N = 4000, R = 2;
+    // The same swirl as in 48-1: positions are computed in JavaScript every frame
+    const seeds = Array.from({ length: N }, (_, i) => ({ a: (i * 2.399963) % 6.283, r: 20 + 130 * Math.sqrt((i + 0.5) / N), s: i % 2 ? 1 : -1 }));
+    const pos = (s, t) => [W / 2 + Math.cos(s.a + t * 0.0004 * s.s) * s.r * 1.4, H / 2 + Math.sin(s.a + t * 0.0004 * s.s) * s.r * 0.85];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Frame time, averaged over the last 60 frames
+    const gaps = []; let last = 0;
+    function measure(now) {
+      if (last) { gaps.push(now - last); if (gaps.length > 60) gaps.shift(); }
+      last = now;
+      const avg = gaps.reduce((a, g) => a + g, 0) / (gaps.length || 1);
+      document.getElementById('out').textContent = `frame time: ${avg.toFixed(1)} ms`;
+    }
+    // One <circle> per particle: 4,000 elements whose attributes change every frame
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const dots = seeds.map(() => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('r', R); return c; });
+    svg.append(...dots);
+    document.getElementById('view').append(svg);
+    function frame(now) {
+      measure(now);
+      const t = reduce ? 0 : now;
+      seeds.forEach((s, i) => { const [x, y] = pos(s, t); dots[i].setAttribute('cx', x.toFixed(1)); dots[i].setAttribute('cy', y.toFixed(1)); });
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>49-2 The Scene, Layer by Layer</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input { accent-color: var(--accent); }
+    .scene { width: min(960px, 100%); height: auto; display: block; border-radius: 14px; }
+    .scene .cord { stroke: #000; stroke-opacity: .55; stroke-width: 1.2; }
+    .star { fill: #fff; animation: twinkle 3s ease-in-out infinite alternate; }
+    @keyframes twinkle { to { opacity: .25; } }
+    .cloud { animation: drift 40s ease-in-out infinite alternate; }
+    .cloud.slow { animation-duration: 60s; }
+    @keyframes drift { to { translate: 60px 0; } }
+    .greeting { font: 600 34px Georgia, "Times New Roman", serif; fill: #ffe9b0; letter-spacing: 2px; animation: appear 2.5s ease-out both; }
+    @keyframes appear { from { opacity: 0; } }
+    .shimmer rect { animation: shimmer 2.4s ease-in-out infinite alternate; }
+    .shimmer rect:nth-child(2n) { animation-delay: -1.2s; }
+    @keyframes shimmer { to { opacity: .1; } }
+    /* Sky lanterns rise along a curved path from their start point */
+    .rise { offset-path: path("M0 0C30-90-40-200 20-330C40-380 10-420 30-470"); offset-rotate: 0deg; translate: var(--x) var(--y);
+      animation: rise 18s linear infinite; }
+    @keyframes rise { from { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 80% { opacity: .9; } to { offset-distance: 100%; opacity: 0; } }
+    /* Lanterns swing around their hang point (set inline as transform-origin) */
+    .lantern { cursor: pointer; outline: none; animation: sway 3.2s ease-in-out infinite alternate; }
+    @keyframes sway { from { rotate: -4deg; } to { rotate: 4deg; } }
+    .lantern.lit use { filter: url(#lantern-glow); }
+    .lantern:focus-visible use { stroke: #fff; stroke-width: 2px; }
+    .lantern:focus-visible .cord { stroke: #fff; stroke-opacity: 1; }
+    .parallax { translate: calc(var(--px, 0) * var(--depth) * 1px) 0; transition: translate .3s ease-out; }
+    .scene.paused, .scene.paused * { animation-play-state: paused !important; }
+    .lantern { --flame: 0; }
+    .lantern.lit { --flame: 1; }
+
+    .layers { width: min(960px, 100%); border: 1px solid var(--border); border-radius: 12px; padding: 8px 14px; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; }
+    .layers legend { font-size: 13px; color: var(--muted); padding: 0 6px; }
+    .toggles { display: contents; }
+    .layers label { display: flex; gap: 6px; align-items: center; }
+    .effect { color: var(--muted); }
+  </style>
+</head>
+<body class="demo">
+  <fieldset class="layers">
+    <legend>Layers, back to front</legend>
+    <div id="toggles" class="toggles"></div>
+    <label class="effect"><input id="texture" type="checkbox" checked> Moon texture filter</label>
+    <label class="effect"><input id="blur" type="checkbox" checked> Cloud blur filter</label>
+  </fieldset>
+  <svg id="scene" class="scene" viewBox="0 0 960 540" role="group" aria-labelledby="scene-title">
+    <title id="scene-title">Mid-Autumn night: a full moon over the hills and seven lanterns you can light</title>
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#0b1026"/>
+          <stop offset=".55" stop-color="#1d1a4a"/>
+          <stop offset=".8" stop-color="#4a2558"/>
+          <stop offset="1" stop-color="#8a3f55"/>
+        </linearGradient>
+        <radialGradient id="halo">
+          <stop offset=".55" stop-color="#fff3c4" stop-opacity=".45"/>
+          <stop offset="1" stop-color="#fff3c4" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="moon-fill" cx=".4" cy=".38" r=".7">
+          <stop offset="0" stop-color="#fffbea"/>
+          <stop offset="1" stop-color="#f3d58c"/>
+        </radialGradient>
+        <!-- Noise, kept only where the moon is, multiplied over it as faint spots -->
+        <filter id="moon-texture" x="0" y="0" width="1" height="1">
+          <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7" result="noise"/>
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.8  0 0 0 0 0.66  0 0 0 0 0.42  0 0 0 -1.2 0.9" result="spots"/>
+          <feComposite in="spots" in2="SourceGraphic" operator="in" result="clipped"/>
+          <feBlend in="clipped" in2="SourceGraphic" mode="multiply"/>
+        </filter>
+        <filter id="soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+        <!-- A warm glow behind a lit lantern -->
+        <filter id="lantern-glow" x="-80%" y="-60%" width="260%" height="220%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="9" result="blur"/>
+          <feFlood flood-color="#ffb347" flood-opacity=".9"/>
+          <feComposite in2="blur" operator="in" result="glow"/>
+          <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="shine" cx=".35" cy=".35" r=".75">
+          <stop offset="0" stop-color="#fff" stop-opacity=".5"/>
+          <stop offset=".6" stop-color="#fff" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="flame">
+          <stop offset="0" stop-color="#fff7cc"/>
+          <stop offset="1" stop-color="#ffb347" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2b2a5e"/>
+          <stop offset="1" stop-color="#0d1230"/>
+        </linearGradient>
+        <!-- The body color comes from --lantern on each <use>; the shine and the flame are shared -->
+        <symbol id="lantern" viewBox="0 0 40 64">
+          <rect x="13" y="0" width="14" height="6" rx="1.5" fill="#d4a017"/>
+          <ellipse cx="20" cy="30" rx="19" ry="22" style="fill: var(--lantern, #dc2626)"/>
+          <ellipse cx="20" cy="30" rx="14" ry="17" fill="url(#flame)" style="opacity: var(--flame, 0); transition: opacity .4s"/>
+          <path d="M20 8v44M11 10q-6 20 0 40M29 10q6 20 0 40" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1.2"/>
+          <ellipse cx="20" cy="30" rx="19" ry="22" fill="url(#shine)"/>
+          <rect x="13" y="50" width="14" height="5" rx="1.5" fill="#d4a017"/>
+          <path d="M16 55v9M20 55v9M24 55v9" stroke="#d4a017" stroke-width="1.4"/>
+        </symbol>
+        <!-- A small sky lantern, drawn around its own center so it can travel along a path -->
+        <symbol id="sky-lantern" viewBox="-8 -10 16 20" overflow="visible">
+          <path d="M-6 -9h12l2 17h-16z" fill="#ffcf73"/>
+          <path d="M-6 -9h12l2 17h-16z" fill="url(#flame)"/>
+        </symbol>
+      </defs>
+    <g id="layer-sky" class="layer" data-name="Sky gradient"><rect width="960" height="540" fill="url(#sky)"/></g>
+    <g id="layer-stars" class="layer" data-name="Stars" aria-hidden="true"></g>
+    <g id="layer-halo" class="layer" data-name="Moon halo"><circle cx="700" cy="150" r="120" fill="url(#halo)"/></g>
+    <g id="layer-moon" class="layer" data-name="Moon"><circle id="moon" cx="700" cy="150" r="62" fill="url(#moon-fill)" filter="url(#moon-texture)"/></g>
+    <g id="layer-clouds" class="layer parallax" data-name="Clouds" style="--depth: 10" filter="url(#soft)" aria-hidden="true">
+      <path class="cloud" d="M560 190q60-26 130-8t150-2q-40 26-130 22t-150-12z" fill="#c9b6e4" opacity=".28"/>
+      <path class="cloud slow" d="M60 240q80-20 170-4t140 2q-50 22-150 18t-160-16z" fill="#c9b6e4" opacity=".2"/>
+    </g>
+    <g id="layer-greeting" class="layer" data-name="Greeting">
+      <path id="greeting-arc" d="M80 300 Q330 200 580 300" fill="none"/>
+      <text class="greeting"><textPath href="#greeting-arc" startOffset="50%" text-anchor="middle">Happy Mid-Autumn Festival</textPath></text>
+    </g>
+    <g id="layer-hills" class="layer parallax" data-name="Hills" style="--depth: 4" aria-hidden="true">
+      <path d="M0 370Q120 310 240 350T480 340T720 352T960 330V540H0Z" fill="#2a2350"/>
+      <path d="M0 405Q160 360 320 400T640 392T960 405V540H0Z" fill="#1c1838"/>
+    </g>
+    <g id="layer-water" class="layer" data-name="Lake and moonlight" aria-hidden="true">
+      <rect y="425" width="960" height="115" fill="url(#lake)"/>
+      <g class="shimmer" fill="#fff3c4">
+        <rect x="660" y="432" width="80" height="2.5" rx="1.2" opacity=".7"/>
+        <rect x="672" y="442" width="56" height="2.5" rx="1.2" opacity=".55"/>
+        <rect x="652" y="452" width="96" height="2.5" rx="1.2" opacity=".45"/>
+        <rect x="680" y="463" width="40" height="2.5" rx="1.2" opacity=".4"/>
+        <rect x="664" y="474" width="72" height="2.5" rx="1.2" opacity=".3"/>
+      </g>
+      <path d="M0 492Q200 470 400 494T960 482V540H0Z" fill="#100d22"/>
+    </g>
+    <g id="layer-sky-lanterns" class="layer" data-name="Sky lanterns" aria-hidden="true">
+      <use class="rise" href="#sky-lantern" width="16" height="20" style="--x: 300px; --y: 470px; animation-delay: 0s"/>
+      <use class="rise" href="#sky-lantern" width="16" height="20" style="--x: 820px; --y: 480px; animation-delay: -6s"/>
+      <use class="rise" href="#sky-lantern" width="16" height="20" style="--x: 560px; --y: 490px; animation-delay: -11s"/>
+    </g>
+    <g id="layer-lanterns" class="layer" data-name="Lanterns">
+      <path d="M-10 40Q480 120 970 40" fill="none" class="cord"/>
+        <g class="lantern" role="button" tabindex="0" aria-pressed="false" aria-label="Lantern 1" style="--lantern: #dc2626; transform-origin: 110px 57.2px; animation-delay: 0.0s">
+          <line x1="110" y1="57.2" x2="110" y2="83.2" class="cord"/>
+          <use href="#lantern" x="90" y="83.2" width="40" height="64"/>
+        </g>
+        <g class="lantern" role="button" tabindex="0" aria-pressed="false" aria-label="Lantern 2" style="--lantern: #f59e0b; transform-origin: 240px 70.4px; animation-delay: -0.7s">
+          <line x1="240" y1="70.4" x2="240" y2="110.4" class="cord"/>
+          <use href="#lantern" x="220" y="110.4" width="40" height="64"/>
+        </g>
+        <g class="lantern" role="button" tabindex="0" aria-pressed="false" aria-label="Lantern 3" style="--lantern: #dc2626; transform-origin: 370px 78.0px; animation-delay: -1.4s">
+          <line x1="370" y1="78.0" x2="370" y2="108.0" class="cord"/>
+          <use href="#lantern" x="350" y="108.0" width="40" height="64"/>
+        </g>
+        <g class="lantern" role="button" tabindex="0" aria-pressed="false" aria-label="Lantern 4" style="--lantern: #e11d48; transform-origin: 500px 79.9px; animation-delay: -2.1s">
+          <line x1="500" y1="79.9" x2="500" y2="125.9" class="cord"/>
+          <use href="#lantern" x="480" y="125.9" width="40" height="64"/>
+        </g>
+        <g class="lantern" role="button" tabindex="0" aria-pressed="false" aria-label="Lantern 5" style="--lantern: #dc2626; transform-origin: 630px 76.3px; animation-delay: -2.8s">
+          <line x1="630" y1="76.3" x2="630" y2="106.3" class="cord"/>
+          <use href="#lantern" x="610" y="106.3" width="40" height="64"/>
+        </g>
+        <g class="lantern" role="button" tabindex="0" aria-pressed="false" aria-label="Lantern 6" style="--lantern: #f59e0b; transform-origin: 760px 66.9px; animation-delay: -3.5s">
+          <line x1="760" y1="66.9" x2="760" y2="106.9" class="cord"/>
+          <use href="#lantern" x="740" y="106.9" width="40" height="64"/>
+        </g>
+        <g class="lantern" role="button" tabindex="0" aria-pressed="false" aria-label="Lantern 7" style="--lantern: #dc2626; transform-origin: 880px 53.3px; animation-delay: -4.2s">
+          <line x1="880" y1="53.3" x2="880" y2="79.3" class="cord"/>
+          <use href="#lantern" x="860" y="79.3" width="40" height="64"/>
+        </g>
+    </g>
+  </svg>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const scene = document.getElementById('scene');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Stars: the same sky every time, from a small seeded random generator
+    let seed = 3;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const stars = document.getElementById('layer-stars');
+    for (let i = 0; i < 90; i++) {
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('class', 'star');
+      c.setAttribute('cx', (rand() * 960).toFixed(1));
+      c.setAttribute('cy', (rand() * 320).toFixed(1));
+      c.setAttribute('r', (0.6 + rand() * 1.1).toFixed(2));
+      c.style.animationDelay = (-rand() * 3).toFixed(2) + 's';
+      stars.append(c);
+    }
+    // Lanterns are buttons: click, Enter and Space toggle them
+    function toggle(g, on = !g.classList.contains('lit')) {
+      g.classList.toggle('lit', on);
+      g.setAttribute('aria-pressed', on);
+    }
+    scene.querySelectorAll('.lantern').forEach((g) => {
+      g.addEventListener('click', () => toggle(g));
+      g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(g); } });
+    });
+    // Parallax: far layers follow the pointer a little, near layers a little more
+    if (!reduce) scene.addEventListener('pointermove', (e) => {
+      const r = scene.getBoundingClientRect();
+      scene.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+    });
+    // One checkbox per layer group, in paint order
+    const toggles = document.getElementById('toggles');
+    scene.querySelectorAll('.layer').forEach((layer) => {
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" checked> ${layer.dataset.name}`;
+      label.querySelector('input').addEventListener('input', (e) => { layer.style.display = e.target.checked ? '' : 'none'; });
+      toggles.append(label);
+    });
+    // Filters can be switched off separately, to see what each one adds
+    document.getElementById('texture').addEventListener('input', (e) => document.getElementById('moon').setAttribute('filter', e.target.checked ? 'url(#moon-texture)' : ''));
+    document.getElementById('blur').addEventListener('input', (e) => document.getElementById('layer-clouds').setAttribute('filter', e.target.checked ? 'url(#soft)' : ''));
+  </script>
+</body>
+</html>

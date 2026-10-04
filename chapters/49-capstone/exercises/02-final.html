@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <title>Exercise 49-2 · Finished</title>
+  <style>
+    .string { width: min(680px, 100%); height: auto; display: block; }
+    .string .cord { stroke: #000; stroke-opacity: .55; stroke-width: 1.2; }
+    .lantern { animation: sway 3.2s ease-in-out infinite alternate; }
+    .lantern:nth-child(odd) { animation-delay: -1.6s; }
+    @keyframes sway { from { rotate: -6deg; } to { rotate: 6deg; } }
+  </style>
+</head>
+<body class="demo">
+  <svg class="string" viewBox="0 0 680 200" role="img" aria-label="Five swinging lanterns on a string">
+    <defs>
+      <radialGradient id="shine" cx=".35" cy=".35" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <symbol id="lantern" viewBox="0 0 40 64">
+        <rect x="13" y="0" width="14" height="6" rx="1.5" fill="#d4a017"/>
+        <ellipse cx="20" cy="30" rx="19" ry="22" style="fill: var(--lantern, #dc2626)"/>
+        <path d="M20 8v44M11 10q-6 20 0 40M29 10q6 20 0 40" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1.2"/>
+        <ellipse cx="20" cy="30" rx="19" ry="22" fill="url(#shine)"/>
+        <rect x="13" y="50" width="14" height="5" rx="1.5" fill="#d4a017"/>
+        <path d="M16 55v9M20 55v9M24 55v9" stroke="#d4a017" stroke-width="1.4"/>
+      </symbol>
+    </defs>
+    <rect width="680" height="200" rx="14" fill="#1d1a4a"/>
+    <path d="M0 40Q340 100 680 40" fill="none" class="cord"/>
+      <g class="lantern" style="--lantern: #dc2626; transform-origin: 100px 52px;"><line x1="100" y1="52" x2="100" y2="82" class="cord"/><use href="#lantern" x="80" y="82" width="40" height="64"/></g>
+      <g class="lantern" style="--lantern: #f59e0b; transform-origin: 220px 66px;"><line x1="220" y1="66" x2="220" y2="96" class="cord"/><use href="#lantern" x="200" y="96" width="40" height="64"/></g>
+      <g class="lantern" style="--lantern: #0d9488; transform-origin: 340px 70px;"><line x1="340" y1="70" x2="340" y2="100" class="cord"/><use href="#lantern" x="320" y="100" width="40" height="64"/></g>
+      <g class="lantern" style="--lantern: #f59e0b; transform-origin: 460px 66px;"><line x1="460" y1="66" x2="460" y2="96" class="cord"/><use href="#lantern" x="440" y="96" width="40" height="64"/></g>
+      <g class="lantern" style="--lantern: #dc2626; transform-origin: 580px 52px;"><line x1="580" y1="52" x2="580" y2="82" class="cord"/><use href="#lantern" x="560" y="82" width="40" height="64"/></g>
+  </svg>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>50-2 Review an AI-Generated SVG</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    .review { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 14px; width: min(860px, 100%); }
+    @media (max-width: 640px) { .review { grid-template-columns: minmax(0, 1fr); } }
+    .src { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+    textarea { font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--fg); resize: vertical; }
+    .preview { width: 200px; height: 200px; border: 1px solid var(--border); border-radius: 12px; display: grid; place-items: center;
+      background: repeating-conic-gradient(color-mix(in srgb, var(--fg) 8%, transparent) 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
+    .preview img { width: 160px; height: 160px; }
+    .size { margin: 6px 0 0; font: 12.5px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
+    .findings { list-style: none; padding: 0; margin: 0; width: min(860px, 100%); display: grid; gap: 6px; }
+    .findings li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: 14px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 10px; }
+    .findings .why { grid-column: 2; font-size: 12.5px; color: var(--muted); }
+    .high .icon { color: #dc2626; } .mid .icon { color: #d97706; } .ok .icon { color: #16a34a; }
+  </style>
+</head>
+<body class="demo">
+  <div class="review">
+    <label class="src"><span>SVG source</span><textarea id="src" spellcheck="false" rows="16"></textarea></label>
+    <div class="side">
+      <div class="preview"><img id="preview" alt="Preview of the SVG source"></div>
+      <p id="size" class="size"></p>
+    </div>
+  </div>
+  <ul id="findings" class="findings" aria-live="polite"></ul>
+  <svg id="probe" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
+  <script type="text/plain" id="sample"><svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="grad1"><stop offset="0" stop-color="#ff6b6b"/><stop offset="1" stop-color="#feca57"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="1" stdDeviation="0.5"/></filter>
+  </defs>
+  <rect x="0" y="0" width="24" height="24" fill="#ffffff" opacity="0"/>
+  <circle cx="12.000000" cy="12.000000" r="9.500000" fill="#4f46e5"/>
+  <path d="M7.9999999 12.0000001 L10.9999998 14.9999997 L16.0000002 9.0000003" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M7.9999999 12.0000001 L10.9999998 14.9999997 L16.0000002 9.0000003" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="30" cy="4" r="3" fill="#22c55e"/>
+  <g></g>
+  <text x="12" y="23" font-size="2" text-anchor="middle" fill="#64748b">Done</text>
+</svg></script>
+  <script>
+    const $ = (id) => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+    $('src').value = $('sample').textContent.trim();
+
+    // Every check reads the parsed document; geometry checks use a script-free copy in a hidden <svg>
+    function review(text) {
+      const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+      const root = doc.documentElement, out = [];
+      const add = (level, msg, why) => out.push({ level, msg, why });
+      if (root.nodeName !== 'svg' || doc.querySelector('parsererror')) return [{ level: 'high', msg: 'Not well-formed SVG', why: 'The browser could not parse it; nothing else was checked.' }];
+      const all = [...root.querySelectorAll('*')];
+      // Security first (chapter 42)
+      const risky = all.filter((el) => el.localName === 'script' || el.localName === 'foreignObject' || [...el.attributes].some((a) => /^on/i.test(a.name) || /^\s*javascript:/i.test(a.value)));
+      if (risky.length) add('high', `${risky.length} element(s) can run script`, 'Remove <script>, foreignObject, on* attributes and javascript: links, or sanitize before inlining.');
+      // Scaling (chapter 4)
+      const vb = root.getAttribute('viewBox');
+      if (!vb) add('high', 'No viewBox', 'Without a viewBox the drawing cannot scale with its box.');
+      if (root.hasAttribute('width') || root.hasAttribute('height')) add('mid', `Fixed size ${root.getAttribute('width') || '?'} × ${root.getAttribute('height') || '?'}`, 'Remove width and height and size the icon from CSS.');
+      // Geometry: copy into the probe without scripts, then measure each shape against the viewBox
+      const probe = $('probe');
+      probe.replaceChildren();
+      const copy = document.importNode(root, true);
+      copy.querySelectorAll('script, foreignObject').forEach((n) => n.remove());
+      // Also drop external references, so measuring never makes the page fetch anything
+      copy.querySelectorAll('*').forEach((el) => [...el.attributes].forEach((a) => { if (/^on/i.test(a.name) || (/href$/i.test(a.name) && !a.value.startsWith('#'))) el.removeAttribute(a.name); }));
+      probe.append(copy);
+      const [vx, vy, vw, vh] = (vb || '0 0 0 0').split(/[\s,]+/).map(Number);
+      const shapes = [...copy.querySelectorAll('path, rect, circle, ellipse, line, polyline, polygon, text')];
+      const outside = shapes.filter((s) => { const b = s.getBBox(); return vb && (b.x >= vx + vw || b.y >= vy + vh || b.x + b.width <= vx || b.y + b.height <= vy); });
+      if (outside.length) add('high', `${outside.length} shape(s) entirely outside the viewBox`, 'They are never visible but still downloaded; often a sign of a wrong coordinate system.');
+      const invisible = shapes.filter((s) => { const cs = getComputedStyle(s); return +cs.opacity === 0 || (cs.fill === 'none' && cs.stroke === 'none'); });
+      if (invisible.length) add('mid', `${invisible.length} invisible shape(s)`, 'opacity 0, or neither fill nor stroke. Delete them.');
+      const seen = new Map(); let dupes = 0;
+      shapes.forEach((s) => { const k = s.outerHTML; seen.has(k) ? dupes++ : seen.set(k, 1); });
+      if (dupes) add('mid', `${dupes} duplicated shape(s)`, 'Identical elements drawn twice look the same as one but cost twice.');
+      probe.replaceChildren();
+      // Clutter (chapter 40)
+      const empty = all.filter((el) => (el.localName === 'g' || el.localName === 'defs') && !el.children.length);
+      if (empty.length) add('mid', `${empty.length} empty group(s)`, 'Leftovers with no content.');
+      const ids = all.filter((el) => el.id).map((el) => el.id);
+      const unused = ids.filter((id) => !text.includes(`#${id}`));
+      if (unused.length) add('mid', `Unused ids: ${unused.join(', ')}`, 'Definitions that nothing references can go.');
+      const long = (text.match(/\d+\.\d{4,}/g) || []).length;
+      if (long) add('mid', `${long} number(s) with 4 or more decimals`, 'Rounding to 2–3 decimals is invisible at icon sizes (SVGO floatPrecision).');
+      // Theming and text (chapters 8, 44)
+      const colors = new Set(text.match(/#[0-9a-f]{3,8}\b/gi) || []);
+      if (colors.size) add('mid', `${colors.size} hard-coded color(s)`, 'For icons, use currentColor or CSS variables so the color follows the page.');
+      if (root.querySelector('text')) add('mid', 'Contains <text>', 'Fonts differ between systems; check that the text is wanted and readable, or provide it outside the image.');
+      // Accessibility (chapter 39)
+      if (!root.querySelector(':scope > title') && !root.hasAttribute('aria-label') && root.getAttribute('aria-hidden') !== 'true') add('mid', 'No accessible name', 'Add a <title>, or aria-hidden="true" if it is decorative.');
+      if (!out.length) add('ok', 'Nothing found', 'The automatic checks passed; still look at it at its real size.');
+      return out;
+    }
+    const ICON = { high: '✗', mid: '!', ok: '✓' };
+    function run() {
+      const text = $('src').value;
+      URL.revokeObjectURL($('preview').src);
+      // The preview is an <img>, so nothing in the source can run (chapter 42)
+      $('preview').src = URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
+      $('size').textContent = `${new Blob([text]).size} bytes`;
+      $('findings').innerHTML = review(text).map((f) => `<li class="${f.level}"><span class="icon" aria-hidden="true">${ICON[f.level]}</span><span>${f.msg.replace(/</g, '&lt;')}</span><span class="why">${f.why.replace(/</g, '&lt;')}</span></li>`).join('');
+    }
+    $('src').addEventListener('input', run);
+    run();
+  </script>
+</body>
+</html>

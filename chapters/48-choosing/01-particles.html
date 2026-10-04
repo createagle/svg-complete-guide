@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../../assets/style.css">
+  <title>48-1 One Effect, Four Renderers</title>
+  <style>
+    .btn { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    input, select { accent-color: var(--accent); }
+    select { font: inherit; }
+    .view { position: relative; width: 480px; height: 300px; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; color: var(--accent); }
+    .view > * { position: absolute; inset: 0; display: block; width: 480px; height: 300px; }
+    .view circle { fill: currentColor; fill-opacity: .6; }
+    .view .dot { position: absolute; left: 0; top: 0; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: currentColor; opacity: .6; }
+    .out { margin: 0; font: 12.5px/1.5 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); white-space: pre; }
+  </style>
+</head>
+<body class="demo">
+  <div class="controls">
+    <label class="control">Renderer <select id="mode">
+      <option value="svg">SVG</option>
+      <option value="css">HTML + CSS transforms</option>
+      <option value="canvas" selected>Canvas 2D</option>
+      <option value="webgl">WebGL 2</option>
+    </select></label>
+    <label class="control">Particles <select id="n"><option>1000</option><option selected>5000</option><option>20000</option><option>100000</option></select></label>
+    <button id="toggle" class="btn" type="button">Pause</button>
+  </div>
+  <div id="view" class="view" role="img" aria-label="Particles swirling around the center"></div>
+  <pre id="out" class="out"></pre>
+  <script>
+    const W = 480, H = 300, R = 2;
+    let pts = new Float32Array(0), seeds = [];
+    function makeSeeds(n) {
+      seeds = Array.from({ length: n }, (_, i) => ({ a: Math.random() * 6.283, r: 20 + 130 * Math.sqrt(Math.random()), s: (0.3 + Math.random()) * (i % 2 ? 1 : -1), w: 4 + Math.random() * 10 }));
+      pts = new Float32Array(n * 2);
+    }
+    // A swirl: every particle orbits the center and wobbles in and out
+    function step(t) {
+      for (let i = 0; i < seeds.length; i++) {
+        const s = seeds[i], a = s.a + t * 0.0004 * s.s, r = s.r + Math.sin(t * 0.002 + s.a * 3) * s.w;
+        pts[i * 2] = W / 2 + Math.cos(a) * r * 1.4;
+        pts[i * 2 + 1] = H / 2 + Math.sin(a) * r * 0.85;
+      }
+    }
+    // The accent color as 0–1 floats, for WebGL
+    function accent() {
+      const [r, g, b] = getComputedStyle(document.getElementById('view')).color.match(/[\d.]+/g).map(Number);
+      return [r / 255, g / 255, b / 255];
+    }
+    const NS = 'http://www.w3.org/2000/svg';
+    // Each renderer: create(view, n) returns { draw(), destroy() }
+    const RENDERERS = {
+      svg(view, n) {
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        const nodes = Array.from({ length: n }, () => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('r', R); return c; });
+        svg.append(...nodes);
+        view.append(svg);
+        return { draw() { for (let i = 0; i < n; i++) { nodes[i].setAttribute('cx', pts[i * 2].toFixed(1)); nodes[i].setAttribute('cy', pts[i * 2 + 1].toFixed(1)); } } };
+      },
+      css(view, n) {
+        const box = document.createElement('div');
+        const nodes = Array.from({ length: n }, () => { const d = document.createElement('div'); d.className = 'dot'; return d; });
+        box.append(...nodes);
+        view.append(box);
+        return { draw() { for (let i = 0; i < n; i++) nodes[i].style.transform = `translate(${pts[i * 2].toFixed(1)}px,${pts[i * 2 + 1].toFixed(1)}px)`; } };
+      },
+      canvas(view, n) {
+        const c = document.createElement('canvas'), dpr = devicePixelRatio || 1;
+        c.width = W * dpr; c.height = H * dpr;
+        const ctx = c.getContext('2d');
+        ctx.scale(dpr, dpr);
+        view.append(c);
+        const color = getComputedStyle(view).color;
+        return { draw() {
+          ctx.clearRect(0, 0, W, H);
+          ctx.fillStyle = color; ctx.globalAlpha = 0.6;
+          ctx.beginPath();
+          for (let i = 0; i < n; i++) { const x = pts[i * 2], y = pts[i * 2 + 1]; ctx.moveTo(x + R, y); ctx.arc(x, y, R, 0, 6.283); }
+          ctx.fill();
+        } };
+      },
+      webgl(view, n) {
+        const c = document.createElement('canvas'), dpr = devicePixelRatio || 1;
+        c.width = W * dpr; c.height = H * dpr;
+        view.append(c);
+        const gl = c.getContext('webgl2');
+        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+        const prog = gl.createProgram();
+        // Every particle is one point; the fragment shader cuts it into a disc
+        gl.attachShader(prog, sh(gl.VERTEX_SHADER, `#version 300 es
+          in vec2 pos; uniform vec2 size; uniform float px;
+          void main() { gl_Position = vec4(pos / size * 2.0 - 1.0, 0, 1); gl_Position.y *= -1.0; gl_PointSize = px; }`));
+        gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, `#version 300 es
+          precision mediump float; uniform vec3 color; out vec4 o;
+          void main() { if (length(gl_PointCoord - 0.5) > 0.5) discard; o = vec4(color * 0.6, 0.6); }`));
+        gl.linkProgram(prog); gl.useProgram(prog);
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, pts.byteLength, gl.DYNAMIC_DRAW);
+        const loc = gl.getAttribLocation(prog, 'pos');
+        gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        gl.uniform2f(gl.getUniformLocation(prog, 'size'), W, H);
+        gl.uniform1f(gl.getUniformLocation(prog, 'px'), R * 2 * dpr);
+        gl.uniform3f(gl.getUniformLocation(prog, 'color'), ...accent());
+        // The canvas expects premultiplied colors, so blend with ONE, not SRC_ALPHA
+        gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.viewport(0, 0, c.width, c.height);
+        return { draw() {
+          gl.bufferSubData(gl.ARRAY_BUFFER, 0, pts);
+          gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.drawArrays(gl.POINTS, 0, n);
+        }, destroy() { gl.getExtension('WEBGL_lose_context')?.loseContext(); } };
+      },
+    };
+    const $ = (id) => document.getElementById(id);
+    let current = null, buildMs = 0;
+    let running = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function build() {
+      current?.destroy?.();
+      $('view').replaceChildren();
+      const n = +$('n').value, t0 = performance.now();
+      makeSeeds(n); step(performance.now());
+      current = RENDERERS[$('mode').value]($('view'), n);
+      current.draw();
+      buildMs = performance.now() - t0;
+    }
+    // Frame time: the average gap between the last 60 animation frames
+    const gaps = []; let last = 0;
+    function frame(now) {
+      if (last) { gaps.push(now - last); if (gaps.length > 60) gaps.shift(); }
+      last = now;
+      if (running) { step(now); current.draw(); }
+      const avg = gaps.reduce((s, g) => s + g, 0) / (gaps.length || 1);
+      $('out').textContent = `renderer: ${$('mode').selectedOptions[0].text} · particles: ${seeds.length} · elements: ${$('view').querySelectorAll('*').length}\n` +
+        `build: ${buildMs.toFixed(0)} ms · frame time: ${avg.toFixed(1)} ms (${(1000 / avg).toFixed(0)} fps)${running ? '' : ' · paused'}`;
+      requestAnimationFrame(frame);
+    }
+    $('toggle').textContent = running ? 'Pause' : 'Play';
+    $('toggle').addEventListener('click', () => { running = !running; $('toggle').textContent = running ? 'Pause' : 'Play'; });
+    $('n').addEventListener('input', build);
+    $('mode').addEventListener('input', build);
+    build();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
